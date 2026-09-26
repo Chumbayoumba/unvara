@@ -43,6 +43,7 @@ import {
   restoreMainWindows,
 } from "./windows"
 import { createWslServersController } from "./wsl/servers"
+import { createLocalModelsController } from "./local-models/controller"
 import { registerWslIpcHandlers } from "./wsl/ipc"
 import { spawnWslSidecar } from "./wsl/sidecar"
 import { migrate } from "./migrate"
@@ -61,7 +62,8 @@ const APP_IDS: Record<string, string> = {
   prod: "ai.unvara.desktop",
 }
 const TEST_ONBOARDING = process.env.OPENCODE_TEST_ONBOARDING === "1"
-const SIDECAR_VERSION = process.env.OPENCODE_SIDECAR_V2 === "1" ? "v2" : "v1"
+// The v2 path reuses any already-running OpenCode daemon; Unvara always runs its own isolated sidecar.
+const SIDECAR_VERSION = "v1" as "v1" | "v2"
 const jsCallStackFeature = "DocumentPolicyIncludeJSCallStacksInCrashReports"
 
 let logger: ReturnType<typeof initLogging>
@@ -164,7 +166,13 @@ const main = Effect.gen(function* () {
       },
     },
   )
+  const localModels = createLocalModelsController({
+    userDataPath: app.getPath("userData"),
+    log: (message, extra, level) => writeLog("local-models", message, extra, level),
+    routerLog: (message, extra, level) => writeLog("llama", message, extra, level),
+  })
   const stopSidecars = async () => {
+    localModels.stopSync()
     await killSidecar()
     wslServers.stopAll()
   }
@@ -373,6 +381,10 @@ const main = Effect.gen(function* () {
     const hostname = "127.0.0.1"
     const url = `http://${hostname}:${port}`
     const password = randomUUID()
+
+    // The local engine endpoint must exist in the environment before the sidecar inherits it.
+    yield* Effect.promise(() => localModels.prepare())
+    void localModels.start().catch((error) => logger.error("local engine failed to start", error))
 
     logger.log("spawning sidecar", { url })
     const { listener, health } = yield* Effect.promise(() =>

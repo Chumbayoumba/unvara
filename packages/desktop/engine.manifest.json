@@ -1,0 +1,61 @@
+{
+  "$comment": "Pinned llama.cpp engine per Unvara release. Update with: bun ./scripts/fetch-engine.ts --pin <build>; bundle with: bun ./scripts/fetch-engine.ts.",
+  "build": "b11201",
+  "source": "https://github.com/ggml-org/llama.cpp/releases/tag/b11201",
+  "backends": {
+    "cpu": {
+      "archives": [
+        {
+          "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11201/llama-b11201-bin-win-cpu-x64.zip",
+          "size": 19154666,
+          "sha256": "916708591114436aaedaa0a8079ac992ec3f82217694551333772136df9f75f0"
+        }
+      ],
+      "bundled": true
+    },
+    "vulkan": {
+      "archives": [
+        {
+          "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11201/llama-b11201-bin-win-vulkan-x64.zip",
+          "size": 33061936,
+          "sha256": "e1e1d848e1ec020b9855c0e220aa3b38fee943efdcc1d1342fcad700d3855543"
+        }
+      ],
+      "bundled": true
+    },
+    "cuda-12.4": {
+      "archives": [
+        {
+          "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11201/llama-b11201-bin-win-cuda-12.4-x64.zip",
+          "size": 263038229,
+          "sha256": "c799294e765e3c290ab6946b6ead90a8bcbbc9ff52ee611551b0fd3a4dd29579"
+        },
+        {
+          "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11201/cudart-llama-bin-win-cuda-12.4-x64.zip",
+          "size": 391443627,
+          "sha256": "8c79a9b226de4b3cacfd1f83d24f962d0773be79f1e7b75c6af4ded7e32ae1d6"
+        }
+      ],
+      "bundled": false,
+      "minDriver": "551.61",
+      "minComputeCap": 5.0
+    },
+    "cuda-13.4": {
+      "archives": [
+        {
+          "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11201/llama-b11201-bin-win-cuda-13.4-x64.zip",
+          "size": 152319569,
+          "sha256": "5d7489bba00ed93378082dbdaaf5eb773ad4776f22cf16109e9cd1512e35f000"
+        },
+        {
+          "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11201/cudart-llama-bin-win-cuda-13.4-x64.zip",
+          "size": 423535356,
+          "sha256": "738f8c251ac22b70c3ae6f83a10cf222725df0395246a2cf58f32bdb85fbe668"
+        }
+      ],
+      "bundled": false,
+      "minDriver": "580.00",
+      "minComputeCap": 7.5
+    }
+  }
+}

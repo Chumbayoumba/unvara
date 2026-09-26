@@ -55,8 +55,10 @@ const getBase = (appId: string): Configuration => ({
   extraMetadata: {
     desktopName: `${appId}.desktop`,
   },
-  files: ["out/**/*", "resources/**/*", "!resources/opencode-cli*"],
+  files: ["out/**/*", "resources/**/*", "!resources/opencode-cli*", "!resources/engine/**"],
   extraResources: [
+    // Pinned llama.cpp CPU + Vulkan builds (scripts/fetch-engine.ts) — the offline safety net for local AI.
+    { from: "resources/engine/", to: "engine/", filter: ["**/*"] },
     ...(channel === "dev"
       ? [
           {

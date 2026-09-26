@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url"
 import { app, utilityProcess } from "electron"
 import type { Details } from "electron"
 import { getLogger } from "./logging"
+import { localDataRoot } from "./paths"
 import { getUserShell, loadShellEnv } from "./shell-env"
 import { getStore } from "./store"
 import { DEFAULT_SERVER_URL_KEY } from "./store-keys"
@@ -27,6 +28,14 @@ type SpawnLocalServerOptions = {
   onExit?: (code: number) => void
 }
 
+const XDG_KEYS = ["XDG_CONFIG_HOME", "XDG_DATA_HOME", "XDG_CACHE_HOME", "XDG_STATE_HOME"]
+// Dev-only knobs that are allowed through from the launching environment.
+const ALLOWED_OPENCODE_ENV = new Set(["OPENCODE_TEST_ONBOARDING", "OPENCODE_PORT"])
+// Captured at module load, before main() sets its own OPENCODE_* values.
+const inheritedOpenCodeEnv = Object.keys(process.env).filter(
+  (key) => key.startsWith("OPENCODE_") && !ALLOWED_OPENCODE_ENV.has(key),
+)
+
 export function getDefaultServerUrl(): string | null {
   const value = getStore().get(DEFAULT_SERVER_URL_KEY)
   return typeof value === "string" ? value : null
@@ -44,12 +53,22 @@ export function setDefaultServerUrl(url: string | null) {
 export function preferAppEnv(userDataPath: string) {
   const shell = process.platform === "win32" ? null : getUserShell()
   const shellEnv = shell ? loadShellEnv(shell, getLogger()) : null
+  const localRoot = localDataRoot(userDataPath)
+  // Unvara must never read, write or reuse an installed OpenCode: drop OpenCode switches inherited from the
+  // user's environment and point every XDG base dir at Unvara's own folders.
+  inheritedOpenCodeEnv.forEach((key) => delete process.env[key])
   Object.assign(process.env, {
-    ...shellEnv,
+    ...Object.fromEntries(Object.entries(shellEnv ?? {}).filter(([key]) => !key.startsWith("OPENCODE_"))),
+    // Tools spawned by the agent (bash, MCP servers) get these back so git/gh/uv keep using the user's own dirs.
+    ...Object.fromEntries(XDG_KEYS.map((key) => [`UNVARA_USER_${key}`, process.env[key] ?? ""])),
     OPENCODE_EXPERIMENTAL_ICON_DISCOVERY: "true",
     OPENCODE_EXPERIMENTAL_FILEWATCHER: "true",
     OPENCODE_CLIENT: "desktop",
-    XDG_STATE_HOME: process.env.XDG_STATE_HOME ?? userDataPath,
+    OPENCODE_DISABLE_CLAUDE_CODE: "1",
+    XDG_CONFIG_HOME: join(userDataPath, "config"),
+    XDG_STATE_HOME: userDataPath,
+    XDG_DATA_HOME: join(localRoot, "data"),
+    XDG_CACHE_HOME: join(localRoot, "cache"),
   })
   return shellEnv
 }
