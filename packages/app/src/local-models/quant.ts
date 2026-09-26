@@ -12,6 +12,13 @@ export function parseQuant(filename: string) {
   return [...name.matchAll(new RegExp(QUANT_PATTERN, "gi"))].at(-1)?.[1]?.toUpperCase()
 }
 
+// Speculative-decoding drafts, MTP heads and imatrix data ship next to the weights but are not models to run.
+const AUXILIARY = /(^|[-_./])(mtp|eagle\d*|dspark|draft|imatrix)([-_./]|$)/i
+
+export function isAuxiliaryGguf(path: string) {
+  return AUXILIARY.test(path)
+}
+
 /** Approximate bits per weight, used only when the exact file size is unknown. */
 const BITS: Record<string, number> = {
   F32: 32,

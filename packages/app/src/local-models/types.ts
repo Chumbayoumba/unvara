@@ -115,6 +115,8 @@ export type LocalModelsSettings = {
   modelsDir: string
   /** Hugging Face endpoint (https://huggingface.co or a mirror such as https://hf-mirror.com). */
   mirror: string
+  /** Set when the first-launch wizard is finished or skipped. */
+  setupCompletedAt?: number
 }
 
 export type LocalModelsState = {
@@ -141,5 +143,9 @@ export type LocalModelsPlatform = {
   /** Stops and deletes partial files; for finished jobs only clears the entry. */
   cancelDownload: (id: string) => Promise<void>
   removeModel: (id: string) => Promise<void>
+  /** Folders other apps (LM Studio) keep GGUF models in, if present. */
+  importSources: () => Promise<string[]>
+  /** Registers GGUF models found under `dir` in place; resolves with how many it found. */
+  importFolder: (dir: string) => Promise<number>
   updateSettings: (patch: Partial<LocalModelsSettings>) => Promise<LocalModelsSettings>
 }

@@ -13,7 +13,7 @@ import {
   type CatalogQuant,
 } from "../../packages/app/src/local-models/catalog"
 import { ggufShape, readGgufMetadata } from "../../packages/app/src/local-models/gguf"
-import { defaultQuant, parseQuant } from "../../packages/app/src/local-models/quant"
+import { defaultQuant, isAuxiliaryGguf, parseQuant } from "../../packages/app/src/local-models/quant"
 
 type Source = {
   id: string
@@ -35,8 +35,6 @@ type Sibling = { rfilename: string; size?: number; lfs?: { sha256: string; size:
 
 const HF = "https://huggingface.co"
 const MIN_APP_VERSION = "0.1.0"
-// Speculative-decoding drafts, MTP heads and imatrix data ship next to the weights but are not models to run.
-const AUXILIARY = /(^|[-_./])(mtp|eagle\d*|dspark|draft|imatrix)([-_./]|$)/i
 // Quant ladder offered when a source has no explicit list; repos that use none of these names get everything.
 const DEFAULT_QUANTS = [
   "IQ2_M",
@@ -106,7 +104,7 @@ async function build(source: Source): Promise<CatalogModel> {
   const excluded = (name: string) =>
     (source.exclude ?? []).some((part) => name.toLowerCase().includes(part.toLowerCase()))
   const ggufFiles = files.siblings.filter(
-    (file) => file.rfilename.endsWith(".gguf") && !AUXILIARY.test(file.rfilename) && !excluded(file.rfilename),
+    (file) => file.rfilename.endsWith(".gguf") && !isAuxiliaryGguf(file.rfilename) && !excluded(file.rfilename),
   )
   const mmproj = ggufFiles
     .filter((file) => /mmproj/i.test(file.rfilename))

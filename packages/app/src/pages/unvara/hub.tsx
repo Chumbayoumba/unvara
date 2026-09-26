@@ -15,7 +15,7 @@ const RAM_RESERVE = 2 * GIB
 const VRAM_RESERVE = 1 * GIB
 const TABS = ["forYou", "catalog", "installed", "downloads"] as const
 const FILTERS = ["all", "uncensored", "official", "agent", "vision", "fits"] as const
-const SLOTS = ["fast", "balanced", "quality"] as const
+export const SLOTS = ["fast", "balanced", "quality"] as const
 
 type Tab = (typeof TABS)[number]
 type Filter = (typeof FILTERS)[number]
@@ -264,7 +264,7 @@ function HardwareChip() {
   )
 }
 
-function PickCard(props: { slot: (typeof SLOTS)[number]; item: ModelFit }) {
+export function PickCard(props: { slot: (typeof SLOTS)[number]; item: ModelFit; onStart?: (job: string) => void }) {
   const language = useLanguage()
   const best = () => props.item.best
   return (
@@ -302,7 +302,7 @@ function PickCard(props: { slot: (typeof SLOTS)[number]; item: ModelFit }) {
       </div>
       <CloseAppsHint fit={best().fit} />
       <div class="mt-auto">
-        <ModelAction model={props.item.model} quant={best().quant.quant} primary />
+        <ModelAction model={props.item.model} quant={best().quant.quant} primary onStart={props.onStart} />
       </div>
     </article>
   )
@@ -390,7 +390,13 @@ function CatalogRow(props: { item: ModelFit; open: boolean; onToggle: () => void
 }
 
 /** Download button, live progress, or "Installed", for one quant of a catalog model. */
-function ModelAction(props: { model: CatalogModel; quant: string; primary?: boolean; compact?: boolean }) {
+function ModelAction(props: {
+  model: CatalogModel
+  quant: string
+  primary?: boolean
+  compact?: boolean
+  onStart?: (job: string) => void
+}) {
   const language = useLanguage()
   const local = useLocalModels()
   const id = () => `${props.model.id}@${props.quant}`
@@ -405,7 +411,7 @@ function ModelAction(props: { model: CatalogModel; quant: string; primary?: bool
         <Button
           primary={props.primary}
           compact={props.compact}
-          onClick={() => void local.api?.download(props.model.id, props.quant)}
+          onClick={() => void local.api?.download(props.model.id, props.quant).then((job) => props.onStart?.(job))}
         >
           <UvIcon.Download size={16} />
           <Show when={!props.compact}>{language.t("unvara.hub.action.download")}</Show>
@@ -435,7 +441,7 @@ function ModelAction(props: { model: CatalogModel; quant: string; primary?: bool
   )
 }
 
-function DownloadRow(props: { job: DownloadJob }) {
+export function DownloadRow(props: { job: DownloadJob }) {
   const language = useLanguage()
   const local = useLocalModels()
   const intl = () => language.intl()
@@ -587,7 +593,13 @@ function CloseAppsHint(props: { fit: Fit }) {
   )
 }
 
-function Button(props: { primary?: boolean; compact?: boolean; onClick: () => void; children: JSX.Element }) {
+export function Button(props: {
+  primary?: boolean
+  compact?: boolean
+  disabled?: boolean
+  onClick: () => void
+  children: JSX.Element
+}) {
   return (
     <button
       type="button"
@@ -597,7 +609,9 @@ function Button(props: { primary?: boolean; compact?: boolean; onClick: () => vo
         "size-7": props.compact,
         "bg-(--uv-ember) text-(--uv-on-ember) hover:bg-(--uv-ember-emphasized)": props.primary,
         "bg-v2-background-bg-layer-02 text-v2-text-text-base hover:bg-(--uv-hover)": !props.primary,
+        "pointer-events-none opacity-40": props.disabled,
       }}
+      disabled={props.disabled}
       onClick={props.onClick}
     >
       {props.children}
@@ -618,7 +632,7 @@ function percent(job: DownloadJob) {
   return job.total ? Math.floor((job.received / job.total) * 100) : 0
 }
 
-function formatSize(locale: string, bytes: number) {
+export function formatSize(locale: string, bytes: number) {
   const gigabytes = bytes >= 1e9
   return new Intl.NumberFormat(locale, {
     style: "unit",
@@ -628,7 +642,7 @@ function formatSize(locale: string, bytes: number) {
 }
 
 /** RAM and VRAM as the OS labels them: whole binary gigabytes (a "32 GB" PC reports ~31.2 GiB usable). */
-function formatMemory(locale: string, bytes: number) {
+export function formatMemory(locale: string, bytes: number) {
   return new Intl.NumberFormat(locale, { style: "unit", unit: "gigabyte", maximumFractionDigits: 0 }).format(
     Math.max(1, Math.ceil(bytes / GIB - 0.1)),
   )

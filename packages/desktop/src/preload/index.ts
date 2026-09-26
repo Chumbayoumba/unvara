@@ -55,6 +55,8 @@ const api: ElectronAPI = {
     resumeDownload: (id) => ipcRenderer.invoke("local-models-download-resume", id),
     cancelDownload: (id) => ipcRenderer.invoke("local-models-download-cancel", id),
     removeModel: (id) => ipcRenderer.invoke("local-models-remove", id),
+    importSources: () => ipcRenderer.invoke("local-models-import-sources"),
+    importFolder: (dir) => ipcRenderer.invoke("local-models-import-folder", dir),
     updateSettings: (patch) => ipcRenderer.invoke("local-models-update-settings", patch),
   },
   updater: {

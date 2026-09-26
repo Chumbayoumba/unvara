@@ -1,10 +1,11 @@
 import { randomUUID } from "node:crypto"
 import { mkdirSync, rmSync } from "node:fs"
 import { createServer } from "node:net"
-import { isAbsolute, join } from "node:path"
+import { basename, isAbsolute, join } from "node:path"
 import { net } from "electron"
 import { downloadUrl, type Catalog } from "@opencode-ai/app/local-models/catalog"
 import { hardwareProfile, planFit, primaryGpu } from "@opencode-ai/app/local-models/fit"
+import { ggufShape } from "@opencode-ai/app/local-models/gguf"
 import { AGENT_CONTEXT, agentReady } from "@opencode-ai/app/local-models/recommend"
 import type {
   DownloadJob,
@@ -18,6 +19,7 @@ import type {
 import bundledCatalog from "../../../../../catalog/catalog.json"
 import { localDataRoot } from "../paths"
 import { createDownloadQueue } from "./downloads"
+import { findModels, importSources } from "./importer"
 import { ENGINE_BUILD, engineDir, installedBackend, isInstalled, preferredBackend, provisionBackend } from "./engine"
 import { bestModelsDrive, detectSystem, listEngineDevices, pickDevice } from "./hardware"
 import { readManifest, readText, writeAtomic, writeManifest, writePresets } from "./presets"
@@ -233,6 +235,60 @@ export function createLocalModelsController(options: { userDataPath: string; log
     options.log("model installed", { id, context, kvType: fit.kvType, mode: fit.mode, tier: fit.tier })
   }
 
+  /** Registers every GGUF model under `dir` in place (nothing is copied); resolves with how many it found. */
+  async function importFolder(dir: string) {
+    const found = await findModels(dir, options.log)
+    const system = state.system ?? (await scanHardware())
+    const hardware = hardwareProfile(system, preferredBackend(primaryGpu(system.gpus)), dir)
+    const known = new Set(state.models.map((model) => model.path))
+    const taken = new Set(state.models.map((model) => model.id))
+    const added = found
+      .filter((item) => !known.has(item.path))
+      .map((item): LocalModel => {
+        const metadata = item.metadata
+        const arch = String(metadata["general.architecture"])
+        const experts = Number(metadata[`${arch}.expert_count`] ?? 0)
+        const used = Number(metadata[`${arch}.expert_used_count`] ?? 0)
+        // The fit only needs the active/total ratio, so file bytes stand in for parameter counts.
+        const shape = ggufShape(metadata, {
+          total: item.size,
+          active: experts && used ? item.size * (0.1 + (0.9 * used) / experts) : undefined,
+        })
+        const fit = planFit(shape, { size: item.size, mmprojSize: item.mmproj?.size }, hardware, {
+          targetContext: AGENT_CONTEXT,
+        })
+        const context = fit.mode === "none" ? Math.min(8192, shape.contextMax) : fit.context
+        const template = String(metadata["tokenizer.chat_template"] ?? "")
+        const name = basename(item.path).replace(/(-\d{5}-of-\d{5})?\.gguf$/i, "")
+        const id = uniqueId(
+          name
+            .toLowerCase()
+            .replace(/[^a-z0-9.]+/g, "-")
+            .replace(/^-|-$/g, ""),
+          taken,
+        )
+        taken.add(id)
+        return {
+          id,
+          name,
+          path: item.path,
+          mmproj: item.mmproj?.path,
+          context,
+          output: Math.min(8192, Math.floor(context / 4)),
+          toolCall: /\btools\b/.test(template),
+          reasoning: /<think>|reasoning/.test(template),
+          vision: Boolean(item.mmproj),
+          overrides: fit.kvType === "q8_0" ? { "cache-type-k": "q8_0", "cache-type-v": "q8_0" } : undefined,
+          size: item.size + (item.mmproj?.size ?? 0),
+          installedAt: Date.now(),
+        }
+      })
+    if (added.length) await saveModels([...state.models, ...added])
+    options.log("models imported", { dir, found: found.length, added: added.length })
+    // Models registered earlier count too: they are all usable now.
+    return found.length
+  }
+
   async function removeModel(id: string) {
     const model = state.models.find((item) => item.id === id)
     if (!model) return
@@ -248,7 +304,10 @@ export function createLocalModelsController(options: { userDataPath: string; log
   function updateSettings(patch: Partial<LocalModelsSettings>) {
     const settings = { ...state.settings, ...patch }
     // llama.cpp on Windows opens files through the ANSI code page, so model folders must stay ASCII.
-    if (!/^[\x20-\x7e]+$/.test(settings.modelsDir) || !isAbsolute(settings.modelsDir))
+    if (
+      patch.modelsDir !== undefined &&
+      (!/^[\x20-\x7e]+$/.test(settings.modelsDir) || !isAbsolute(settings.modelsDir))
+    )
       throw new Error(`models folder must be an absolute ASCII path: ${settings.modelsDir}`)
     writeAtomic(files.settings, JSON.stringify(settings, null, 2))
     emit({ settings })
@@ -268,6 +327,8 @@ export function createLocalModelsController(options: { userDataPath: string; log
     start,
     scanHardware,
     download,
+    importFolder,
+    importSources,
     removeModel,
     updateSettings,
     getCatalog: () => catalog,
@@ -292,6 +353,12 @@ function upgradeCandidates(preferred: EngineBackend, current: EngineBackend): En
   if (preferred === "cuda-13.4") return current === "cuda-12.4" ? [] : ["cuda-13.4", "cuda-12.4"]
   if (preferred === "cuda-12.4") return ["cuda-12.4"]
   return []
+}
+
+function uniqueId(base: string, taken: Set<string>) {
+  const id = base || "model"
+  if (!taken.has(id)) return id
+  return Array.from({ length: taken.size + 1 }, (_, index) => `${id}-${index + 2}`).find((item) => !taken.has(item))!
 }
 
 function readSettings(file: string): LocalModelsSettings {

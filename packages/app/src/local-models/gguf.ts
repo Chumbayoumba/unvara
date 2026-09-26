@@ -51,14 +51,23 @@ export async function readGgufMetadata(
   options: { fetch?: Fetcher; headers?: Record<string, string> } = {},
 ): Promise<Record<string, unknown>> {
   const fetcher = options.fetch ?? fetch
+  return readGgufMetadataWith(async (offset, length) => {
+    const response = await fetcher(url, {
+      headers: { ...options.headers, range: `bytes=${offset}-${offset + length - 1}` },
+    })
+    if (!response.ok) throw new Error(`GGUF header request failed: HTTP ${response.status}`)
+    return new Uint8Array(await response.arrayBuffer())
+  })
+}
+
+/** Reads growing chunks from `read` (network or disk) until the whole metadata section is in memory. */
+export async function readGgufMetadataWith(
+  read: (offset: number, length: number) => Promise<Uint8Array>,
+): Promise<Record<string, unknown>> {
   const chunks: Uint8Array[] = []
   const state = { length: 0, next: FIRST_CHUNK }
   while (true) {
-    const response = await fetcher(url, {
-      headers: { ...options.headers, range: `bytes=${state.length}-${state.length + state.next - 1}` },
-    })
-    if (!response.ok) throw new Error(`GGUF header request failed: HTTP ${response.status}`)
-    const chunk = new Uint8Array(await response.arrayBuffer())
+    const chunk = await read(state.length, state.next)
     chunks.push(chunk)
     state.length += chunk.byteLength
     const complete = chunk.byteLength < state.next

@@ -12,6 +12,8 @@
     "./local-models/types": "./src/local-models/types.ts",
     "./local-models/catalog": "./src/local-models/catalog.ts",
     "./local-models/fit": "./src/local-models/fit.ts",
+    "./local-models/gguf": "./src/local-models/gguf.ts",
+    "./local-models/quant": "./src/local-models/quant.ts",
     "./local-models/recommend": "./src/local-models/recommend.ts",
     "./vite": "./vite.js",
     "./index.css": "./src/index.css"

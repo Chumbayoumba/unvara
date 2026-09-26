@@ -11,6 +11,7 @@ import { Persist, persisted } from "@/utils/persist"
 import { setV2Toast, ToastRegion } from "@/utils/toast"
 import { UvIcon } from "./icons"
 import { UnvaraWordmark } from "./mark"
+import { UnvaraSetup } from "./setup"
 import { IconButton, UnvaraSidebar } from "./sidebar"
 
 // Three native Windows caption buttons at 46px each sit over the top-right corner of the window.
@@ -28,6 +29,12 @@ export default function UnvaraLayout(props: ParentProps) {
 
   createEffect(() => setV2Toast(true))
   useLocalProviderRefresh()
+  const localModels = useLocalModels()
+  // Desktop only: the first-launch wizard covers the window until it is finished or skipped.
+  const setupPending = () => {
+    const state = localModels.store.state
+    return !!localModels.api && !!state && !state.settings.setupCompletedAt
+  }
 
   command.register("unvara-layout", () => [
     {
@@ -98,6 +105,9 @@ export default function UnvaraLayout(props: ParentProps) {
           <Suspense>{props.children}</Suspense>
         </main>
       </div>
+      <Show when={setupPending()}>
+        <UnvaraSetup />
+      </Show>
       <ToastRegion v2 />
     </div>
   )
