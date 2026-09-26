@@ -10,6 +10,7 @@ import { Location } from "./location"
 import { PtyID } from "./pty/schema"
 import { Shell } from "./shell"
 import { lazy } from "./util/lazy"
+import { UserEnv } from "./util/user-env"
 
 const BUFFER_LIMIT = 1024 * 1024 * 2
 // Exited sessions stay observable (status, exit code, retained output) until removed explicitly.
@@ -168,7 +169,7 @@ const layer = Layer.effect(
       const args = Shell.login(command) ? [...(input.args ?? []), "-l"] : [...(input.args ?? [])]
       const cwd = input.cwd || location.directory
       const env = {
-        ...process.env,
+        ...UserEnv.userProcessEnv(),
         ...input.env,
         TERM: "xterm-256color",
         OPENCODE_TERMINAL: "1",

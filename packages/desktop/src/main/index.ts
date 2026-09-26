@@ -201,7 +201,8 @@ const main = Effect.gen(function* () {
   app.commandLine.appendSwitch("proxy-bypass-list", "<-loopback>")
   const features = app.commandLine.getSwitchValue("enable-features")
   app.commandLine.appendSwitch("enable-features", features ? `${jsCallStackFeature},${features}` : jsCallStackFeature)
-  if (!app.isPackaged) app.commandLine.appendSwitch("remote-debugging-port", "9222")
+  // 9222 is Chrome's default debugging port and is often already taken by the user's browser.
+  if (!app.isPackaged) app.commandLine.appendSwitch("remote-debugging-port", "9333")
 
   if (!app.requestSingleInstanceLock()) {
     app.quit()

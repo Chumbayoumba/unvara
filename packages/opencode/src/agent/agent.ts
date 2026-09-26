@@ -10,6 +10,7 @@ import { Auth } from "../auth"
 import { ProviderTransform } from "@/provider/transform"
 
 import PROMPT_GENERATE from "./generate.txt"
+import PROMPT_CHAT from "./prompt/chat.txt"
 import PROMPT_COMPACTION from "./prompt/compaction.txt"
 import PROMPT_EXPLORE from "./prompt/explore.txt"
 import PROMPT_SUMMARY from "./prompt/summary.txt"
@@ -176,6 +177,17 @@ const layer = Layer.effect(
               }),
               user,
             ),
+            mode: "primary",
+            native: true,
+          },
+          // Unvara: plain conversation for small or tool-less local models. Tools are also stripped in
+          // session/llm/request.ts so a user "allow" rule can never bring them back.
+          chat: {
+            name: "chat",
+            description: "Plain conversation without tools. Light prompt that fits small local models.",
+            options: {},
+            permission: Permission.merge(defaults, Permission.fromConfig({ "*": "deny" }), user),
+            prompt: PROMPT_CHAT,
             mode: "primary",
             native: true,
           },

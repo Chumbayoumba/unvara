@@ -98,9 +98,14 @@ export const prepare = Effect.fn("LLMRequestPrep.prepare")(function* (input: Pre
   }
   if (isOpenaiOauth) options.instructions = system.join("\n")
 
+  const tools = resolveTools(input)
+  const history =
+    Object.keys(tools).length === 0 && input.model.providerID === "unvara" && hasToolCalls(input.messages)
+      ? flattenToolHistory(input.messages)
+      : input.messages
   const messages =
     isOpenaiOauth || input.isWorkflow
-      ? input.messages
+      ? history
       : [
           ...system.map(
             (x): ModelMessage => ({
@@ -108,7 +113,7 @@ export const prepare = Effect.fn("LLMRequestPrep.prepare")(function* (input: Pre
               content: x,
             }),
           ),
-          ...input.messages,
+          ...history,
         ]
 
   const params = yield* input.plugin.trigger(
@@ -145,7 +150,6 @@ export const prepare = Effect.fn("LLMRequestPrep.prepare")(function* (input: Pre
     },
   )
 
-  const tools = resolveTools(input)
   // Codex parity: OpenAI Responses-family providers hardcode `strict: false`
   // on every function tool so MCP-sourced and dynamic schemas that don't
   // satisfy OpenAI's structured-outputs constraints still register.
@@ -205,12 +209,48 @@ export const prepare = Effect.fn("LLMRequestPrep.prepare")(function* (input: Pre
   }
 })
 
-function resolveTools(input: Pick<PrepareInput, "tools" | "agent" | "permission" | "user">) {
+function resolveTools(input: Pick<PrepareInput, "tools" | "agent" | "permission" | "user" | "model">) {
+  // Unvara: chat mode and models without tool calling get no tools at all — permissions alone would let a user
+  // "allow" rule bring them back.
+  if (input.agent.name === "chat" || !input.model.capabilities.toolcall) return {}
   const disabled = Permission.disabled(
     Object.keys(input.tools),
     Permission.merge(input.agent.permission, input.permission ?? []),
   )
   return Record.filter(input.tools, (_, k) => input.user.tools?.[k] !== false && !disabled.has(k))
+}
+
+/**
+ * Local chat templates reject tool calls in the history when the request carries no tools (e.g. after switching
+ * Agent → Chat mid-conversation), so earlier tool traffic is replayed as plain text.
+ */
+function flattenToolHistory(messages: ModelMessage[]): ModelMessage[] {
+  return messages.map((message): ModelMessage => {
+    if (message.role === "tool") {
+      return {
+        role: "user",
+        content: message.content
+          .map((part) => (part.type === "tool-result" ? `[${part.toolName} result]\n${toolOutputText(part.output)}` : ""))
+          .filter(Boolean)
+          .join("\n\n"),
+      }
+    }
+    if (message.role !== "assistant" || !Array.isArray(message.content)) return message
+    return {
+      ...message,
+      content: message.content.map((part) =>
+        part.type === "tool-call"
+          ? { type: "text" as const, text: `[called ${part.toolName} ${JSON.stringify(part.input).slice(0, 500)}]` }
+          : part,
+      ),
+    }
+  })
+}
+
+function toolOutputText(output: unknown) {
+  const value = typeof output === "object" && output && "value" in output ? output.value : output
+  const text = typeof value === "string" ? value : JSON.stringify(value)
+  return text.length > 2000 ? `${text.slice(0, 2000)}…` : text
 }
 
 export function hasToolCalls(messages: ModelMessage[]): boolean {

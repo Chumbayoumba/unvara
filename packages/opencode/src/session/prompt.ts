@@ -1261,12 +1261,16 @@ const layer = Layer.effect(
               sys.mcp(agent, session.permission),
               MessageV2.toModelMessagesEffect(msgs, model),
             ])
-            const system = [
-              ...env,
-              ...instructions,
-              ...(mcpInstructions ? [mcpInstructions] : []),
-              ...(skills ? [skills] : []),
-            ]
+            // The Unvara chat agent runs on small local contexts: no environment, project instructions, MCP or skills.
+            const system =
+              agent.name === "chat"
+                ? []
+                : [
+                    ...env,
+                    ...instructions,
+                    ...(mcpInstructions ? [mcpInstructions] : []),
+                    ...(skills ? [skills] : []),
+                  ]
             const format = lastUser.format ?? { type: "text" as const }
             if (format.type === "json_schema") system.push(STRUCTURED_OUTPUT_SYSTEM_PROMPT)
             const result = yield* handle.process({
