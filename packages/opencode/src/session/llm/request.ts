@@ -209,7 +209,10 @@ export const prepare = Effect.fn("LLMRequestPrep.prepare")(function* (input: Pre
   }
 })
 
-function resolveTools(input: Pick<PrepareInput, "tools" | "agent" | "permission" | "user" | "model">) {
+const FULL_TOOLSET_CONTEXT = 32768
+const LOCAL_CORE_TOOLS = new Set(["read", "edit", "write", "glob", "grep", "bash", "webfetch", "todowrite"])
+
+export function resolveTools(input: Pick<PrepareInput, "tools" | "agent" | "permission" | "user" | "model">) {
   // Unvara: chat mode and models without tool calling get no tools at all — permissions alone would let a user
   // "allow" rule bring them back.
   if (input.agent.name === "chat" || !input.model.capabilities.toolcall) return {}
@@ -217,7 +220,13 @@ function resolveTools(input: Pick<PrepareInput, "tools" | "agent" | "permission"
     Object.keys(input.tools),
     Permission.merge(input.agent.permission, input.permission ?? []),
   )
-  return Record.filter(input.tools, (_, k) => input.user.tools?.[k] !== false && !disabled.has(k))
+  // Unvara: a local model with a short window gets only the core tools; the full set's schemas alone would fill
+  // much of its context.
+  const core = input.model.providerID === "unvara" && input.model.limit.context < FULL_TOOLSET_CONTEXT
+  return Record.filter(
+    input.tools,
+    (_, k) => input.user.tools?.[k] !== false && !disabled.has(k) && (!core || LOCAL_CORE_TOOLS.has(k)),
+  )
 }
 
 /**
@@ -230,7 +239,9 @@ function flattenToolHistory(messages: ModelMessage[]): ModelMessage[] {
       return {
         role: "user",
         content: message.content
-          .map((part) => (part.type === "tool-result" ? `[${part.toolName} result]\n${toolOutputText(part.output)}` : ""))
+          .map((part) =>
+            part.type === "tool-result" ? `[${part.toolName} result]\n${toolOutputText(part.output)}` : "",
+          )
           .filter(Boolean)
           .join("\n\n"),
       }

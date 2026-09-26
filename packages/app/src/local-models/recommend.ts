@@ -8,6 +8,8 @@ import { quantLevel } from "./quant"
 
 /** Models are fitted for agent use (tools + a long prompt); chat needs less, so one context serves both. */
 export const AGENT_CONTEXT = 32768
+/** Below this even the core toolset crowds out the conversation, so local models start in Chat. */
+export const MIN_AGENT_CONTEXT = 16384
 
 const TIER_RANK: Record<Tier, number> = { ideal: 0, good: 1, slow: 2, extreme: 3, "wont-run": 4 }
 // Below this a model is too slow to recommend, however smart it is.
@@ -40,12 +42,15 @@ export function tierRank(tier: Tier) {
   return TIER_RANK[tier]
 }
 
-/** Tools plus room for the agent prompt; 16–32k gets the trimmed local toolset later, below that it's chat only. */
+/** Tools plus room for the agent prompt; below 32k the server hands local models only the core tools. */
 export function agentReady(model: CatalogModel, fit: Fit) {
   // A tools-capable chat template isn't enough: small models loop on malformed calls. The curated `agent` tag
   // marks models whose tool calling was checked.
   return (
-    model.tags.includes("agent") && model.capabilities.tools && fit.context >= AGENT_CONTEXT && fit.tier !== "wont-run"
+    model.tags.includes("agent") &&
+    model.capabilities.tools &&
+    fit.context >= MIN_AGENT_CONTEXT &&
+    fit.tier !== "wont-run"
   )
 }
 
