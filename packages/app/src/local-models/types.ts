@@ -1,5 +1,6 @@
 /** Shared between the Electron main process (engine, router, downloads) and the app UI. */
-import type { Catalog } from "./catalog"
+import type { Catalog, CatalogModel } from "./catalog"
+import type { HubResult, HubSort } from "./huggingface"
 
 /** OpenCode provider id of the local llama.cpp models (the `unvara-local` plugin). */
 export const LOCAL_PROVIDER_ID = "unvara"
@@ -143,6 +144,10 @@ export type LocalModelsPlatform = {
   /** Stops and deletes partial files; for finished jobs only clears the entry. */
   cancelDownload: (id: string) => Promise<void>
   removeModel: (id: string) => Promise<void>
+  /** Live Hugging Face search over GGUF repos. */
+  searchHub: (query: string, sort: HubSort, uncensored: boolean) => Promise<HubResult[]>
+  /** A repo's quants and GGUF dims in catalog form (its id is `hf:<repo>`), ready to fit and download. */
+  hubDetails: (repo: string) => Promise<CatalogModel>
   /** Folders other apps (LM Studio) keep GGUF models in, if present. */
   importSources: () => Promise<string[]>
   /** Registers GGUF models found under `dir` in place; resolves with how many it found. */

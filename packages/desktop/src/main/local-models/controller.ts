@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto"
-import { mkdirSync, rmSync } from "node:fs"
+import { existsSync, mkdirSync, readdirSync, rmdirSync, rmSync } from "node:fs"
 import { createServer } from "node:net"
-import { basename, isAbsolute, join } from "node:path"
+import { basename, dirname, isAbsolute, join } from "node:path"
 import { net } from "electron"
-import { downloadUrl, type Catalog } from "@opencode-ai/app/local-models/catalog"
+import { downloadUrl, type Catalog, type CatalogModel } from "@opencode-ai/app/local-models/catalog"
+import { buildCatalogModel, hubSource, searchHub, type HubSort } from "@opencode-ai/app/local-models/huggingface"
 import { hardwareProfile, planFit, primaryGpu } from "@opencode-ai/app/local-models/fit"
 import { ggufShape } from "@opencode-ai/app/local-models/gguf"
 import { AGENT_CONTEXT, agentReady } from "@opencode-ai/app/local-models/recommend"
@@ -61,6 +62,7 @@ export function createLocalModelsController(options: { userDataPath: string; log
     inUse: (path) => state.models.some((model) => [model.path, model.mmproj, ...(model.files ?? [])].includes(path)),
   })
   state.downloads = queue.jobs()
+  const hubModels = new Map<string, CatalogModel>()
   const listeners = new Set<(state: LocalModelsState) => void>()
   const runtime = { router: undefined as Router | undefined, port: 0, apiKey: "" }
 
@@ -180,8 +182,27 @@ export function createLocalModelsController(options: { userDataPath: string; log
   }
 
   /** Queues a catalog model (all shards plus its vision projector); resolves with the job id. */
+  /** Live Hugging Face search; results go through `hubDetails` before they can be fitted or downloaded. */
+  function searchHuggingFace(query: string, sort: HubSort, uncensored: boolean) {
+    return searchHub(query, { sort, uncensored, fetch: net.fetch, mirror: state.settings.mirror })
+  }
+
+  /** Files, quants and GGUF dims of any repo, in catalog form; cached so a download can find it again. */
+  async function hubDetails(repo: string) {
+    const model = await buildCatalogModel(hubSource(repo), { fetch: net.fetch, mirror: state.settings.mirror })
+    hubModels.set(model.id, model)
+    return model
+  }
+
+  /** Curated entries first; `hf:` ids are rebuilt from Hugging Face when a queued job outlives the session. */
+  async function findModel(id: string) {
+    const known = catalog.models.find((item) => item.id === id) ?? hubModels.get(id)
+    if (known || !id.startsWith("hf:")) return known
+    return hubDetails(id.slice("hf:".length))
+  }
+
   async function download(catalogId: string, quant: string) {
-    const model = catalog.models.find((item) => item.id === catalogId)
+    const model = await findModel(catalogId)
     const choice = model?.quants.find((item) => item.quant === quant)
     if (!model || !choice) throw new Error(`unknown catalog model ${catalogId}@${quant}`)
     const modelsDir = state.settings.modelsDir || chooseModelsDir(state.system ?? (await scanHardware()))
@@ -197,7 +218,7 @@ export function createLocalModelsController(options: { userDataPath: string; log
 
   /** Registers finished files as a model, with the context this PC can hold at agent size. */
   async function install(job: DownloadJob) {
-    const model = catalog.models.find((item) => item.id === job.catalogId)
+    const model = await findModel(job.catalogId)
     const choice = model?.quants.find((item) => item.quant === job.quant)
     if (!model || !choice) throw new Error(`unknown catalog model ${job.id}`)
     const system = state.system ?? (await scanHardware())
@@ -210,7 +231,8 @@ export function createLocalModelsController(options: { userDataPath: string; log
     // A model that doesn't fit is still registered: llama.cpp's --fit may cope, and the UI shows the tier.
     const context = fit.mode === "none" ? Math.min(8192, model.contextMax) : fit.context
     const mmproj = model.mmproj ? job.files.at(-1)?.dest : undefined
-    const id = `${model.id}-${job.quant.toLowerCase()}`
+    // Live-search ids look like "hf:publisher/repo"; model ids stay plain for llama.cpp presets and OpenCode.
+    const id = `${model.id}-${job.quant}`.toLowerCase().replace(/[^a-z0-9._-]+/g, "-")
     await saveModels([
       ...state.models.filter((item) => item.id !== id),
       {
@@ -297,7 +319,9 @@ export function createLocalModelsController(options: { userDataPath: string; log
     const models = state.models.filter((item) => item.id !== id)
     await saveModels(models)
     const kept = new Set(models.flatMap((item) => [item.path, item.mmproj, ...(item.files ?? [])]))
-    ;(model.files ?? []).filter((file) => !kept.has(file)).forEach((file) => rmSync(file, { force: true }))
+    const deleted = (model.files ?? []).filter((file) => !kept.has(file))
+    deleted.forEach((file) => rmSync(file, { force: true }))
+    new Set(deleted.map((file) => dirname(file))).forEach((dir) => pruneEmpty(dir, state.settings.modelsDir))
     if (model.source) queue.cancel(`${model.source.catalogId}@${model.source.quant}`)
   }
 
@@ -327,6 +351,8 @@ export function createLocalModelsController(options: { userDataPath: string; log
     start,
     scanHardware,
     download,
+    searchHuggingFace,
+    hubDetails,
     importFolder,
     importSources,
     removeModel,
@@ -353,6 +379,13 @@ function upgradeCandidates(preferred: EngineBackend, current: EngineBackend): En
   if (preferred === "cuda-13.4") return current === "cuda-12.4" ? [] : ["cuda-13.4", "cuda-12.4"]
   if (preferred === "cuda-12.4") return ["cuda-12.4"]
   return []
+}
+
+/** Removes `dir` and its parents while they are empty, never leaving the models folder itself. */
+function pruneEmpty(dir: string, root: string) {
+  if (!root || dir === root || !dir.startsWith(root) || !existsSync(dir) || readdirSync(dir).length > 0) return
+  rmdirSync(dir)
+  pruneEmpty(dirname(dir), root)
 }
 
 function uniqueId(base: string, taken: Set<string>) {

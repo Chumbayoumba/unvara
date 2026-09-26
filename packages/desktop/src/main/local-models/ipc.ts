@@ -1,4 +1,5 @@
 import { app, ipcMain } from "electron"
+import type { HubSort } from "@opencode-ai/app/local-models/huggingface"
 import type { LocalModelsSettings } from "@opencode-ai/app/local-models/types"
 import type { LocalModelsController } from "./controller"
 
@@ -38,6 +39,10 @@ export function registerLocalModelsIpcHandlers(controller: LocalModelsController
   ipcMain.handle("local-models-download-resume", (_, id: string) => controller.resumeDownload(id))
   ipcMain.handle("local-models-download-cancel", (_, id: string) => controller.cancelDownload(id))
   ipcMain.handle("local-models-remove", (_, id: string) => controller.removeModel(id))
+  ipcMain.handle("local-models-hub-search", (_, query: string, sort: HubSort, uncensored: boolean) =>
+    controller.searchHuggingFace(query, sort, uncensored),
+  )
+  ipcMain.handle("local-models-hub-details", (_, repo: string) => controller.hubDetails(repo))
   ipcMain.handle("local-models-import-sources", () => controller.importSources())
   ipcMain.handle("local-models-import-folder", (_, dir: string) => controller.importFolder(dir))
   ipcMain.handle("local-models-update-settings", (_, patch: Partial<LocalModelsSettings>) =>

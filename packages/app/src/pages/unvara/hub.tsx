@@ -6,6 +6,7 @@ import { useLocalModels } from "@/local-models/context"
 import { primaryGpu, type Fit, type Tier } from "@/local-models/fit"
 import { agentReady, tierRank, type ModelFit } from "@/local-models/recommend"
 import type { DownloadJob } from "@/local-models/types"
+import { HubSearch } from "./hub-search"
 import { UvIcon } from "./icons"
 import { IconButton } from "./sidebar"
 
@@ -13,7 +14,7 @@ const GIB = 1024 ** 3
 // Same reserves the fit engine keeps free for Windows and the app itself.
 const RAM_RESERVE = 2 * GIB
 const VRAM_RESERVE = 1 * GIB
-const TABS = ["forYou", "catalog", "installed", "downloads"] as const
+const TABS = ["forYou", "catalog", "huggingface", "installed", "downloads"] as const
 const FILTERS = ["all", "uncensored", "official", "agent", "vision", "fits"] as const
 export const SLOTS = ["fast", "balanced", "quality"] as const
 
@@ -28,7 +29,8 @@ const TIER_STYLE: Record<Tier, string> = {
   "wont-run": "bg-v2-background-bg-layer-02 text-v2-text-text-faint",
 }
 
-const CARD = "rounded-(--uv-radius-card) bg-v2-background-bg-layer-01 shadow-[0_0_0_1px_var(--v2-border-border-muted)]"
+export const CARD =
+  "rounded-(--uv-radius-card) bg-v2-background-bg-layer-01 shadow-[0_0_0_1px_var(--v2-border-border-muted)]"
 
 /** Models hub: picks for this PC, the full catalog with per-quant fit, installed models and downloads. */
 export function UnvaraHub() {
@@ -153,6 +155,10 @@ export function UnvaraHub() {
                   )}
                 </For>
               </div>
+            </Match>
+
+            <Match when={ui.tab === "huggingface"}>
+              <HubSearch />
             </Match>
 
             <Match when={ui.tab === "installed"}>
@@ -308,7 +314,7 @@ export function PickCard(props: { slot: (typeof SLOTS)[number]; item: ModelFit; 
   )
 }
 
-function CatalogRow(props: { item: ModelFit; open: boolean; onToggle: () => void }) {
+export function CatalogRow(props: { item: ModelFit; open: boolean; onToggle: () => void }) {
   const language = useLanguage()
   const best = () => props.item.best
   const description = () =>
@@ -321,7 +327,9 @@ function CatalogRow(props: { item: ModelFit; open: boolean; onToggle: () => void
             <h3 class="text-[15px] font-[500] text-v2-text-text-base">{props.item.model.name}</h3>
             <Badges model={props.item.model} fit={best().fit} />
           </div>
-          <p class="text-[13px] leading-[19px] text-v2-text-text-faint">{description()}</p>
+          <Show when={description()}>
+            <p class="text-[13px] leading-[19px] text-v2-text-text-faint">{description()}</p>
+          </Show>
           <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12.5px] text-v2-text-text-muted">
             <TierPill tier={best().fit.tier} />
             <Show when={best().fit.tier !== "wont-run"}>
