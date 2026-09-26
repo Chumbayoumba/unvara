@@ -1275,6 +1275,7 @@ export const dict = {
   "unvara.greeting.evening": "Добрый вечер",
   "unvara.greeting.night": "Не спится?",
   "unvara.composer.placeholder": "Чем могу помочь?",
+  "unvara.composer.loading": "Загружаем {{name}} в память… Первый ответ займёт немного больше времени.",
   "unvara.welcome.title": "С чего начнём?",
   "unvara.welcome.action": "Выбрать папку",
   "unvara.welcome.body": "Unvara работает с папкой на этом компьютере. Чаты и файлы никуда не уходят.",

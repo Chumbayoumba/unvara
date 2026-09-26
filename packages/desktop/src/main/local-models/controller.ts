@@ -22,7 +22,7 @@ import bundledCatalog from "../../../../../catalog/catalog.json"
 import { localDataRoot } from "../paths"
 import { createDownloadQueue } from "./downloads"
 import { findModels, importSources } from "./importer"
-import { createSpeedMeter } from "./speed"
+import { createRouterLogObserver } from "./speed"
 import { ENGINE_BUILD, engineDir, installedBackend, isInstalled, preferredBackend, provisionBackend } from "./engine"
 import { bestModelsDrive, detectSystem, listEngineDevices, pickDevice } from "./hardware"
 import { readManifest, readText, writeAtomic, writeManifest, writePresets } from "./presets"
@@ -73,7 +73,12 @@ export function createLocalModelsController(options: { userDataPath: string; log
   })
   state.downloads = queue.jobs()
   const hubModels = new Map<string, CatalogModel>()
-  const meter = createSpeedMeter(recordSpeed)
+  // OpenCode's requests make the router load models on demand; the logs are how the UI learns about it.
+  const meter = createRouterLogObserver({
+    loading: (model) => emit({ router: { status: "loading", model } }),
+    loaded: (model) => emit({ router: { status: "ready", model } }),
+    speed: recordSpeed,
+  })
   const listeners = new Set<(state: LocalModelsState) => void>()
   const runtime = { router: undefined as Router | undefined, port: 0, apiKey: "" }
 

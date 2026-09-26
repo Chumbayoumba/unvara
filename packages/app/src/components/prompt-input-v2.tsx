@@ -8,6 +8,8 @@ import { TooltipV2 } from "@opencode-ai/ui/v2/tooltip-v2"
 import type { ReferenceInfo } from "@opencode-ai/sdk/v2/client"
 import { createEffect, createMemo, For, on, Show } from "solid-js"
 import { useLocal } from "@/context/local"
+import { useLocalModels } from "@/local-models/context"
+import { LOCAL_PROVIDER_ID } from "@/local-models/types"
 import { ModelSelectorPopoverV2 } from "@/components/dialog-select-model"
 import { DialogSelectModelUnpaidV2 } from "@/components/dialog-select-model-unpaid-v2"
 import type { PromptInputProps } from "@/components/prompt-input/contracts"
@@ -78,7 +80,30 @@ export function PromptInputV2Composer(props: PromptInputV2ComposerProps) {
           </>
         }
       />
+      <ModelLoadingNote model={props.controller.model.selection} />
     </div>
+  )
+}
+
+/** Local models load into memory on the first message after a while; say so instead of looking stuck. */
+function ModelLoadingNote(props: { model: PromptInputProps["controls"]["model"]["selection"] }) {
+  const language = useLanguage()
+  const local = useLocalModels()
+  const loading = () => {
+    const router = local.store.state?.router
+    const model = props.model.current()
+    if (router?.status !== "loading" || model?.provider.id !== LOCAL_PROVIDER_ID || model.id !== router.model) return
+    return model.name
+  }
+  return (
+    <Show when={loading()}>
+      {(name) => (
+        <div class="flex items-center justify-center gap-2 text-[12.5px] text-v2-text-text-faint">
+          <span class="size-3 animate-spin rounded-full border-[1.5px] border-current border-t-transparent" />
+          {language.t("unvara.composer.loading", { name: name() })}
+        </div>
+      )}
+    </Show>
   )
 }
 
