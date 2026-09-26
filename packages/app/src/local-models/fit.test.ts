@@ -125,6 +125,8 @@ describe("quant", () => {
     expect(parseQuant("Huihui-Qwen3.8-27B-abliterated-GSQ-RCO-IQ3_XXS.gguf")).toBe("IQ3_XXS")
     expect(parseQuant("model.BF16-00001-of-00002.gguf")).toBe("BF16")
     expect(parseQuant("gpt-oss-20b-MXFP4.gguf")).toBe("MXFP4")
+    expect(parseQuant("huihui-ai_Huihui-gpt-oss-20b-BF16-abliterated-Q4_K_M.gguf")).toBe("Q4_K_M")
+    expect(parseQuant("Huihui-Qwen3.6-35B-A3B-abliterated.IQ4_XS.gguf")).toBe("IQ4_XS")
   })
 
   test("groups precision and picks the default download", () => {

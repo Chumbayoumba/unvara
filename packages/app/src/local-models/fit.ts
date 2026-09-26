@@ -27,13 +27,15 @@ export type ModelShape = {
   /** MoE: parameters used per token. Dense models omit it. */
   paramsActive?: number
   layers: number
+  /** KV heads and head sizes of the full-attention layers. */
   headCountKv: number
   keyLength: number
   valueLength: number
-  /** Hybrid / linear-attention archs keep a KV cache only on these layers (defaults to all layers). */
+  /** Layers whose KV cache grows with the context (defaults to all layers); hybrid, linear-attention and
+   * sliding-window archs have fewer. */
   fullAttentionLayers?: number
-  /** Sliding-window attention size in tokens, if the arch uses it on some layers. */
-  slidingWindow?: number
+  /** Sliding-window layers: their cache never grows past the window. */
+  swa?: { layers: number; window: number; headCountKv: number; keyLength: number; valueLength: number }
   contextMax: number
 }
 
@@ -62,11 +64,11 @@ export function kvBytesPerToken(shape: ModelShape, kvType: KvType) {
 }
 
 export function kvBytes(shape: ModelShape, context: number, kvType: KvType) {
-  const perToken = kvBytesPerToken(shape, kvType)
-  const window = shape.slidingWindow
-  // Jan: with sliding-window layers roughly half the cache is capped at the window size.
-  if (window && window < context) return (perToken * context + perToken * window) / 2
-  return perToken * context
+  const swa = shape.swa
+  if (!swa) return kvBytesPerToken(shape, kvType) * context
+  // llama.cpp keeps the window plus one micro-batch (512) of cache on sliding-window layers.
+  const windowed = kvBytesPerToken({ ...shape, ...swa, fullAttentionLayers: swa.layers }, kvType)
+  return kvBytesPerToken(shape, kvType) * context + windowed * Math.min(context, swa.window + 512)
 }
 
 export function planFit(

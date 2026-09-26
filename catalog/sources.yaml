@@ -1,0 +1,227 @@
+# Unvara model catalog — hand-curated sources.
+# `bun script/catalog/build.ts` turns this into catalog/catalog.json (sizes, sha256, GGUF dims come from Hugging Face).
+#
+# uncensored: abliterated | heretic | finetune | null (official)
+# activeParams: required for MoE models (billions), e.g. 3 for "A3B"
+# quants: optional allow-list; by default the usual ladder (Q2…Q8, IQ3/IQ4, MXFP4) is offered
+# exclude: filename parts to skip; drafts, MTP heads and imatrix files are always skipped
+# capabilities are auto-detected from the chat template; list them here to force them on
+
+# ── Uncensored ──────────────────────────────────────────────────────────────
+- id: qwen3.6-35b-a3b-abliterated
+  repo: mradermacher/Huihui-Qwen3.6-35B-A3B-abliterated-GGUF
+  name: Qwen3.6 35B A3B
+  family: qwen
+  uncensored: abliterated
+  base: Qwen/Qwen3.6-35B-A3B
+  activeParams: 3
+  tags: [moe, code, agent, multilingual]
+  sampling: { temperature: 0.7, topP: 0.8, topK: 20, minP: 0 }
+  description:
+    en: Mixture-of-experts model that thinks like a 35B but runs like a 3B. The best all-rounder for 8–12 GB GPUs with 32 GB RAM.
+    ru: MoE-модель, которая думает как 35B, а работает со скоростью 3B. Лучший универсал для видеокарт на 8–12 ГБ и 32 ГБ оперативки.
+
+- id: qwen3.8-27b-abliterated
+  repo: huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF
+  name: Qwen3.8 27B
+  family: qwen
+  uncensored: abliterated
+  base: Qwen/Qwen3.8-27B
+  tags: [code, agent, reasoning, multilingual]
+  exclude: [GSQ, Ternary]
+  quants: [IQ2_S, Q2_K_XL, IQ3_XXS, Q3_K_XL, IQ4_XS, Q4_K_M, Q4_K_XL, Q5_K_XL, Q6_K, Q8_0]
+  sampling: { temperature: 0.6, topP: 0.95, topK: 20, minP: 0 }
+  description:
+    en: Strong dense model for code and long reasoning. Wants 16–24 GB of VRAM to be fast.
+    ru: Сильная плотная модель для кода и длинных рассуждений. Чтобы работать быстро, ей нужно 16–24 ГБ видеопамяти.
+
+- id: gemma-4-12b-heretic
+  repo: culturerevolt/gemma-4-12b-heretic-abliterated-GGUF
+  name: Gemma 4 12B
+  family: gemma
+  uncensored: heretic
+  base: google/gemma-4-12b-it
+  tags: [multilingual, writing]
+  sampling: { temperature: 1.0, topP: 0.95, topK: 64, minP: 0 }
+  description:
+    en: Fluent, creative writer with excellent Russian. Fits fully on a 12 GB GPU.
+    ru: Живо и грамотно пишет, отлично владеет русским. Целиком помещается в видеокарту на 12 ГБ.
+
+- id: gemma-4-e4b-uncensored
+  repo: HauhauCS/Gemma-4-E4B-Uncensored-HauhauCS-Aggressive
+  name: Gemma 4 E4B
+  family: gemma
+  uncensored: finetune
+  base: google/gemma-4-E4B-it
+  tags: [small, fast, multilingual]
+  quants: [IQ3_M, Q3_K_M, IQ4_XS, Q4_K_M, Q5_K_M, Q6_K_P, Q8_K_P]
+  sampling: { temperature: 1.0, topP: 0.95, topK: 64, minP: 0 }
+  description:
+    en: Small and quick. Runs on almost any PC, including laptops without a dedicated GPU.
+    ru: Маленькая и быстрая. Запускается почти на любом ПК, включая ноутбуки без видеокарты.
+
+- id: gemma-4-e2b-uncensored
+  repo: HauhauCS/Gemma-4-E2B-Uncensored-HauhauCS-Aggressive
+  name: Gemma 4 E2B
+  family: gemma
+  uncensored: finetune
+  base: google/gemma-4-E2B-it
+  tags: [small, fast]
+  quants: [IQ3_M, Q3_K_P, Q4_K_P, Q5_K_P, Q6_K_P, Q8_K_P]
+  sampling: { temperature: 1.0, topP: 0.95, topK: 64, minP: 0 }
+  description:
+    en: The lightest option — for older laptops and 8 GB RAM machines.
+    ru: Самый лёгкий вариант — для старых ноутбуков и компьютеров с 8 ГБ оперативки.
+
+- id: qwen3.5-9b-abliterated
+  repo: mradermacher/Huihui-Qwen3.5-9B-abliterated-GGUF
+  name: Qwen3.5 9B
+  family: qwen
+  uncensored: abliterated
+  base: Qwen/Qwen3.5-9B
+  tags: [agent, code, multilingual]
+  sampling: { temperature: 0.7, topP: 0.8, topK: 20, minP: 0 }
+  description:
+    en: Balanced 9B that handles tools well. Fits an 8 GB GPU with room for a long context.
+    ru: Сбалансированная 9B, уверенно работает с инструментами. Помещается в 8 ГБ видеопамяти с длинным контекстом.
+
+- id: qwen3-4b-2507-abliterated
+  repo: mradermacher/Huihui-Qwen3-4B-Instruct-2507-abliterated-GGUF
+  name: Qwen3 4B Instruct 2507
+  family: qwen
+  uncensored: abliterated
+  base: Qwen/Qwen3-4B-Instruct-2507
+  tags: [small, fast, agent]
+  sampling: { temperature: 0.7, topP: 0.8, topK: 20, minP: 0 }
+  description:
+    en: Tiny but surprisingly capable, and very fast on any GPU. Good first model.
+    ru: Крошечная, но на удивление толковая и очень быстрая на любой видеокарте. Хорошая первая модель.
+
+- id: qwen3-vl-8b-abliterated
+  repo: mradermacher/Qwen3-VL-8B-Instruct-abliterated-GGUF
+  name: Qwen3 VL 8B
+  family: qwen
+  uncensored: abliterated
+  base: Qwen/Qwen3-VL-8B-Instruct
+  tags: [vision, multilingual]
+  capabilities: [vision]
+  sampling: { temperature: 0.7, topP: 0.8, topK: 20, minP: 0 }
+  description:
+    en: Understands images — screenshots, photos, documents.
+    ru: Понимает изображения — скриншоты, фото, документы.
+
+- id: gpt-oss-20b-abliterated
+  repo: bartowski/huihui-ai_Huihui-gpt-oss-20b-BF16-abliterated-GGUF
+  name: gpt-oss 20B
+  family: gpt-oss
+  uncensored: abliterated
+  base: openai/gpt-oss-20b
+  activeParams: 3.6
+  tags: [moe, reasoning, agent]
+  # Experts are MXFP4 natively, so every other quant is ~11.5 GB too.
+  quants: [MXFP4]
+  sampling: { temperature: 1.0, topP: 1.0, topK: 0, minP: 0 }
+  description:
+    en: OpenAI's open MoE model with strong reasoning; fast thanks to 3.6B active parameters.
+    ru: Открытая MoE-модель от OpenAI с сильными рассуждениями; быстрая благодаря 3.6B активных параметров.
+
+- id: mistral-small-3.2-24b-abliterated
+  repo: mradermacher/Huihui-Mistral-Small-3.2-24B-Instruct-2506-abliterated-llamacppfixed-GGUF
+  name: Mistral Small 3.2 24B
+  family: mistral
+  uncensored: abliterated
+  base: mistralai/Mistral-Small-3.2-24B-Instruct-2506
+  tags: [writing, agent, multilingual]
+  sampling: { temperature: 0.15, topP: 1.0, topK: 0, minP: 0 }
+  description:
+    en: Reliable European 24B, good at instructions and tool use. Best with 16 GB+ of VRAM.
+    ru: Надёжная европейская 24B, хорошо следует инструкциям и работает с инструментами. Лучше с 16 ГБ видеопамяти и больше.
+
+- id: llama-3.2-3b-abliterated
+  repo: QuantFactory/Llama-3.2-3B-Instruct-abliterated-GGUF
+  name: Llama 3.2 3B
+  family: llama
+  uncensored: abliterated
+  base: meta-llama/Llama-3.2-3B-Instruct
+  tags: [small, fast]
+  sampling: { temperature: 0.6, topP: 0.9, topK: 40, minP: 0.05 }
+  description:
+    en: Classic small model from Meta. Very light, English-first.
+    ru: Классическая маленькая модель от Meta. Очень лёгкая, лучше всего по-английски.
+
+- id: deepseek-v4-flash-abliterated
+  repo: huihui-ai/Huihui-DeepSeek-V4-Flash-0731-abliterated-GGUF
+  name: DeepSeek V4 Flash
+  family: deepseek
+  uncensored: abliterated
+  base: deepseek-ai/DeepSeek-V4-Flash
+  activeParams: 13
+  tags: [moe, reasoning, code, huge]
+  quants: [Q2, Q2_K, MXFP4, Q4_K]
+  sampling: { temperature: 0.6, topP: 0.95, topK: 0, minP: 0 }
+  description:
+    en: Frontier-scale MoE (284B). Needs a workstation — roughly 128 GB+ of RAM even at low quants.
+    ru: MoE флагманского уровня (284B). Нужна рабочая станция — около 128 ГБ оперативки даже на низких квантах.
+
+# ── Official (censored) ─────────────────────────────────────────────────────
+- id: qwen3.6-35b-a3b
+  repo: unsloth/Qwen3.6-35B-A3B-GGUF
+  name: Qwen3.6 35B A3B
+  family: qwen
+  uncensored: null
+  base: Qwen/Qwen3.6-35B-A3B
+  activeParams: 3
+  tags: [moe, code, agent, multilingual]
+  sampling: { temperature: 0.7, topP: 0.8, topK: 20, minP: 0 }
+  description:
+    en: Official Qwen MoE — the most reliable tool caller in this size class.
+    ru: Официальная MoE от Qwen — самая надёжная в работе с инструментами в своём классе.
+
+- id: qwen3.8-27b
+  repo: unsloth/Qwen3.8-27B-GGUF
+  name: Qwen3.8 27B
+  family: qwen
+  uncensored: null
+  base: Qwen/Qwen3.8-27B
+  tags: [code, agent, reasoning]
+  sampling: { temperature: 0.6, topP: 0.95, topK: 20, minP: 0 }
+  description:
+    en: Official dense Qwen for serious coding work.
+    ru: Официальная плотная Qwen для серьёзной работы с кодом.
+
+- id: gemma-4-12b
+  repo: unsloth/gemma-4-12b-it-GGUF
+  name: Gemma 4 12B
+  family: gemma
+  uncensored: null
+  base: google/gemma-4-12b-it
+  tags: [multilingual, writing]
+  sampling: { temperature: 1.0, topP: 0.95, topK: 64, minP: 0 }
+  description:
+    en: Google's official 12B.
+    ru: Официальная 12B от Google.
+
+- id: gpt-oss-20b
+  repo: ggml-org/gpt-oss-20b-GGUF
+  name: gpt-oss 20B
+  family: gpt-oss
+  uncensored: null
+  base: openai/gpt-oss-20b
+  activeParams: 3.6
+  tags: [moe, reasoning, agent]
+  sampling: { temperature: 1.0, topP: 1.0, topK: 0, minP: 0 }
+  description:
+    en: OpenAI's official open-weights model.
+    ru: Официальная открытая модель от OpenAI.
+
+- id: qwen3-4b-2507
+  repo: unsloth/Qwen3-4B-Instruct-2507-GGUF
+  name: Qwen3 4B Instruct 2507
+  family: qwen
+  uncensored: null
+  base: Qwen/Qwen3-4B-Instruct-2507
+  tags: [small, fast, agent]
+  sampling: { temperature: 0.7, topP: 0.8, topK: 20, minP: 0 }
+  description:
+    en: Official small Qwen with dependable tool calling.
+    ru: Официальная маленькая Qwen с надёжным вызовом инструментов.

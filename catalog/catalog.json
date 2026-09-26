@@ -1,0 +1,2231 @@
+{
+  "schemaVersion": 1,
+  "minAppVersion": "0.1.0",
+  "generatedAt": "2026-09-26T19:32:45.140Z",
+  "models": [
+    {
+      "id": "qwen3.6-35b-a3b-abliterated",
+      "name": "Qwen3.6 35B A3B",
+      "family": "qwen",
+      "repo": "mradermacher/Huihui-Qwen3.6-35B-A3B-abliterated-GGUF",
+      "publisher": "mradermacher",
+      "uncensored": "abliterated",
+      "base": "Qwen/Qwen3.6-35B-A3B",
+      "description": {
+        "en": "Mixture-of-experts model that thinks like a 35B but runs like a 3B. The best all-rounder for 8–12 GB GPUs with 32 GB RAM.",
+        "ru": "MoE-модель, которая думает как 35B, а работает со скоростью 3B. Лучший универсал для видеокарт на 8–12 ГБ и 32 ГБ оперативки."
+      },
+      "tags": [
+        "moe",
+        "code",
+        "agent",
+        "multilingual"
+      ],
+      "capabilities": {
+        "tools": true,
+        "vision": true,
+        "reasoning": true
+      },
+      "license": "apache-2.0",
+      "arch": "qwen35moe",
+      "paramsTotal": 34660610688,
+      "paramsActive": 3000000000,
+      "contextMax": 262144,
+      "shape": {
+        "paramsTotal": 34660610688,
+        "paramsActive": 3000000000,
+        "layers": 40,
+        "headCountKv": 2,
+        "keyLength": 256,
+        "valueLength": 256,
+        "fullAttentionLayers": 10,
+        "contextMax": 262144
+      },
+      "quants": [
+        {
+          "quant": "Q2_K",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.6-35B-A3B-abliterated.Q2_K.gguf",
+              "size": 12939594624,
+              "sha256": "5073fcc761e51afba317bb5af004691ba5f048a4c284d9d2330ef0caea5da224"
+            }
+          ],
+          "size": 12939594624
+        },
+        {
+          "quant": "Q3_K_M",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.6-35B-A3B-abliterated.Q3_K_M.gguf",
+              "size": 16764765056,
+              "sha256": "2027d5759576c20a91a0a78c07855392e5428a5ddc6a4d5b413c44b01a5e6c36"
+            }
+          ],
+          "size": 16764765056
+        },
+        {
+          "quant": "IQ4_XS",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.6-35B-A3B-abliterated.IQ4_XS.gguf",
+              "size": 18939313024,
+              "sha256": "eaf7e52f7298d7f7a55318376afbb5f72ae62fbd434eb97515ee14410220e0e2"
+            }
+          ],
+          "size": 18939313024
+        },
+        {
+          "quant": "Q4_K_M",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.6-35B-A3B-abliterated.Q4_K_M.gguf",
+              "size": 21166758784,
+              "sha256": "fbaa4eb3e2365abffd495c5efa7df88c2b2a5088ba32cd2895973d130991e92b"
+            }
+          ],
+          "size": 21166758784
+        },
+        {
+          "quant": "Q5_K_M",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.6-35B-A3B-abliterated.Q5_K_M.gguf",
+              "size": 24729131904,
+              "sha256": "0b9660729ffe997d3ac5510689f27c724008c6f3acbb9d1f05dfebde7096f807"
+            }
+          ],
+          "size": 24729131904
+        },
+        {
+          "quant": "Q6_K",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.6-35B-A3B-abliterated.Q6_K.gguf",
+              "size": 28514153344,
+              "sha256": "420f7a99363f9ac98b532aef0897096b0a68704180a6b8b680ee121bb76720ee"
+            }
+          ],
+          "size": 28514153344
+        },
+        {
+          "quant": "Q8_0",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.6-35B-A3B-abliterated.Q8_0.gguf",
+              "size": 36903140224,
+              "sha256": "7981c833234041b6dc2852b8140a0c08419b16c96f5b20c3c1270813cabd965c"
+            }
+          ],
+          "size": 36903140224
+        }
+      ],
+      "recommendedQuant": "Q4_K_M",
+      "mmproj": {
+        "name": "Huihui-Qwen3.6-35B-A3B-abliterated.mmproj-f16.gguf",
+        "size": 899283616,
+        "sha256": "284a01871fea0abae77672967576d53717cf7fa465ba3eb9d6deb98521f943a6"
+      },
+      "sampling": {
+        "temperature": 0.7,
+        "topP": 0.8,
+        "topK": 20,
+        "minP": 0
+      },
+      "downloads": 62598,
+      "updatedAt": "2026-04-21T16:20:23.000Z"
+    },
+    {
+      "id": "qwen3.8-27b-abliterated",
+      "name": "Qwen3.8 27B",
+      "family": "qwen",
+      "repo": "huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF",
+      "publisher": "huihui-ai",
+      "uncensored": "abliterated",
+      "base": "Qwen/Qwen3.8-27B",
+      "description": {
+        "en": "Strong dense model for code and long reasoning. Wants 16–24 GB of VRAM to be fast.",
+        "ru": "Сильная плотная модель для кода и длинных рассуждений. Чтобы работать быстро, ей нужно 16–24 ГБ видеопамяти."
+      },
+      "tags": [
+        "code",
+        "agent",
+        "reasoning",
+        "multilingual"
+      ],
+      "capabilities": {
+        "tools": true,
+        "vision": true,
+        "reasoning": true
+      },
+      "license": "apache-2.0",
+      "arch": "qwen35",
+      "paramsTotal": 27320697856,
+      "contextMax": 262144,
+      "shape": {
+        "paramsTotal": 27320697856,
+        "layers": 65,
+        "headCountKv": 4,
+        "keyLength": 256,
+        "valueLength": 256,
+        "fullAttentionLayers": 16,
+        "contextMax": 262144
+      },
+      "quants": [
+        {
+          "quant": "IQ2_S",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.8-27B-abliterated-UD-IQ2_S.gguf",
+              "size": 8424398848,
+              "sha256": "b4b7bdec2e49a66542f5816295a7503f2fc52dd7bd04ca45bc370820cfe81d03"
+            }
+          ],
+          "size": 8424398848
+        },
+        {
+          "quant": "Q2_K_XL",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.8-27B-abliterated-UD-Q2_K_XL.gguf",
+              "size": 10011909024,
+              "sha256": "3715d3c31491d706c164445246d31f7ac59822a735d3ae53560b826e248b0e73"
+            }
+          ],
+          "size": 10011909024
+        },
+        {
+          "quant": "IQ3_XXS",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.8-27B-abliterated-UD-IQ3_XXS.gguf",
+              "size": 11021122464,
+              "sha256": "e86259c841888b06fd84750963a0263947c9aae3c3029b52cbb3faa34a554827"
+            }
+          ],
+          "size": 11021122464
+        },
+        {
+          "quant": "Q3_K_XL",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.8-27B-abliterated-UD-Q3_K_XL.gguf",
+              "size": 13326125984,
+              "sha256": "c6e144d78595c4656946187c2cee42f9062b3b4fa9874bc1be3e9263396253da"
+            }
+          ],
+          "size": 13326125984
+        },
+        {
+          "quant": "IQ4_XS",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.8-27B-abliterated-UD-IQ4_XS.gguf",
+              "size": 14403496864,
+              "sha256": "d83adbbbaace8acdfcfe28004f779326176b9df00b4ec99dc6c24d749723d3b9"
+            }
+          ],
+          "size": 14403496864
+        },
+        {
+          "quant": "Q4_K_M",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.8-27B-abliterated-UD-DW-Q4_K_M.gguf",
+              "size": 16551316384,
+              "sha256": "0c7cfe3060493485bb9a6a51195897b0c1d347a49929206adb9a52170183ea03"
+            }
+          ],
+          "size": 16551316384
+        },
+        {
+          "quant": "Q4_K_XL",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.8-27B-abliterated-UD-Q4_K_XL.gguf",
+              "size": 17378626464,
+              "sha256": "ebbc66b45cf36bf47dc052d560337ff047a8b4eef851c8919d83d623703b6aa4"
+            }
+          ],
+          "size": 17378626464
+        },
+        {
+          "quant": "Q5_K_XL",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.8-27B-abliterated-UD-Q5_K_XL.gguf",
+              "size": 20673612704,
+              "sha256": "a6ff520853eba5cad302a2a16144b7fe683792cca7fb2830a08479e78ebe12b6"
+            }
+          ],
+          "size": 20673612704
+        },
+        {
+          "quant": "Q6_K",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.8-27B-abliterated-Q6_K.gguf",
+              "size": 22430999840,
+              "sha256": "a5c159519d7bdba523578977d649dbfc48f2e47277ec77edd77670003b5b2492"
+            }
+          ],
+          "size": 22430999840
+        },
+        {
+          "quant": "Q8_0",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.8-27B-abliterated-Q8_0.gguf",
+              "size": 29047084320,
+              "sha256": "427b9416c2aba9d21da4e90ddac50a2bc8b6d0bfef675af3580a43aa38e000c3"
+            }
+          ],
+          "size": 29047084320
+        }
+      ],
+      "recommendedQuant": "Q4_K_M",
+      "mmproj": {
+        "name": "mmproj-model-bf16.gguf",
+        "size": 931145888,
+        "sha256": "c9a09064683620bea3d3bfed5d4462e1a97a7d2fff7e5045d6862a0a85eeb5b5"
+      },
+      "sampling": {
+        "temperature": 0.6,
+        "topP": 0.95,
+        "topK": 20,
+        "minP": 0
+      },
+      "downloads": 2235656,
+      "updatedAt": "2026-09-21T17:35:19.000Z"
+    },
+    {
+      "id": "gemma-4-12b-heretic",
+      "name": "Gemma 4 12B",
+      "family": "gemma",
+      "repo": "culturerevolt/gemma-4-12b-heretic-abliterated-GGUF",
+      "publisher": "culturerevolt",
+      "uncensored": "heretic",
+      "base": "google/gemma-4-12b-it",
+      "description": {
+        "en": "Fluent, creative writer with excellent Russian. Fits fully on a 12 GB GPU.",
+        "ru": "Живо и грамотно пишет, отлично владеет русским. Целиком помещается в видеокарту на 12 ГБ."
+      },
+      "tags": [
+        "multilingual",
+        "writing"
+      ],
+      "capabilities": {
+        "tools": true,
+        "vision": true,
+        "reasoning": true
+      },
+      "license": "apache-2.0",
+      "arch": "gemma4",
+      "paramsTotal": 11907350576,
+      "contextMax": 262144,
+      "shape": {
+        "paramsTotal": 11907350576,
+        "layers": 48,
+        "headCountKv": 1,
+        "keyLength": 512,
+        "valueLength": 512,
+        "fullAttentionLayers": 8,
+        "swa": {
+          "layers": 40,
+          "window": 1024,
+          "headCountKv": 8,
+          "keyLength": 256,
+          "valueLength": 256
+        },
+        "contextMax": 262144
+      },
+      "quants": [
+        {
+          "quant": "IQ3_XS",
+          "files": [
+            {
+              "name": "gemma-4-12b-heretic-IQ3_XS.gguf",
+              "size": 5272393056,
+              "sha256": "e3b989172aeca98f32200c8031c603cd7191d8d487acd3cfde59c26ba4d4f4b7"
+            }
+          ],
+          "size": 5272393056
+        },
+        {
+          "quant": "IQ4_XS",
+          "files": [
+            {
+              "name": "gemma-4-12b-heretic-IQ4_XS.gguf",
+              "size": 6635255136,
+              "sha256": "e0b47213375123b2511650783db8923b834bd7046ca77928a059f33c0ca0af8b"
+            }
+          ],
+          "size": 6635255136
+        },
+        {
+          "quant": "Q4_K_M",
+          "files": [
+            {
+              "name": "gemma-4-12b-heretic-Q4_K_M.gguf",
+              "size": 7381382496,
+              "sha256": "6c4067ea0210d2367b2dbdd460d2dd86032a9b6e8dcbe03b83a3ea0a0a16dbee"
+            }
+          ],
+          "size": 7381382496
+        },
+        {
+          "quant": "Q5_K_M",
+          "files": [
+            {
+              "name": "gemma-4-12b-heretic-Q5_K_M.gguf",
+              "size": 8547267936,
+              "sha256": "02635254d20e4732b9b2b2ae4504509195ff88e6bd9fb1fac445b20dc9416bea"
+            }
+          ],
+          "size": 8547267936
+        },
+        {
+          "quant": "Q6_K",
+          "files": [
+            {
+              "name": "gemma-4-12b-heretic-Q6_K.gguf",
+              "size": 9786021216,
+              "sha256": "ea50ec1e6065576314a09f4f2051e07d5bf61d8d6cce11c09249c155217aeeab"
+            }
+          ],
+          "size": 9786021216
+        },
+        {
+          "quant": "Q8_0",
+          "files": [
+            {
+              "name": "gemma-4-12b-heretic-abliterated-Q8_0.gguf",
+              "size": 12669645440,
+              "sha256": "e4734aeb71209e9595eaac1b46b6370f4329cad4515ab449a788cb3b04745dec"
+            }
+          ],
+          "size": 12669645440
+        }
+      ],
+      "recommendedQuant": "Q4_K_M",
+      "mmproj": {
+        "name": "gemma-4-12b-heretic-mmproj-f16.gguf",
+        "size": 175115840,
+        "sha256": "2e269f906eb15169ee9ce880ea649bd6d42d4964c21f8ede10d0d0efc738bcbb"
+      },
+      "sampling": {
+        "temperature": 1,
+        "topP": 0.95,
+        "topK": 64,
+        "minP": 0
+      },
+      "downloads": 157908,
+      "updatedAt": "2026-06-05T11:32:36.000Z"
+    },
+    {
+      "id": "gemma-4-e4b-uncensored",
+      "name": "Gemma 4 E4B",
+      "family": "gemma",
+      "repo": "HauhauCS/Gemma-4-E4B-Uncensored-HauhauCS-Aggressive",
+      "publisher": "HauhauCS",
+      "uncensored": "finetune",
+      "base": "google/gemma-4-E4B-it",
+      "description": {
+        "en": "Small and quick. Runs on almost any PC, including laptops without a dedicated GPU.",
+        "ru": "Маленькая и быстрая. Запускается почти на любом ПК, включая ноутбуки без видеокарты."
+      },
+      "tags": [
+        "small",
+        "fast",
+        "multilingual"
+      ],
+      "capabilities": {
+        "tools": true,
+        "vision": true,
+        "reasoning": false
+      },
+      "license": "gemma",
+      "arch": "gemma4",
+      "paramsTotal": 7518069290,
+      "contextMax": 131072,
+      "shape": {
+        "paramsTotal": 7518069290,
+        "layers": 42,
+        "headCountKv": 2,
+        "keyLength": 512,
+        "valueLength": 512,
+        "fullAttentionLayers": 4,
+        "swa": {
+          "layers": 20,
+          "window": 512,
+          "headCountKv": 2,
+          "keyLength": 256,
+          "valueLength": 256
+        },
+        "contextMax": 131072
+      },
+      "quants": [
+        {
+          "quant": "IQ3_M",
+          "files": [
+            {
+              "name": "Gemma-4-E4B-Uncensored-HauhauCS-Aggressive-IQ3_M.gguf",
+              "size": 4714690528,
+              "sha256": "d17a59387ef0ada0823fb4572b609da920d822f31b6ac983e323da55c31aa3a2"
+            }
+          ],
+          "size": 4714690528
+        },
+        {
+          "quant": "Q3_K_M",
+          "files": [
+            {
+              "name": "Gemma-4-E4B-Uncensored-HauhauCS-Aggressive-Q3_K_M.gguf",
+              "size": 4850391008,
+              "sha256": "a60db97bb4f61f0167d64f369c198428b2bb10a636b6f339f2f947ac40202a98"
+            }
+          ],
+          "size": 4850391008
+        },
+        {
+          "quant": "IQ4_XS",
+          "files": [
+            {
+              "name": "Gemma-4-E4B-Uncensored-HauhauCS-Aggressive-IQ4_XS.gguf",
+              "size": 5070950368,
+              "sha256": "8e533ca658a3959fd3ee8b5f575c24b87c5a278649d5053480d4cce280bdbd6c"
+            }
+          ],
+          "size": 5070950368
+        },
+        {
+          "quant": "Q4_K_M",
+          "files": [
+            {
+              "name": "Gemma-4-E4B-Uncensored-HauhauCS-Aggressive-Q4_K_M.gguf",
+              "size": 5335285728,
+              "sha256": "d0027dd3a9128d9323e9f282c8bf010a8526c46477584535991dc1a869b56e96"
+            }
+          ],
+          "size": 5335285728
+        },
+        {
+          "quant": "Q5_K_M",
+          "files": [
+            {
+              "name": "Gemma-4-E4B-Uncensored-HauhauCS-Aggressive-Q5_K_M.gguf",
+              "size": 5762908128,
+              "sha256": "c96f1afc2af92bb27b1d5057fd91c8f6e41e9a72f9f32faa389e1601a6963ee6"
+            }
+          ],
+          "size": 5762908128
+        },
+        {
+          "quant": "Q6_K_P",
+          "files": [
+            {
+              "name": "Gemma-4-E4B-Uncensored-HauhauCS-Aggressive-Q6_K_P.gguf",
+              "size": 6249794528,
+              "sha256": "f28b0ae262158af10d847c3f01bfdb943161dd31320f3aed20775ee2ad6c67a6"
+            }
+          ],
+          "size": 6249794528
+        },
+        {
+          "quant": "Q8_K_P",
+          "files": [
+            {
+              "name": "Gemma-4-E4B-Uncensored-HauhauCS-Aggressive-Q8_K_P.gguf",
+              "size": 8133226464,
+              "sha256": "a4c4177f9fd7e3f56522675afb742f079a53f9226195b7db5e9888c872f053da"
+            }
+          ],
+          "size": 8133226464
+        }
+      ],
+      "recommendedQuant": "Q4_K_M",
+      "mmproj": {
+        "name": "mmproj-Gemma-4-E4B-Uncensored-HauhauCS-Aggressive-f16.gguf",
+        "size": 990288832,
+        "sha256": "debad39ab9c1152ab67695a674fb35e8375b2320c57bfd5075835d3ccb16c7db"
+      },
+      "sampling": {
+        "temperature": 1,
+        "topP": 0.95,
+        "topK": 64,
+        "minP": 0
+      },
+      "downloads": 1416341,
+      "updatedAt": "2026-04-06T03:50:35.000Z"
+    },
+    {
+      "id": "gemma-4-e2b-uncensored",
+      "name": "Gemma 4 E2B",
+      "family": "gemma",
+      "repo": "HauhauCS/Gemma-4-E2B-Uncensored-HauhauCS-Aggressive",
+      "publisher": "HauhauCS",
+      "uncensored": "finetune",
+      "base": "google/gemma-4-E2B-it",
+      "description": {
+        "en": "The lightest option — for older laptops and 8 GB RAM machines.",
+        "ru": "Самый лёгкий вариант — для старых ноутбуков и компьютеров с 8 ГБ оперативки."
+      },
+      "tags": [
+        "small",
+        "fast"
+      ],
+      "capabilities": {
+        "tools": true,
+        "vision": true,
+        "reasoning": false
+      },
+      "license": "gemma",
+      "arch": "gemma4",
+      "paramsTotal": 4647450147,
+      "contextMax": 131072,
+      "shape": {
+        "paramsTotal": 4647450147,
+        "layers": 35,
+        "headCountKv": 1,
+        "keyLength": 512,
+        "valueLength": 512,
+        "fullAttentionLayers": 3,
+        "swa": {
+          "layers": 12,
+          "window": 512,
+          "headCountKv": 1,
+          "keyLength": 256,
+          "valueLength": 256
+        },
+        "contextMax": 131072
+      },
+      "quants": [
+        {
+          "quant": "IQ3_M",
+          "files": [
+            {
+              "name": "Gemma-4-E2B-Uncensored-HauhauCS-Aggressive-IQ3_M.gguf",
+              "size": 3134964672,
+              "sha256": "0796d58372742ef8ddc76dd64cd2fde217b7ef32e3dc58e10873253e569cad6b"
+            }
+          ],
+          "size": 3134964672
+        },
+        {
+          "quant": "Q3_K_P",
+          "files": [
+            {
+              "name": "Gemma-4-E2B-Uncensored-HauhauCS-Aggressive-Q3_K_P.gguf",
+              "size": 3224043456,
+              "sha256": "0c47867b4aafb0e0e6e0cd29971d44d8f357151ae5cb35ad3a0e8bd293fec685"
+            }
+          ],
+          "size": 3224043456
+        },
+        {
+          "quant": "Q4_K_P",
+          "files": [
+            {
+              "name": "Gemma-4-E2B-Uncensored-HauhauCS-Aggressive-Q4_K_P.gguf",
+              "size": 3450277824,
+              "sha256": "aa866c1e514468f3d0f33971679d63c11b7c9c47acddd1cc5785fc467e52c21d"
+            }
+          ],
+          "size": 3450277824
+        },
+        {
+          "quant": "Q5_K_P",
+          "files": [
+            {
+              "name": "Gemma-4-E2B-Uncensored-HauhauCS-Aggressive-Q5_K_P.gguf",
+              "size": 3663440832,
+              "sha256": "1f757b2445b5b76979b6fe71c09fb0d87559986b1fa412b4ee32c8c05d7978ce"
+            }
+          ],
+          "size": 3663440832
+        },
+        {
+          "quant": "Q6_K_P",
+          "files": [
+            {
+              "name": "Gemma-4-E2B-Uncensored-HauhauCS-Aggressive-Q6_K_P.gguf",
+              "size": 3866957760,
+              "sha256": "8dd59a0e2d917c1ba518db07c4012d9ac34e5d6ae10f8e209f2a4c43c55fe7b7"
+            }
+          ],
+          "size": 3866957760
+        },
+        {
+          "quant": "Q8_K_P",
+          "files": [
+            {
+              "name": "Gemma-4-E2B-Uncensored-HauhauCS-Aggressive-Q8_K_P.gguf",
+              "size": 5036057536,
+              "sha256": "dfee358c38cc41419dd538d9afe2e22245738c752a2e6b5adb9a6654cf30d67b"
+            }
+          ],
+          "size": 5036057536
+        }
+      ],
+      "recommendedQuant": "Q4_K_P",
+      "mmproj": {
+        "name": "mmproj-Gemma-4-E2B-Uncensored-HauhauCS-Aggressive-f16.gguf",
+        "size": 985570240,
+        "sha256": "628b7e999f89beef70b32396ae84f59c096e867747d7901f0134064ff672e290"
+      },
+      "sampling": {
+        "temperature": 1,
+        "topP": 0.95,
+        "topK": 64,
+        "minP": 0
+      },
+      "downloads": 84871,
+      "updatedAt": "2026-04-06T03:51:20.000Z"
+    },
+    {
+      "id": "qwen3.5-9b-abliterated",
+      "name": "Qwen3.5 9B",
+      "family": "qwen",
+      "repo": "mradermacher/Huihui-Qwen3.5-9B-abliterated-GGUF",
+      "publisher": "mradermacher",
+      "uncensored": "abliterated",
+      "base": "Qwen/Qwen3.5-9B",
+      "description": {
+        "en": "Balanced 9B that handles tools well. Fits an 8 GB GPU with room for a long context.",
+        "ru": "Сбалансированная 9B, уверенно работает с инструментами. Помещается в 8 ГБ видеопамяти с длинным контекстом."
+      },
+      "tags": [
+        "agent",
+        "code",
+        "multilingual"
+      ],
+      "capabilities": {
+        "tools": true,
+        "vision": true,
+        "reasoning": true
+      },
+      "license": "apache-2.0",
+      "arch": "qwen35",
+      "paramsTotal": 8953803264,
+      "contextMax": 262144,
+      "shape": {
+        "paramsTotal": 8953803264,
+        "layers": 32,
+        "headCountKv": 4,
+        "keyLength": 256,
+        "valueLength": 256,
+        "fullAttentionLayers": 8,
+        "contextMax": 262144
+      },
+      "quants": [
+        {
+          "quant": "Q2_K",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.5-9B-abliterated.Q2_K.gguf",
+              "size": 3638519168,
+              "sha256": "1043af53783b2411aae54d935fb77e424441442e81d67031d759caee6232e1e7"
+            }
+          ],
+          "size": 3638519168
+        },
+        {
+          "quant": "Q3_K_M",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.5-9B-abliterated.Q3_K_M.gguf",
+              "size": 4616185216,
+              "sha256": "5a9dd2c815674a38ee8f1d8c5beddda609dd6ae8a3142e451de45333a074cfd0"
+            }
+          ],
+          "size": 4616185216
+        },
+        {
+          "quant": "IQ4_XS",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.5-9B-abliterated.IQ4_XS.gguf",
+              "size": 5102069120,
+              "sha256": "6c01a4bdf987e208327aa1bb3a56c9e32b05a807966aa762cc8b750eb32bc1f5"
+            }
+          ],
+          "size": 5102069120
+        },
+        {
+          "quant": "Q4_K_M",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.5-9B-abliterated.Q4_K_M.gguf",
+              "size": 5627045248,
+              "sha256": "ea1858ef4dc4b648b8dbb44612962a0333e945060dd0545ac0f28d7c4416e4b3"
+            }
+          ],
+          "size": 5627045248
+        },
+        {
+          "quant": "Q5_K_M",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.5-9B-abliterated.Q5_K_M.gguf",
+              "size": 6522004864,
+              "sha256": "946072b16f5d672e60357410f900888f6522b3ae49f241b5bf2142cb89637fb6"
+            }
+          ],
+          "size": 6522004864
+        },
+        {
+          "quant": "Q6_K",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.5-9B-abliterated.Q6_K.gguf",
+              "size": 7359260032,
+              "sha256": "c57ef5dc56ead87f054e808c14e4edbd4be60b3a32717cc38ea54e90dc296d2c"
+            }
+          ],
+          "size": 7359260032
+        },
+        {
+          "quant": "Q8_0",
+          "files": [
+            {
+              "name": "Huihui-Qwen3.5-9B-abliterated.Q8_0.gguf",
+              "size": 9527502208,
+              "sha256": "9df7ce00f4df74344dd788ade97c412ef9850e58b44ff337e56fbf07be24a97f"
+            }
+          ],
+          "size": 9527502208
+        }
+      ],
+      "recommendedQuant": "Q4_K_M",
+      "mmproj": {
+        "name": "Huihui-Qwen3.5-9B-abliterated.mmproj-f16.gguf",
+        "size": 918166016,
+        "sha256": "56f07ff42fc9ab24fc06a93dce5a48fb2dbe08bff1a1c6e519d50af450820148"
+      },
+      "sampling": {
+        "temperature": 0.7,
+        "topP": 0.8,
+        "topK": 20,
+        "minP": 0
+      },
+      "downloads": 58180,
+      "updatedAt": "2026-03-10T06:43:50.000Z"
+    },
+    {
+      "id": "qwen3-4b-2507-abliterated",
+      "name": "Qwen3 4B Instruct 2507",
+      "family": "qwen",
+      "repo": "mradermacher/Huihui-Qwen3-4B-Instruct-2507-abliterated-GGUF",
+      "publisher": "mradermacher",
+      "uncensored": "abliterated",
+      "base": "Qwen/Qwen3-4B-Instruct-2507",
+      "description": {
+        "en": "Tiny but surprisingly capable, and very fast on any GPU. Good first model.",
+        "ru": "Крошечная, но на удивление толковая и очень быстрая на любой видеокарте. Хорошая первая модель."
+      },
+      "tags": [
+        "small",
+        "fast",
+        "agent"
+      ],
+      "capabilities": {
+        "tools": true,
+        "vision": false,
+        "reasoning": true
+      },
+      "license": "apache-2.0",
+      "arch": "qwen3",
+      "paramsTotal": 4022468096,
+      "contextMax": 262144,
+      "shape": {
+        "paramsTotal": 4022468096,
+        "layers": 36,
+        "headCountKv": 8,
+        "keyLength": 128,
+        "valueLength": 128,
+        "fullAttentionLayers": 36,
+        "contextMax": 262144
+      },
+      "quants": [
+        {
+          "quant": "Q2_K",
+          "files": [
+            {
+              "name": "Huihui-Qwen3-4B-Instruct-2507-abliterated.Q2_K.gguf",
+              "size": 1669500192,
+              "sha256": "f68f240d7bda40c722f4d480a54e5b2b2fcff7dbc3f24f701d38babc523a401b"
+            }
+          ],
+          "size": 1669500192
+        },
+        {
+          "quant": "Q3_K_M",
+          "files": [
+            {
+              "name": "Huihui-Qwen3-4B-Instruct-2507-abliterated.Q3_K_M.gguf",
+              "size": 2075618592,
+              "sha256": "99b57b42c71c47ba1322b86b57ecf76c25794161aab10f9de7ab3960de506602"
+            }
+          ],
+          "size": 2075618592
+        },
+        {
+          "quant": "IQ4_XS",
+          "files": [
+            {
+              "name": "Huihui-Qwen3-4B-Instruct-2507-abliterated.IQ4_XS.gguf",
+              "size": 2286316832,
+              "sha256": "58563093919bb4c5f132eed5b1f1f2670d63aa0267e5113062002f76ce86003a"
+            }
+          ],
+          "size": 2286316832
+        },
+        {
+          "quant": "Q4_K_M",
+          "files": [
+            {
+              "name": "Huihui-Qwen3-4B-Instruct-2507-abliterated.Q4_K_M.gguf",
+              "size": 2497281312,
+              "sha256": "b1324e2f1bd2e0610d591f54f93e38d90b187f69d1f215f4cace349eade678d7"
+            }
+          ],
+          "size": 2497281312
+        },
+        {
+          "quant": "Q5_K_M",
+          "files": [
+            {
+              "name": "Huihui-Qwen3-4B-Instruct-2507-abliterated.Q5_K_M.gguf",
+              "size": 2889514272,
+              "sha256": "3b50bafc887098d7112b065f0d3c87ad093b779d438a7378a10676230383e6e8"
+            }
+          ],
+          "size": 2889514272
+        },
+        {
+          "quant": "Q6_K",
+          "files": [
+            {
+              "name": "Huihui-Qwen3-4B-Instruct-2507-abliterated.Q6_K.gguf",
+              "size": 3306261792,
+              "sha256": "af2b42201062d26bb4f22bd589a2fe206ea6c470be091609ce01c790af840ea2"
+            }
+          ],
+          "size": 3306261792
+        },
+        {
+          "quant": "Q8_0",
+          "files": [
+            {
+              "name": "Huihui-Qwen3-4B-Instruct-2507-abliterated.Q8_0.gguf",
+              "size": 4280405792,
+              "sha256": "f3b6a790d226efadd863152415713d4d177a22e80eb37bc54537dab110062f31"
+            }
+          ],
+          "size": 4280405792
+        }
+      ],
+      "recommendedQuant": "Q4_K_M",
+      "sampling": {
+        "temperature": 0.7,
+        "topP": 0.8,
+        "topK": 20,
+        "minP": 0
+      },
+      "downloads": 8496,
+      "updatedAt": "2025-08-08T00:52:36.000Z"
+    },
+    {
+      "id": "qwen3-vl-8b-abliterated",
+      "name": "Qwen3 VL 8B",
+      "family": "qwen",
+      "repo": "mradermacher/Qwen3-VL-8B-Instruct-abliterated-GGUF",
+      "publisher": "mradermacher",
+      "uncensored": "abliterated",
+      "base": "Qwen/Qwen3-VL-8B-Instruct",
+      "description": {
+        "en": "Understands images — screenshots, photos, documents.",
+        "ru": "Понимает изображения — скриншоты, фото, документы."
+      },
+      "tags": [
+        "vision",
+        "multilingual"
+      ],
+      "capabilities": {
+        "tools": true,
+        "vision": true,
+        "reasoning": false
+      },
+      "license": "apache-2.0",
+      "arch": "qwen3vl",
+      "paramsTotal": 8190735360,
+      "contextMax": 262144,
+      "shape": {
+        "paramsTotal": 8190735360,
+        "layers": 36,
+        "headCountKv": 8,
+        "keyLength": 128,
+        "valueLength": 128,
+        "fullAttentionLayers": 36,
+        "contextMax": 262144
+      },
+      "quants": [
+        {
+          "quant": "Q2_K",
+          "files": [
+            {
+              "name": "Qwen3-VL-8B-Instruct-abliterated.Q2_K.gguf",
+              "size": 3281734720,
+              "sha256": "af7e99bb61ea2a0dfd0f828088b3b20b7d08315242e94b2ddc020a5c89c55f28"
+            }
+          ],
+          "size": 3281734720
+        },
+        {
+          "quant": "Q3_K_M",
+          "files": [
+            {
+              "name": "Qwen3-VL-8B-Instruct-abliterated.Q3_K_M.gguf",
+              "size": 4124163136,
+              "sha256": "126516df4ab91b5a33f8a12258f777f6e1042157a4c741d823d14b144263e5d0"
+            }
+          ],
+          "size": 4124163136
+        },
+        {
+          "quant": "IQ4_XS",
+          "files": [
+            {
+              "name": "Qwen3-VL-8B-Instruct-abliterated.IQ4_XS.gguf",
+              "size": 4593298496,
+              "sha256": "615420502b47d014363650ef29812fb199a61e3970d754ddd3820d292f2b5bd2"
+            }
+          ],
+          "size": 4593298496
+        },
+        {
+          "quant": "Q4_K_M",
+          "files": [
+            {
+              "name": "Qwen3-VL-8B-Instruct-abliterated.Q4_K_M.gguf",
+              "size": 5027785792,
+              "sha256": "713d7cfeb8e1eccb3c92838c26d3fc5c99d238ce161caa3b3d5e3133ec491f42"
+            }
+          ],
+          "size": 5027785792
+        },
+        {
+          "quant": "Q5_K_M",
+          "files": [
+            {
+              "name": "Qwen3-VL-8B-Instruct-abliterated.Q5_K_M.gguf",
+              "size": 5851114560,
+              "sha256": "6bead04b1b589e3cee4bc9dbc2e4a4c07fa5e38cb3212a4020d8e7e55d7423ca"
+            }
+          ],
+          "size": 5851114560
+        },
+        {
+          "quant": "Q6_K",
+          "files": [
+            {
+              "name": "Qwen3-VL-8B-Instruct-abliterated.Q6_K.gguf",
+              "size": 6725901376,
+              "sha256": "ccca1cd47d48c6e596b56eb0f17f3a94613aa25a251adc6b127d7cfb063eab16"
+            }
+          ],
+          "size": 6725901376
+        },
+        {
+          "quant": "Q8_0",
+          "files": [
+            {
+              "name": "Qwen3-VL-8B-Instruct-abliterated.Q8_0.gguf",
+              "size": 8709520448,
+              "sha256": "58c5b9afa8f873b35574ddb0d51c2a87151309aa745843d0a89951d24f663f12"
+            }
+          ],
+          "size": 8709520448
+        }
+      ],
+      "recommendedQuant": "Q4_K_M",
+      "mmproj": {
+        "name": "Qwen3-VL-8B-Instruct-abliterated.mmproj-f16.gguf",
+        "size": 1159030336,
+        "sha256": "fe1a01686420659ecfc442347ea8d07ab43e2eaafc9c9e709910a73d992b99b2"
+      },
+      "sampling": {
+        "temperature": 0.7,
+        "topP": 0.8,
+        "topK": 20,
+        "minP": 0
+      },
+      "downloads": 664768,
+      "updatedAt": "2025-11-15T11:01:32.000Z"
+    },
+    {
+      "id": "gpt-oss-20b-abliterated",
+      "name": "gpt-oss 20B",
+      "family": "gpt-oss",
+      "repo": "bartowski/huihui-ai_Huihui-gpt-oss-20b-BF16-abliterated-GGUF",
+      "publisher": "bartowski",
+      "uncensored": "abliterated",
+      "base": "openai/gpt-oss-20b",
+      "description": {
+        "en": "OpenAI's open MoE model with strong reasoning; fast thanks to 3.6B active parameters.",
+        "ru": "Открытая MoE-модель от OpenAI с сильными рассуждениями; быстрая благодаря 3.6B активных параметров."
+      },
+      "tags": [
+        "moe",
+        "reasoning",
+        "agent"
+      ],
+      "capabilities": {
+        "tools": true,
+        "vision": false,
+        "reasoning": true
+      },
+      "arch": "gpt-oss",
+      "paramsTotal": 20914757184,
+      "paramsActive": 3600000000,
+      "contextMax": 131072,
+      "shape": {
+        "paramsTotal": 20914757184,
+        "paramsActive": 3600000000,
+        "layers": 24,
+        "headCountKv": 8,
+        "keyLength": 64,
+        "valueLength": 64,
+        "fullAttentionLayers": 12,
+        "swa": {
+          "layers": 12,
+          "window": 128,
+          "headCountKv": 8,
+          "keyLength": 64,
+          "valueLength": 64
+        },
+        "contextMax": 131072
+      },
+      "quants": [
+        {
+          "quant": "MXFP4",
+          "files": [
+            {
+              "name": "huihui-ai_Huihui-gpt-oss-20b-BF16-abliterated-MXFP4_MOE.gguf",
+              "size": 12109565600,
+              "sha256": "abca50d1bd95c49d71db36aad0f38090ea5465ce148634c496a48bc87030bdd9"
+            }
+          ],
+          "size": 12109565600
+        }
+      ],
+      "recommendedQuant": "MXFP4",
+      "sampling": {
+        "temperature": 1,
+        "topP": 1,
+        "topK": 0,
+        "minP": 0
+      },
+      "downloads": 6025,
+      "updatedAt": "2025-08-08T03:23:23.000Z"
+    },
+    {
+      "id": "mistral-small-3.2-24b-abliterated",
+      "name": "Mistral Small 3.2 24B",
+      "family": "mistral",
+      "repo": "mradermacher/Huihui-Mistral-Small-3.2-24B-Instruct-2506-abliterated-llamacppfixed-GGUF",
+      "publisher": "mradermacher",
+      "uncensored": "abliterated",
+      "base": "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+      "description": {
+        "en": "Reliable European 24B, good at instructions and tool use. Best with 16 GB+ of VRAM.",
+        "ru": "Надёжная европейская 24B, хорошо следует инструкциям и работает с инструментами. Лучше с 16 ГБ видеопамяти и больше."
+      },
+      "tags": [
+        "writing",
+        "agent",
+        "multilingual"
+      ],
+      "capabilities": {
+        "tools": true,
+        "vision": true,
+        "reasoning": false
+      },
+      "license": "apache-2.0",
+      "arch": "llama",
+      "paramsTotal": 23572403200,
+      "contextMax": 131072,
+      "shape": {
+        "paramsTotal": 23572403200,
+        "layers": 40,
+        "headCountKv": 8,
+        "keyLength": 128,
+        "valueLength": 128,
+        "fullAttentionLayers": 40,
+        "contextMax": 131072
+      },
+      "quants": [
+        {
+          "quant": "Q2_K",
+          "files": [
+            {
+              "name": "Huihui-Mistral-Small-3.2-24B-Instruct-2506-abliterated-llamacppfixed.Q2_K.gguf",
+              "size": 8890339648,
+              "sha256": "23fff5bfe713311f9a5b0de95428f200dcb25db7c04e9d6fd78392eeb241677c"
+            }
+          ],
+          "size": 8890339648
+        },
+        {
+          "quant": "Q3_K_M",
+          "files": [
+            {
+              "name": "Huihui-Mistral-Small-3.2-24B-Instruct-2506-abliterated-llamacppfixed.Q3_K_M.gguf",
+              "size": 11474096448,
+              "sha256": "339d140011d44e3d5ecd206605304049398c835e0f56909faa2ec4e1309427f8"
+            }
+          ],
+          "size": 11474096448
+        },
+        {
+          "quant": "IQ4_XS",
+          "files": [
+            {
+              "name": "Huihui-Mistral-Small-3.2-24B-Instruct-2506-abliterated-llamacppfixed.IQ4_XS.gguf",
+              "size": 12890001728,
+              "sha256": "40ed9918f2d227d33546b895ccc27bfd3d07a5d4cc572cdad97e0016804c4026"
+            }
+          ],
+          "size": 12890001728
+        },
+        {
+          "quant": "Q4_K_M",
+          "files": [
+            {
+              "name": "Huihui-Mistral-Small-3.2-24B-Instruct-2506-abliterated-llamacppfixed.Q4_K_M.gguf",
+              "size": 14333923648,
+              "sha256": "73829e3062dda23cfdb12f12013dabb52907cd3e35167af28d2a63d3940f38ad"
+            }
+          ],
+          "size": 14333923648
+        },
+        {
+          "quant": "Q5_K_M",
+          "files": [
+            {
+              "name": "Huihui-Mistral-Small-3.2-24B-Instruct-2506-abliterated-llamacppfixed.Q5_K_M.gguf",
+              "size": 16763998528,
+              "sha256": "f231c0a302fa379d995b81bb44b78e77af30bea47d8cf2d520452d2bdf8a8d7d"
+            }
+          ],
+          "size": 16763998528
+        },
+        {
+          "quant": "Q6_K",
+          "files": [
+            {
+              "name": "Huihui-Mistral-Small-3.2-24B-Instruct-2506-abliterated-llamacppfixed.Q6_K.gguf",
+              "size": 19345953088,
+              "sha256": "7bdb8654c0375351bb1842658bc2d934e1339456df991909fc78c91a240ba232"
+            }
+          ],
+          "size": 19345953088
+        },
+        {
+          "quant": "Q8_0",
+          "files": [
+            {
+              "name": "Huihui-Mistral-Small-3.2-24B-Instruct-2506-abliterated-llamacppfixed.Q8_0.gguf",
+              "size": 25054794048,
+              "sha256": "f180412d0c951586f29bff7a230c341955cbd97955d6200309fea3f2e095a3cc"
+            }
+          ],
+          "size": 25054794048
+        }
+      ],
+      "recommendedQuant": "Q4_K_M",
+      "mmproj": {
+        "name": "Huihui-Mistral-Small-3.2-24B-Instruct-2506-abliterated-llamacppfixed.mmproj-f16.gguf",
+        "size": 878054272,
+        "sha256": "160b69f725423b079117cde361e89186dab2280b8eee15c0cfbb839f59d9ff71"
+      },
+      "sampling": {
+        "temperature": 0.15,
+        "topP": 1,
+        "topK": 0,
+        "minP": 0
+      },
+      "downloads": 6489,
+      "updatedAt": "2025-07-31T02:54:24.000Z"
+    },
+    {
+      "id": "llama-3.2-3b-abliterated",
+      "name": "Llama 3.2 3B",
+      "family": "llama",
+      "repo": "QuantFactory/Llama-3.2-3B-Instruct-abliterated-GGUF",
+      "publisher": "QuantFactory",
+      "uncensored": "abliterated",
+      "base": "meta-llama/Llama-3.2-3B-Instruct",
+      "description": {
+        "en": "Classic small model from Meta. Very light, English-first.",
+        "ru": "Классическая маленькая модель от Meta. Очень лёгкая, лучше всего по-английски."
+      },
+      "tags": [
+        "small",
+        "fast"
+      ],
+      "capabilities": {
+        "tools": true,
+        "vision": false,
+        "reasoning": false
+      },
+      "license": "llama3.2",
+      "arch": "llama",
+      "paramsTotal": 3212749888,
+      "contextMax": 131072,
+      "shape": {
+        "paramsTotal": 3212749888,
+        "layers": 28,
+        "headCountKv": 8,
+        "keyLength": 128,
+        "valueLength": 128,
+        "fullAttentionLayers": 28,
+        "contextMax": 131072
+      },
+      "quants": [
+        {
+          "quant": "Q2_K",
+          "files": [
+            {
+              "name": "Llama-3.2-3B-Instruct-abliterated.Q2_K.gguf",
+              "size": 1363935552,
+              "sha256": "99b8f47b8cc0e6fac2edef7b14a159ae08e8a25c29402b91ca9421bb115ff368"
+            }
+          ],
+          "size": 1363935552
+        },
+        {
+          "quant": "Q3_K_M",
+          "files": [
+            {
+              "name": "Llama-3.2-3B-Instruct-abliterated.Q3_K_M.gguf",
+              "size": 1687159104,
+              "sha256": "c07529c6263ace00e8457da702ea6686a526c22d28048d2aba4d52895f8f0bcc"
+            }
+          ],
+          "size": 1687159104
+        },
+        {
+          "quant": "Q4_K_M",
+          "files": [
+            {
+              "name": "Llama-3.2-3B-Instruct-abliterated.Q4_K_M.gguf",
+              "size": 2019377472,
+              "sha256": "e1f2b428e316d8bd1cb5ca13e9649329e299d951fbcee6b3cd0e9f1d646c9fa7"
+            }
+          ],
+          "size": 2019377472
+        },
+        {
+          "quant": "Q5_K_M",
+          "files": [
+            {
+              "name": "Llama-3.2-3B-Instruct-abliterated.Q5_K_M.gguf",
+              "size": 2322153792,
+              "sha256": "679509e374244c8796802fa528a912754190f466f462524b416f86d317bcd829"
+            }
+          ],
+          "size": 2322153792
+        },
+        {
+          "quant": "Q6_K",
+          "files": [
+            {
+              "name": "Llama-3.2-3B-Instruct-abliterated.Q6_K.gguf",
+              "size": 2643853632,
+              "sha256": "e25a296ca0e3f13ecb822dda46dbb486cdc1f5dcd0017c49722486ee78dc697c"
+            }
+          ],
+          "size": 2643853632
+        },
+        {
+          "quant": "Q8_0",
+          "files": [
+            {
+              "name": "Llama-3.2-3B-Instruct-abliterated.Q8_0.gguf",
+              "size": 3421899072,
+              "sha256": "0de529057e98ad8dc2e6bc85f6a3b57521aaa16a1133233c4fe2477aad8697fd"
+            }
+          ],
+          "size": 3421899072
+        }
+      ],
+      "recommendedQuant": "Q4_K_M",
+      "sampling": {
+        "temperature": 0.6,
+        "topP": 0.9,
+        "topK": 40,
+        "minP": 0.05
+      },
+      "downloads": 8934,
+      "updatedAt": "2024-10-08T17:48:36.000Z"
+    },
+    {
+      "id": "deepseek-v4-flash-abliterated",
+      "name": "DeepSeek V4 Flash",
+      "family": "deepseek",
+      "repo": "huihui-ai/Huihui-DeepSeek-V4-Flash-0731-abliterated-GGUF",
+      "publisher": "huihui-ai",
+      "uncensored": "abliterated",
+      "base": "deepseek-ai/DeepSeek-V4-Flash",
+      "description": {
+        "en": "Frontier-scale MoE (284B). Needs a workstation — roughly 128 GB+ of RAM even at low quants.",
+        "ru": "MoE флагманского уровня (284B). Нужна рабочая станция — около 128 ГБ оперативки даже на низких квантах."
+      },
+      "tags": [
+        "moe",
+        "reasoning",
+        "code",
+        "huge"
+      ],
+      "capabilities": {
+        "tools": true,
+        "vision": false,
+        "reasoning": true
+      },
+      "license": "mit",
+      "arch": "deepseek4",
+      "paramsTotal": 284334567511,
+      "paramsActive": 13000000000,
+      "contextMax": 1048576,
+      "shape": {
+        "paramsTotal": 284334567511,
+        "paramsActive": 13000000000,
+        "layers": 43,
+        "headCountKv": 1,
+        "keyLength": 512,
+        "valueLength": 512,
+        "fullAttentionLayers": 8,
+        "contextMax": 1048576
+      },
+      "quants": [
+        {
+          "quant": "Q2",
+          "files": [
+            {
+              "name": "DeepSeek-V4-Flash-Q2-0731.gguf",
+              "size": 86720111488,
+              "sha256": "73d17d12b2988b31df519ae381096bcaa737361664d76ce2c88a9ed6b68ff756"
+            }
+          ],
+          "size": 86720111488
+        },
+        {
+          "quant": "Q2_K",
+          "files": [
+            {
+              "name": "DeepSeek-V4-Flash-Q2_K-0731.gguf",
+              "size": 97591747456,
+              "sha256": "4a459b2ceb344fc2d651f328ec8d2fc29f1e14e252f97e501d32c68d5bc65d38"
+            }
+          ],
+          "size": 97591747456
+        },
+        {
+          "quant": "MXFP4",
+          "files": [
+            {
+              "name": "DeepSeek-V4-Flash-Q4-mxfp4-0731.gguf",
+              "size": 155976458848,
+              "sha256": "897c9d82ec412e1d983dcda579c96bd256454414b5b80d2570452477abe7beed"
+            }
+          ],
+          "size": 155976458848
+        },
+        {
+          "quant": "Q4_K",
+          "files": [
+            {
+              "name": "DeepSeek-V4-Flash-Q4_K-0731.gguf",
+              "size": 164633502592,
+              "sha256": "cef5fe745703f67c3cc799c312b597ced82a86cf10611dd7ec553ae27be1eacd"
+            }
+          ],
+          "size": 164633502592
+        }
+      ],
+      "recommendedQuant": "MXFP4",
+      "sampling": {
+        "temperature": 0.6,
+        "topP": 0.95,
+        "topK": 0,
+        "minP": 0
+      },
+      "downloads": 478309,
+      "updatedAt": "2026-08-03T14:05:07.000Z"
+    },
+    {
+      "id": "qwen3.6-35b-a3b",
+      "name": "Qwen3.6 35B A3B",
+      "family": "qwen",
+      "repo": "unsloth/Qwen3.6-35B-A3B-GGUF",
+      "publisher": "unsloth",
+      "uncensored": null,
+      "base": "Qwen/Qwen3.6-35B-A3B",
+      "description": {
+        "en": "Official Qwen MoE — the most reliable tool caller in this size class.",
+        "ru": "Официальная MoE от Qwen — самая надёжная в работе с инструментами в своём классе."
+      },
+      "tags": [
+        "moe",
+        "code",
+        "agent",
+        "multilingual"
+      ],
+      "capabilities": {
+        "tools": true,
+        "vision": true,
+        "reasoning": true
+      },
+      "license": "apache-2.0",
+      "arch": "qwen35moe",
+      "paramsTotal": 34660610688,
+      "paramsActive": 3000000000,
+      "contextMax": 262144,
+      "shape": {
+        "paramsTotal": 34660610688,
+        "paramsActive": 3000000000,
+        "layers": 40,
+        "headCountKv": 2,
+        "keyLength": 256,
+        "valueLength": 256,
+        "fullAttentionLayers": 10,
+        "contextMax": 262144
+      },
+      "quants": [
+        {
+          "quant": "IQ2_M",
+          "files": [
+            {
+              "name": "Qwen3.6-35B-A3B-UD-IQ2_M.gguf",
+              "size": 11522702304,
+              "sha256": "2be7ef1ed7e1af8b10d3829102cf9a6c2bd5ddb64d675b4ece23a60799403d43"
+            }
+          ],
+          "size": 11522702304
+        },
+        {
+          "quant": "Q2_K_XL",
+          "files": [
+            {
+              "name": "Qwen3.6-35B-A3B-UD-Q2_K_XL.gguf",
+              "size": 12290628576,
+              "sha256": "96b9c0af5c77a4ecaabe3983175112b5ece763261c1ece12b2494b692a70dad7"
+            }
+          ],
+          "size": 12290628576
+        },
+        {
+          "quant": "IQ3_XXS",
+          "files": [
+            {
+              "name": "Qwen3.6-35B-A3B-UD-IQ3_XXS.gguf",
+              "size": 13211155424,
+              "sha256": "9c964e657212fea1f24905dd7b0a89b82fd807d19fab0b41da14251b07b88fbe"
+            }
+          ],
+          "size": 13211155424
+        },
+        {
+          "quant": "Q3_K_M",
+          "files": [
+            {
+              "name": "Qwen3.6-35B-A3B-UD-Q3_K_M.gguf",
+              "size": 16600710112,
+              "sha256": "1b715841683f960bd9a49f008181bd910ee169b78d4cf465b6fde7f4d929ff99"
+            }
+          ],
+          "size": 16600710112
+        },
+        {
+          "quant": "Q3_K_XL",
+          "files": [
+            {
+              "name": "Qwen3.6-35B-A3B-UD-Q3_K_XL.gguf",
+              "size": 16845511648,
+              "sha256": "a832b9689925f1bd335bbe985cdfb06c36bf2cf268f4f8f6eceafa3ceb515617"
+            }
+          ],
+          "size": 16845511648
+        },
+        {
+          "quant": "IQ4_XS",
+          "files": [
+            {
+              "name": "Qwen3.6-35B-A3B-UD-IQ4_XS.gguf",
+              "size": 17730509792,
+              "sha256": "649d7508507b84638732c4f52c24c8b15843c6dca2f3ff793ae07c14a67ebbb3"
+            }
+          ],
+          "size": 17730509792
+        },
+        {
+          "quant": "MXFP4",
+          "files": [
+            {
+              "name": "Qwen3.6-35B-A3B-MXFP4_MOE.gguf",
+              "size": 21706144736,
+              "sha256": "2fdd20997c4d88ee25f70f500c61f8b999378d92ab055f9d450fc70d617158d3"
+            }
+          ],
+          "size": 21706144736
+        },
+        {
+          "quant": "Q4_K_M",
+          "files": [
+            {
+              "name": "Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+              "size": 22134528992,
+              "sha256": "ac0e2c1189e055faa36eff361580e79c5bd6f8e76bffb4ce547f167d53e31a61"
+            }
+          ],
+          "size": 22134528992
+        },
+        {
+          "quant": "Q4_K_XL",
+          "files": [
+            {
+              "name": "Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf",
+              "size": 22360456160,
+              "sha256": "707a55a8a4397ecde44de0c499d3e68c1ad1d240d1da65826b4949d1043f4450"
+            }
+          ],
+          "size": 22360456160
+        },
+        {
+          "quant": "Q5_K_M",
+          "files": [
+            {
+              "name": "Qwen3.6-35B-A3B-UD-Q5_K_M.gguf",
+              "size": 26456194016,
+              "sha256": "c13ce26253ea334df472bd8fbd2d6da66d8a41195c17f6fcbf44c4d20ece0932"
+            }
+          ],
+          "size": 26456194016
+        },
+        {
+          "quant": "Q6_K",
+          "files": [
+            {
+              "name": "Qwen3.6-35B-A3B-UD-Q6_K.gguf",
+              "size": 29308320736,
+              "sha256": "4fe53b148b46f9b88830e2a3055c5b15c3a4d1e3ddc9a1384a108d8b9d59f043"
+            }
+          ],
+          "size": 29308320736
+        },
+        {
+          "quant": "Q8_0",
+          "files": [
+            {
+              "name": "Qwen3.6-35B-A3B-Q8_0.gguf",
+              "size": 36903140320,
+              "sha256": "d1a395809f65a43a13ad119eb4e7acdef1ac6d68120f39902c8ab96e72794a59"
+            }
+          ],
+          "size": 36903140320
+        }
+      ],
+      "recommendedQuant": "Q4_K_M",
+      "mmproj": {
+        "name": "mmproj-BF16.gguf",
+        "size": 902822624,
+        "sha256": "356dfaa3111376a4f7165e32e8749713378d1700b37cf52e0c50d9f23322334d"
+      },
+      "sampling": {
+        "temperature": 0.7,
+        "topP": 0.8,
+        "topK": 20,
+        "minP": 0
+      },
+      "downloads": 1276799,
+      "updatedAt": "2026-04-20T12:42:25.000Z"
+    },
+    {
+      "id": "qwen3.8-27b",
+      "name": "Qwen3.8 27B",
+      "family": "qwen",
+      "repo": "unsloth/Qwen3.8-27B-GGUF",
+      "publisher": "unsloth",
+      "uncensored": null,
+      "base": "Qwen/Qwen3.8-27B",
+      "description": {
+        "en": "Official dense Qwen for serious coding work.",
+        "ru": "Официальная плотная Qwen для серьёзной работы с кодом."
+      },
+      "tags": [
+        "code",
+        "agent",
+        "reasoning"
+      ],
+      "capabilities": {
+        "tools": true,
+        "vision": true,
+        "reasoning": true
+      },
+      "license": "apache-2.0",
+      "arch": "qwen35",
+      "paramsTotal": 27320697856,
+      "contextMax": 262144,
+      "shape": {
+        "paramsTotal": 27320697856,
+        "layers": 65,
+        "headCountKv": 4,
+        "keyLength": 256,
+        "valueLength": 256,
+        "fullAttentionLayers": 16,
+        "contextMax": 262144
+      },
+      "quants": [
+        {
+          "quant": "Q2_K_XL",
+          "files": [
+            {
+              "name": "Qwen3.8-27B-UD-Q2_K_XL.gguf",
+              "size": 9828981664,
+              "sha256": "fd4730dd8aad070517978752b63d530aeb1740d2283cab9fa24f1e404032ddb0"
+            }
+          ],
+          "size": 9828981664
+        },
+        {
+          "quant": "IQ3_XXS",
+          "files": [
+            {
+              "name": "Qwen3.8-27B-UD-IQ3_XXS.gguf",
+              "size": 10934860704,
+              "sha256": "c0b7c3038681ed2e3040456c1dd45f9858b6c2290bed172c70388a94874f3eee"
+            }
+          ],
+          "size": 10934860704
+        },
+        {
+          "quant": "Q3_K_XL",
+          "files": [
+            {
+              "name": "Qwen3.8-27B-UD-Q3_K_XL.gguf",
+              "size": 13146393504,
+              "sha256": "8c2a45ff85e7674ca185ec8eb6cdeab0e617ed9d8018caed0b64380eb2a67a5e"
+            }
+          ],
+          "size": 13146393504
+        },
+        {
+          "quant": "IQ4_XS",
+          "files": [
+            {
+              "name": "Qwen3.8-27B-UD-IQ4_XS.gguf",
+              "size": 14252845984,
+              "sha256": "40fac4050e940397dbf13087afd50f4734a11805bf9d65ef8ddd7483470e6199"
+            }
+          ],
+          "size": 14252845984
+        },
+        {
+          "quant": "Q4_K_M",
+          "files": [
+            {
+              "name": "Qwen3.8-27B-UD-Q4_K_M.gguf",
+              "size": 16464440224,
+              "sha256": "322e194ff79741c7baa497c240f677f54b201b0efab44ca8e50f122b39123482"
+            }
+          ],
+          "size": 16464440224
+        },
+        {
+          "quant": "Q4_K_XL",
+          "files": [
+            {
+              "name": "Qwen3.8-27B-UD-Q4_K_XL.gguf",
+              "size": 17559178144,
+              "sha256": "3f227079003add2511437e5b1e94812e363385225bf6a9b47b0054a72bc8b01e"
+            }
+          ],
+          "size": 17559178144
+        },
+        {
+          "quant": "Q5_K_M",
+          "files": [
+            {
+              "name": "Qwen3.8-27B-UD-Q5_K_M.gguf",
+              "size": 19771509664,
+              "sha256": "2de73110cb254cbf09b54b717578dadff12ef1194e7271527e68202f39ba4bfd"
+            }
+          ],
+          "size": 19771509664
+        },
+        {
+          "quant": "Q6_K",
+          "files": [
+            {
+              "name": "Qwen3.8-27B-UD-Q6_K.gguf",
+              "size": 21983677344,
+              "sha256": "c9c206812fbe4ac7b76a729e25928b63f2ae89d37f69da7a71c20aec763cd436"
+            }
+          ],
+          "size": 21983677344
+        },
+        {
+          "quant": "Q8_0",
+          "files": [
+            {
+              "name": "Qwen3.8-27B-Q8_0.gguf",
+              "size": 29047086048,
+              "sha256": "a680f44a06920e5d689774823782006aa3acc8db95750323373b24139b67e348"
+            }
+          ],
+          "size": 29047086048
+        }
+      ],
+      "recommendedQuant": "Q4_K_M",
+      "mmproj": {
+        "name": "mmproj-BF16.gguf",
+        "size": 931146432,
+        "sha256": "83ee4f4f205fa514161778c41df1ea14144faa0f713510893b63c2395f5c2d53"
+      },
+      "sampling": {
+        "temperature": 0.6,
+        "topP": 0.95,
+        "topK": 20,
+        "minP": 0
+      },
+      "downloads": 6832629,
+      "updatedAt": "2026-08-20T12:04:25.000Z"
+    },
+    {
+      "id": "gemma-4-12b",
+      "name": "Gemma 4 12B",
+      "family": "gemma",
+      "repo": "unsloth/gemma-4-12b-it-GGUF",
+      "publisher": "unsloth",
+      "uncensored": null,
+      "base": "google/gemma-4-12b-it",
+      "description": {
+        "en": "Google's official 12B.",
+        "ru": "Официальная 12B от Google."
+      },
+      "tags": [
+        "multilingual",
+        "writing"
+      ],
+      "capabilities": {
+        "tools": true,
+        "vision": true,
+        "reasoning": true
+      },
+      "license": "apache-2.0",
+      "arch": "gemma4",
+      "paramsTotal": 11907350576,
+      "contextMax": 262144,
+      "shape": {
+        "paramsTotal": 11907350576,
+        "layers": 48,
+        "headCountKv": 1,
+        "keyLength": 512,
+        "valueLength": 512,
+        "fullAttentionLayers": 8,
+        "swa": {
+          "layers": 40,
+          "window": 1024,
+          "headCountKv": 8,
+          "keyLength": 256,
+          "valueLength": 256
+        },
+        "contextMax": 262144
+      },
+      "quants": [
+        {
+          "quant": "IQ2_M",
+          "files": [
+            {
+              "name": "gemma-4-12b-it-UD-IQ2_M.gguf",
+              "size": 4213353280,
+              "sha256": "4bd2461d35398dbcf5f3d5f0c9ad91cac78ae35b556e3a81f315a0cc0815ae8c"
+            }
+          ],
+          "size": 4213353280
+        },
+        {
+          "quant": "IQ3_XXS",
+          "files": [
+            {
+              "name": "gemma-4-12b-it-UD-IQ3_XXS.gguf",
+              "size": 4639716160,
+              "sha256": "0cf13ac91a6c1b1aaaeae633181c75af0f1fa3da1a89abf2086038e105c789f0"
+            }
+          ],
+          "size": 4639716160
+        },
+        {
+          "quant": "Q2_K_XL",
+          "files": [
+            {
+              "name": "gemma-4-12b-it-UD-Q2_K_XL.gguf",
+              "size": 4661419840,
+              "sha256": "aa6e1ccf5cd1c5340c4786f0bda2478181327f14aba2359e51e455d02c90bff3"
+            }
+          ],
+          "size": 4661419840
+        },
+        {
+          "quant": "Q3_K_M",
+          "files": [
+            {
+              "name": "gemma-4-12b-it-Q3_K_M.gguf",
+              "size": 5693872960,
+              "sha256": "dbf58f4c413b82b27106867eb42f7087e4172a172f6f201e2e11598a6582e504"
+            }
+          ],
+          "size": 5693872960
+        },
+        {
+          "quant": "Q3_K_XL",
+          "files": [
+            {
+              "name": "gemma-4-12b-it-UD-Q3_K_XL.gguf",
+              "size": 6022684480,
+              "sha256": "30adc491834f9e57625331b5ae2a51d59a817458d6d9406eca4fd71ff88b9295"
+            }
+          ],
+          "size": 6022684480
+        },
+        {
+          "quant": "IQ4_XS",
+          "files": [
+            {
+              "name": "gemma-4-12b-it-IQ4_XS.gguf",
+              "size": 6375734080,
+              "sha256": "b0037d0e0de0290177045ca214b2a0fb1079d18bde57842b3ca32f5b0cd76774"
+            }
+          ],
+          "size": 6375734080
+        },
+        {
+          "quant": "Q4_K_M",
+          "files": [
+            {
+              "name": "gemma-4-12b-it-Q4_K_M.gguf",
+              "size": 7121861440,
+              "sha256": "0a270ec9fe6b34f4a0d33992b6135117b484ebc4766ab76b51d4ae8c457e4c42"
+            }
+          ],
+          "size": 7121861440
+        },
+        {
+          "quant": "Q4_K_XL",
+          "files": [
+            {
+              "name": "gemma-4-12b-it-UD-Q4_K_XL.gguf",
+              "size": 7366423360,
+              "sha256": "90fd944d227e9d9b68e7e2c7d5b57b79d4c66ed521b0919fbbd932cf834f6f8e"
+            }
+          ],
+          "size": 7366423360
+        },
+        {
+          "quant": "Q5_K_M",
+          "files": [
+            {
+              "name": "gemma-4-12b-it-Q5_K_M.gguf",
+              "size": 8413576000,
+              "sha256": "32c554c7d1338a23837ae39b3db482213a4a642f96df3b2619f516a2375d16cd"
+            }
+          ],
+          "size": 8413576000
+        },
+        {
+          "quant": "Q6_K",
+          "files": [
+            {
+              "name": "gemma-4-12b-it-Q6_K.gguf",
+              "size": 9786022720,
+              "sha256": "6f394336500bb5409bd68c31aa9d75097b5e6104f6cf30c82a09a7b64df41faf"
+            }
+          ],
+          "size": 9786022720
+        },
+        {
+          "quant": "Q8_0",
+          "files": [
+            {
+              "name": "gemma-4-12b-it-Q8_0.gguf",
+              "size": 12669647680,
+              "sha256": "f20e7ff1be28c283eeeb18fc895733791c56a5851d5cd3fe9691b7f7d12afa72"
+            }
+          ],
+          "size": 12669647680
+        }
+      ],
+      "recommendedQuant": "Q4_K_M",
+      "mmproj": {
+        "name": "mmproj-BF16.gguf",
+        "size": 175115840,
+        "sha256": "2e269f906eb15169ee9ce880ea649bd6d42d4964c21f8ede10d0d0efc738bcbb"
+      },
+      "sampling": {
+        "temperature": 1,
+        "topP": 0.95,
+        "topK": 64,
+        "minP": 0
+      },
+      "downloads": 1296940,
+      "updatedAt": "2026-07-17T12:52:56.000Z"
+    },
+    {
+      "id": "gpt-oss-20b",
+      "name": "gpt-oss 20B",
+      "family": "gpt-oss",
+      "repo": "ggml-org/gpt-oss-20b-GGUF",
+      "publisher": "ggml-org",
+      "uncensored": null,
+      "base": "openai/gpt-oss-20b",
+      "description": {
+        "en": "OpenAI's official open-weights model.",
+        "ru": "Официальная открытая модель от OpenAI."
+      },
+      "tags": [
+        "moe",
+        "reasoning",
+        "agent"
+      ],
+      "capabilities": {
+        "tools": true,
+        "vision": false,
+        "reasoning": true
+      },
+      "license": "apache-2.0",
+      "arch": "gpt-oss",
+      "paramsTotal": 20914757184,
+      "paramsActive": 3600000000,
+      "contextMax": 131072,
+      "shape": {
+        "paramsTotal": 20914757184,
+        "paramsActive": 3600000000,
+        "layers": 24,
+        "headCountKv": 8,
+        "keyLength": 64,
+        "valueLength": 64,
+        "fullAttentionLayers": 12,
+        "swa": {
+          "layers": 12,
+          "window": 128,
+          "headCountKv": 8,
+          "keyLength": 64,
+          "valueLength": 64
+        },
+        "contextMax": 131072
+      },
+      "quants": [
+        {
+          "quant": "MXFP4",
+          "files": [
+            {
+              "name": "gpt-oss-20b-MXFP4.gguf",
+              "size": 12109566624,
+              "sha256": "27cd6c432c7672cb812a92f611cf3ba7bbc35928262bb1e1253ff4ee6ae35901"
+            }
+          ],
+          "size": 12109566624
+        }
+      ],
+      "recommendedQuant": "MXFP4",
+      "sampling": {
+        "temperature": 1,
+        "topP": 1,
+        "topK": 0,
+        "minP": 0
+      },
+      "downloads": 142451,
+      "updatedAt": "2026-07-28T07:55:12.000Z"
+    },
+    {
+      "id": "qwen3-4b-2507",
+      "name": "Qwen3 4B Instruct 2507",
+      "family": "qwen",
+      "repo": "unsloth/Qwen3-4B-Instruct-2507-GGUF",
+      "publisher": "unsloth",
+      "uncensored": null,
+      "base": "Qwen/Qwen3-4B-Instruct-2507",
+      "description": {
+        "en": "Official small Qwen with dependable tool calling.",
+        "ru": "Официальная маленькая Qwen с надёжным вызовом инструментов."
+      },
+      "tags": [
+        "small",
+        "fast",
+        "agent"
+      ],
+      "capabilities": {
+        "tools": true,
+        "vision": false,
+        "reasoning": true
+      },
+      "license": "apache-2.0",
+      "arch": "qwen3",
+      "paramsTotal": 4022468096,
+      "contextMax": 262144,
+      "shape": {
+        "paramsTotal": 4022468096,
+        "layers": 36,
+        "headCountKv": 8,
+        "keyLength": 128,
+        "valueLength": 128,
+        "fullAttentionLayers": 36,
+        "contextMax": 262144
+      },
+      "quants": [
+        {
+          "quant": "IQ2_M",
+          "files": [
+            {
+              "name": "Qwen3-4B-Instruct-2507-UD-IQ2_M.gguf",
+              "size": 1530402400,
+              "sha256": "6711372517e0e2d6dd1c008a22203299d1ba5d44f894a95fdc40a136815d4fe3"
+            }
+          ],
+          "size": 1530402400
+        },
+        {
+          "quant": "Q2_K",
+          "files": [
+            {
+              "name": "Qwen3-4B-Instruct-2507-Q2_K.gguf",
+              "size": 1669500000,
+              "sha256": "f7ed2f57713ad29e1a4ec093be0cdf3d7fd31e137e8fd4fc3edcfd04a5267862"
+            }
+          ],
+          "size": 1669500000
+        },
+        {
+          "quant": "IQ3_XXS",
+          "files": [
+            {
+              "name": "Qwen3-4B-Instruct-2507-UD-IQ3_XXS.gguf",
+              "size": 1674376800,
+              "sha256": "c886effc2f09e63bbf9419a8136fab49dba22a578c24885f63c5f483de75ad3e"
+            }
+          ],
+          "size": 1674376800
+        },
+        {
+          "quant": "Q2_K_XL",
+          "files": [
+            {
+              "name": "Qwen3-4B-Instruct-2507-UD-Q2_K_XL.gguf",
+              "size": 1695724640,
+              "sha256": "b7675a5b61a3e7fec4c2f138ba50504ede76c737c478029ea30510e1ee09976c"
+            }
+          ],
+          "size": 1695724640
+        },
+        {
+          "quant": "Q3_K_M",
+          "files": [
+            {
+              "name": "Qwen3-4B-Instruct-2507-Q3_K_M.gguf",
+              "size": 2075618400,
+              "sha256": "9c6e0763577125a994a9bea0bbd7a737ac4498b8a6a4e0f788727553af1806c9"
+            }
+          ],
+          "size": 2075618400
+        },
+        {
+          "quant": "Q3_K_XL",
+          "files": [
+            {
+              "name": "Qwen3-4B-Instruct-2507-UD-Q3_K_XL.gguf",
+              "size": 2128385120,
+              "sha256": "6aa5c26f5624cf8820f6f0207479445da5a33c4db73a2e097cf6f91f9ce0550e"
+            }
+          ],
+          "size": 2128385120
+        },
+        {
+          "quant": "IQ4_XS",
+          "files": [
+            {
+              "name": "Qwen3-4B-Instruct-2507-IQ4_XS.gguf",
+              "size": 2270751840,
+              "sha256": "cfd15a69e4801abfa16f0263b77ffbf97cbb8af67782a70cc95cf627b3dfa27d"
+            }
+          ],
+          "size": 2270751840
+        },
+        {
+          "quant": "Q4_K_M",
+          "files": [
+            {
+              "name": "Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+              "size": 2497281120,
+              "sha256": "3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597"
+            }
+          ],
+          "size": 2497281120
+        },
+        {
+          "quant": "Q4_K_XL",
+          "files": [
+            {
+              "name": "Qwen3-4B-Instruct-2507-UD-Q4_K_XL.gguf",
+              "size": 2546340960,
+              "sha256": "4bbe1f2f8ebe69fad3be8e15d69f220b06448a9dd26f82d7d81cce88ebfc39fd"
+            }
+          ],
+          "size": 2546340960
+        },
+        {
+          "quant": "Q5_K_M",
+          "files": [
+            {
+              "name": "Qwen3-4B-Instruct-2507-Q5_K_M.gguf",
+              "size": 2889514080,
+              "sha256": "5bde5e9d883622acb02bf77fe7dcbc56a8b9a9ad4be78a72ca23a532658b4ecb"
+            }
+          ],
+          "size": 2889514080
+        },
+        {
+          "quant": "Q6_K",
+          "files": [
+            {
+              "name": "Qwen3-4B-Instruct-2507-Q6_K.gguf",
+              "size": 3306261600,
+              "sha256": "cd7b21b38b3e71400587c184b6a9b04d3beb4d13fdae6464d4075dee4f1bc5ad"
+            }
+          ],
+          "size": 3306261600
+        },
+        {
+          "quant": "Q8_0",
+          "files": [
+            {
+              "name": "Qwen3-4B-Instruct-2507-Q8_0.gguf",
+              "size": 4280405600,
+              "sha256": "391c1e410fd9f4cf2de2b510273b56a84c19ce18f4fa3bfb3774031dac4ef068"
+            }
+          ],
+          "size": 4280405600
+        }
+      ],
+      "recommendedQuant": "Q4_K_M",
+      "sampling": {
+        "temperature": 0.7,
+        "topP": 0.8,
+        "topK": 20,
+        "minP": 0
+      },
+      "downloads": 183341,
+      "updatedAt": "2025-08-20T06:23:07.000Z"
+    }
+  ]
+}

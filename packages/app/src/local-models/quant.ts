@@ -8,7 +8,8 @@ const QUANT_PATTERN = /(?:^|[-_.])(IQ\d+(?:_[A-Z0-9]+)+|Q\d+(?:_[A-Z0-9]+)*|BF16
 
 export function parseQuant(filename: string) {
   const name = filename.replace(/\.gguf$/i, "").replace(/-\d{5}-of-\d{5}$/i, "")
-  return name.match(QUANT_PATTERN)?.[1]?.toUpperCase()
+  // The quant is the last tag in the name: "…-gpt-oss-20b-BF16-abliterated-Q4_K_M" is Q4_K_M, not BF16.
+  return [...name.matchAll(new RegExp(QUANT_PATTERN, "gi"))].at(-1)?.[1]?.toUpperCase()
 }
 
 /** Approximate bits per weight, used only when the exact file size is unknown. */
