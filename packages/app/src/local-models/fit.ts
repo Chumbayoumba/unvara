@@ -176,8 +176,9 @@ function bandwidth(hardware: HardwareProfile, pool: "gpu" | "ram") {
   const known = gpuBandwidth(gpu.name)
   // Unknown or laptop GPU: conservative guess by VRAM class.
   const guess = gpu.vram >= 16 * GIB ? 450 : gpu.vram >= 8 * GIB ? 300 : 180
-  // Vulkan reaches a little less of the bus than CUDA on NVIDIA cards.
-  const backend = gpu.backend === "vulkan" ? 0.85 : 1
+  // Measured on an RTX 3070 Ti (Qwen3-4B Q4_K_M): CUDA 138 tok/s vs Vulkan 33 tok/s, so Vulkan on NVIDIA is
+  // modelled at ~0.3 of CUDA; on AMD/Intel Vulkan is the native path and gets most of the bus.
+  const backend = gpu.backend === "vulkan" ? (/nvidia|geforce|rtx|gtx|quadro/i.test(gpu.name) ? 0.3 : 0.85) : 1
   return (known ?? guess) * backend * 1e9
 }
 

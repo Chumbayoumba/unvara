@@ -103,6 +103,22 @@ describe("score", () => {
   })
 })
 
+describe("speed estimate", () => {
+  test("matches the measured CUDA speed of a 4B Q4_K_M model on an RTX 3070 Ti (~138 tok/s)", () => {
+    const fit = planFit(qwen3_4b, { size: 2.5e9 }, rtx3070ti, { targetContext: 4096 })
+    expect(fit.tokensPerSecond).toBeGreaterThan(110)
+    expect(fit.tokensPerSecond).toBeLessThan(170)
+  })
+
+  test("Vulkan on NVIDIA is modelled much slower than CUDA (measured 33 vs 138 tok/s)", () => {
+    const gpu = rtx3070ti.gpu ?? { name: "", vram: 0, backend: "cpu" as const }
+    const vulkan: HardwareProfile = { ...rtx3070ti, gpu: { ...gpu, backend: "vulkan" } }
+    const fit = planFit(qwen3_4b, { size: 2.5e9 }, vulkan, { targetContext: 4096 })
+    expect(fit.tokensPerSecond).toBeGreaterThan(25)
+    expect(fit.tokensPerSecond).toBeLessThan(60)
+  })
+})
+
 describe("quant", () => {
   test("parses quant names from GGUF filenames", () => {
     expect(parseQuant("Qwen3-4B-Instruct-2507-Q4_K_M.gguf")).toBe("Q4_K_M")
