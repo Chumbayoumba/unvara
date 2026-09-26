@@ -1,6 +1,6 @@
 {
-  "name": "OpenCode",
-  "short_name": "OpenCode",
+  "name": "Unvara",
+  "short_name": "Unvara",
   "id": "/",
   "start_url": "/",
   "scope": "/",
@@ -18,7 +18,7 @@
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#080808",
-  "background_color": "#080808",
+  "theme_color": "#151515",
+  "background_color": "#151515",
   "display": "standalone"
 }

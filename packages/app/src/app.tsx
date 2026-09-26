@@ -59,14 +59,14 @@ import { SDKProvider, useSDK } from "@/context/sdk"
 import { WslServersProvider } from "@/wsl/context"
 import DirectoryLayout, { DirectoryDataProvider } from "@/pages/directory-layout"
 import LegacyLayout from "@/pages/layout"
-import NewLayout from "@/pages/layout-new"
+import UnvaraLayout from "@/pages/unvara/layout"
 import { ErrorPage } from "./pages/error"
 import { useCheckServerHealth } from "./utils/server-health"
 import { legacySessionHref, legacySessionServer, requireServerKey, sessionHref } from "./utils/session-route"
 import { createSessionLineage } from "@/pages/session/session-lineage"
 
 import { SessionPage, SessionRouteErrorBoundary, TargetSessionRouteContent } from "@/pages/session"
-import { NewHome } from "@/pages/home"
+import { UnvaraHome } from "@/pages/unvara/home"
 import { LegacyHome } from "@/pages/home/legacy-home"
 
 const NewSession = lazy(() => import("@/pages/new-session"))
@@ -372,7 +372,7 @@ function NewAppLayout(props: ParentProps<{ serverScoped?: JSX.Element }>) {
   return (
     <SelectedServerProviders>
       <ServerScopedProviders serverScoped={props.serverScoped}>
-        <NewLayout>{props.children}</NewLayout>
+        <UnvaraLayout>{props.children}</UnvaraLayout>
       </ServerScopedProviders>
     </SelectedServerProviders>
   )
@@ -636,7 +636,7 @@ function Routes(props: { serverScoped?: JSX.Element }) {
         </Route>
       </Route>
       <Show when={settings.general.newLayoutDesigns()}>
-        <Route path="/" component={NewHome} />
+        <Route path="/" component={UnvaraHome} />
         <Route path="/:dir/session/:id" component={NewLayoutLegacySessionRedirect} />
         <Route path="/server/:serverKey/session/:id" component={TargetSessionRoute} />
       </Show>

@@ -2271,7 +2271,7 @@ export default function Page() {
           {settings.general.newLayoutDesigns() ? (
             <Show when={sessionPanelKey()} keyed>
               {(_) => (
-                <SessionPanelFrame newLayout raised={!!params.id}>
+                <SessionPanelFrame newLayout>
                   <ErrorBoundary fallback={sessionErrorFallback}>{sessionPanelContent()}</ErrorBoundary>
                 </SessionPanelFrame>
               )}

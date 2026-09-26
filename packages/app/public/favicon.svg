@@ -1,1 +1,8 @@
-../../ui/src/assets/favicon/favicon.svg
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 24 24" fill="none">
+  <defs><linearGradient id="t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#262524"/><stop offset="1" stop-color="#121212"/></linearGradient></defs>
+  <rect width="24" height="24" rx="5.4" fill="url(#t)"/>
+  <g transform="translate(12 12) scale(0.755) translate(-12 -11.75)">
+    <path d="M15.38 5.25A8 8 0 1 1 8.62 5.25" stroke="#E2A04F" stroke-width="2.25" stroke-linecap="round"/>
+    <circle cx="12" cy="3.6" r="1.7" fill="#E2A04F"/>
+  </g>
+</svg>

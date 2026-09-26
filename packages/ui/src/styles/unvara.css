@@ -1,0 +1,172 @@
+/*
+ * Unvara design layer — fonts and shell tokens.
+ * Colors live in the generated theme (design/tokens.json → themes/unvara.json).
+ * See design/GUIDEBOOK.md for the rules behind every value here.
+ */
+
+@font-face {
+  font-family: "Unvara Sans";
+  src: url("../assets/fonts/unvara/inter-latin-standard-normal.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
+    U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Unvara Sans";
+  src: url("../assets/fonts/unvara/inter-cyrillic-standard-normal.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: "Unvara Serif";
+  src: url("../assets/fonts/unvara/source-serif-4-latin-standard-normal.woff2") format("woff2-variations");
+  font-weight: 200 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
+    U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Unvara Serif";
+  src: url("../assets/fonts/unvara/source-serif-4-cyrillic-standard-normal.woff2") format("woff2-variations");
+  font-weight: 200 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: "Unvara Mono";
+  src: url("../assets/fonts/unvara/jetbrains-mono-latin-wght-normal.woff2") format("woff2-variations");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
+    U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Unvara Mono";
+  src: url("../assets/fonts/unvara/jetbrains-mono-cyrillic-wght-normal.woff2") format("woff2-variations");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+:root {
+  --font-family-sans: "Unvara Sans", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --font-family-sans--font-feature-settings: "cv11", "ss03";
+  --font-family-mono: "Unvara Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+  --font-family-serif: "Unvara Serif", Georgia, "Times New Roman", serif;
+  --font-family-text: var(--font-family-sans);
+  --v2-font-family-sans: var(--font-family-sans);
+
+  /* Brand — used sparingly: logo mark, active send button, focus of brand moments. */
+  --uv-ember: #e2a04f;
+  --uv-ember-emphasized: #c98733;
+  --uv-ember-soft: #f1c68b;
+  --uv-on-ember: #1a1206;
+
+  /* Shell geometry */
+  --uv-sidebar-width: 288px;
+  --uv-header-height: 48px;
+  --uv-row-height: 32px;
+  --uv-row-gap: 8px;
+  --uv-leading-slot: 28px;
+  --uv-composer-width: 672px;
+  --uv-thread-width: 768px;
+
+  /* Radii */
+  --uv-radius-xs: 6px;
+  --uv-radius-sm: 7px;
+  --uv-radius: 8px;
+  --uv-radius-lg: 10px;
+  --uv-radius-card: 12px;
+  --uv-radius-composer: 14px;
+
+  /* Interaction overlays (alpha on top of any surface) */
+  --uv-hover: var(--v2-overlay-simple-overlay-hover);
+  --uv-selected: var(--v2-overlay-simple-overlay-pressed);
+
+  /* Motion */
+  --uv-dur-fast: 60ms;
+  --uv-dur-snap: 120ms;
+  --uv-dur-base: 200ms;
+  --uv-dur-sheet: 300ms;
+  --uv-ease-out: cubic-bezier(0.165, 0.84, 0.44, 1);
+  --uv-ease-snap: cubic-bezier(0.32, 0.72, 0, 1);
+  --uv-ease-overshoot: cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--uv-ember) 32%, transparent);
+}
+
+/* ── Composer skin ─────────────────────────────────────────────────────────
+ * Claude-style composer: layer-01 surface, 14px radius, 1px strong ring,
+ * soft drop shadow, 15px text. Overrides session-ui utilities without forking them. */
+[data-component="prompt-input-v2"] {
+  background-color: var(--v2-background-bg-layer-01);
+  border-radius: var(--uv-radius-composer);
+  box-shadow:
+    0 0 0 1px var(--v2-border-border-strong),
+    0 4px 20px rgb(0 0 0 / 0.075);
+  transition: box-shadow var(--uv-dur-base) var(--uv-ease-out);
+}
+
+[data-component="prompt-input-v2"]:focus-within {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--v2-text-text-base) 32%, transparent),
+    0 4px 20px rgb(0 0 0 / 0.12);
+}
+
+[data-component="prompt-input-v2"] [data-component="prompt-input"],
+[data-component="prompt-input-v2"] [data-component="prompt-input"] ~ div {
+  padding: 14px 16px 6px;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+}
+
+[data-action="prompt-submit"] {
+  width: 32px;
+  height: 32px;
+  padding: 7px;
+  border-radius: var(--uv-radius);
+  background-image: none !important;
+  background-color: var(--uv-ember);
+  color: var(--uv-on-ember);
+  box-shadow: none;
+  transition:
+    background-color var(--uv-dur-snap) var(--uv-ease-out),
+    opacity var(--uv-dur-snap) var(--uv-ease-out);
+}
+
+[data-action="prompt-submit"]:hover:not(:disabled) {
+  background-color: var(--uv-ember-emphasized);
+}
+
+[data-action="prompt-submit"]:disabled {
+  opacity: 0.45;
+}
+
+[data-action="prompt-submit"] svg {
+  color: var(--uv-on-ember);
+}

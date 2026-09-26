@@ -5,6 +5,7 @@ import { createStore } from "solid-js/store"
 import { makeEventListener } from "@solid-primitives/event-listener"
 import { createSimpleContext } from "../context/helper"
 import oc2ThemeJson from "./themes/oc-2.json"
+import unvaraThemeJson from "./themes/unvara.json"
 import { resolveThemeVariant, themeToCss } from "./resolve"
 import { resolveThemeVariantV2, themeV2ToCss } from "./v2/resolve"
 import type { DesktopTheme } from "./types"
@@ -44,6 +45,7 @@ function knownThemes() {
 }
 
 const names: Record<string, string> = {
+  unvara: "Unvara",
   "oc-2": "OC-2",
   amoled: "AMOLED",
   aura: "Aura",
@@ -83,6 +85,8 @@ const names: Record<string, string> = {
   zenburn: "Zenburn",
 }
 const oc2Theme = oc2ThemeJson as DesktopTheme
+const unvaraTheme = unvaraThemeJson as DesktopTheme
+export const DEFAULT_THEME_ID = "unvara"
 
 function normalize(id: string | null | undefined) {
   return id === "oc-1" ? "oc-2" : id
@@ -152,11 +156,11 @@ function applyThemeCss(theme: DesktopTheme, themeId: string, mode: "light" | "da
   ensureThemeStyleElement().textContent = fullCss
   document.documentElement.dataset.theme = themeId
   document.documentElement.dataset.colorScheme = mode
-  document.documentElement.style.backgroundColor = isDark ? "#080808" : "#fafafa"
+  document.documentElement.style.backgroundColor = isDark ? "#111111" : "#f3f3f0"
 
   // Update theme-color meta tag to match light/dark mode
   const meta = document.querySelector('meta[name="theme-color"]')
-  if (meta) meta.setAttribute("content", isDark ? "#080808" : "#fafafa")
+  if (meta) meta.setAttribute("content", isDark ? "#111111" : "#f3f3f0")
 }
 
 function cacheThemeVariants(theme: DesktopTheme, themeId: string) {
@@ -177,12 +181,13 @@ export const { use: useTheme, provider: ThemeProvider } = createSimpleContext({
     defaultTheme?: string
     onThemeApplied?: (theme: DesktopTheme, mode: "light" | "dark", scheme: ColorScheme) => void
   }) => {
-    const themeId = normalize(read(STORAGE_KEYS.THEME_ID) ?? props.defaultTheme) ?? "oc-2"
+    const themeId = normalize(read(STORAGE_KEYS.THEME_ID) ?? props.defaultTheme) ?? DEFAULT_THEME_ID
     const colorScheme = (read(STORAGE_KEYS.COLOR_SCHEME) as ColorScheme | null) ?? "system"
     const mode = colorScheme === "system" ? getSystemMode() : colorScheme
     const [store, setStore] = createStore({
       themes: {
         "oc-2": oc2Theme,
+        unvara: unvaraTheme,
       } as Record<string, DesktopTheme>,
       themeId,
       colorScheme,
@@ -263,7 +268,7 @@ export const { use: useTheme, provider: ThemeProvider } = createSimpleContext({
       makeEventListener(mediaQuery, "change", onMedia)
 
       const rawTheme = read(STORAGE_KEYS.THEME_ID)
-      const savedTheme = normalize(rawTheme ?? props.defaultTheme) ?? "oc-2"
+      const savedTheme = normalize(rawTheme ?? props.defaultTheme) ?? DEFAULT_THEME_ID
       const savedScheme = (read(STORAGE_KEYS.COLOR_SCHEME) as ColorScheme | null) ?? "system"
       if (rawTheme && rawTheme !== savedTheme) {
         write(STORAGE_KEYS.THEME_ID, savedTheme)

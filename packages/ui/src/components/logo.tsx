@@ -5,28 +5,40 @@ export const Mark = (props: { class?: string }) => {
     <svg
       data-component="logo-mark"
       classList={{ [props.class ?? ""]: !!props.class }}
-      viewBox="0 0 16 20"
+      viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path data-slot="logo-logo-mark-shadow" d="M12 16H4V8H12V16Z" fill="var(--icon-weak-base)" />
-      <path data-slot="logo-logo-mark-o" d="M12 4H4V16H12V4ZM16 20H0V0H16V20Z" fill="var(--icon-strong-base)" />
+      <path
+        data-slot="logo-logo-mark-o"
+        d="M15.38 5.25A8 8 0 1 1 8.62 5.25"
+        stroke="var(--uv-ember, #e2a04f)"
+        stroke-width="2.25"
+        stroke-linecap="round"
+      />
+      <circle cx="12" cy="3.6" r="1.7" fill="var(--uv-ember, #e2a04f)" />
     </svg>
   )
 }
 
 export const Splash = (props: Pick<ComponentProps<"svg">, "ref" | "class">) => {
+  // Unvara mark: open ember ring with a spark in the gap (see design/GUIDEBOOK.md).
   return (
     <svg
       ref={props.ref}
       data-component="logo-splash"
       classList={{ [props.class ?? ""]: !!props.class }}
-      viewBox="0 0 80 100"
+      viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path d="M60 80H20V40H60V80Z" fill="var(--icon-base)" />
-      <path d="M60 20H20V80H60V20ZM80 100H0V0H80V100Z" fill="var(--icon-strong-base)" />
+      <path
+        d="M15.38 5.25A8 8 0 1 1 8.62 5.25"
+        stroke="var(--uv-ember, #e2a04f)"
+        stroke-width="2.25"
+        stroke-linecap="round"
+      />
+      <circle cx="12" cy="3.6" r="1.7" fill="var(--uv-ember, #e2a04f)" />
     </svg>
   )
 }

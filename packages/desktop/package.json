@@ -4,10 +4,8 @@
   "version": "1.18.32",
   "type": "module",
   "license": "MIT",
-  "homepage": "https://opencode.ai",
   "author": {
-    "name": "OpenCode",
-    "email": "hello@opencode.ai"
+    "name": "Unvara"
   },
   "scripts": {
     "typecheck": "tsgo -b",
