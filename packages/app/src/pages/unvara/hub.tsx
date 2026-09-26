@@ -3,10 +3,11 @@ import { createStore } from "solid-js/store"
 import { useLanguage } from "@/context/language"
 import type { CatalogModel } from "@/local-models/catalog"
 import { useLocalModels } from "@/local-models/context"
-import { primaryGpu, type Fit, type Tier } from "@/local-models/fit"
+import { planFit, primaryGpu, type Fit, type Tier } from "@/local-models/fit"
 import { agentReady, tierRank, type ModelFit } from "@/local-models/recommend"
-import type { DownloadJob } from "@/local-models/types"
+import type { DownloadJob, LocalModel } from "@/local-models/types"
 import { HubSearch } from "./hub-search"
+import { ModelSettings } from "./model-settings"
 import { UvIcon } from "./icons"
 import { IconButton } from "./sidebar"
 
@@ -36,7 +37,7 @@ export const CARD =
 export function UnvaraHub() {
   const language = useLanguage()
   const local = useLocalModels()
-  const [ui, setUi] = createStore({ tab: "forYou" as Tab, filter: "all" as Filter, open: "", confirm: "" })
+  const [ui, setUi] = createStore({ tab: "forYou" as Tab, filter: "all" as Filter, open: "" })
 
   const state = () => local.store.state
   const pending = () => state()?.downloads.filter((job) => job.status !== "done").length ?? 0
@@ -169,47 +170,7 @@ export function UnvaraHub() {
                     <p class="text-[14px] text-v2-text-text-faint">{language.t("unvara.hub.empty.installed")}</p>
                   }
                 >
-                  {(model) => (
-                    <div class={`${CARD} flex items-center gap-4 p-4`}>
-                      <div class="flex min-w-0 flex-1 flex-col gap-1">
-                        <span class="text-[15px] font-[500] text-v2-text-text-base">{model.name}</span>
-                        <span class="truncate text-[12.5px] text-v2-text-text-faint">
-                          {[
-                            model.size ? formatSize(language.intl(), model.size) : undefined,
-                            contextLabel(model.context),
-                            model.path,
-                          ]
-                            .filter(Boolean)
-                            .join(" · ")}
-                        </span>
-                      </div>
-                      <Show
-                        when={ui.confirm === model.id}
-                        fallback={
-                          <IconButton
-                            label={language.t("unvara.hub.action.remove")}
-                            onClick={() => setUi("confirm", model.id)}
-                          >
-                            <UvIcon.Trash />
-                          </IconButton>
-                        }
-                      >
-                        <button
-                          type="button"
-                          class="rounded-(--uv-radius) bg-(--v2-state-bg-danger) px-3 py-1.5 text-[13px] text-(--v2-state-fg-danger)"
-                          onClick={() => {
-                            setUi("confirm", "")
-                            void local.api?.removeModel(model.id)
-                          }}
-                        >
-                          {language.t("unvara.hub.action.removeConfirm", {
-                            size: formatSize(language.intl(), model.size ?? 0),
-                          })}
-                        </button>
-                        <Button onClick={() => setUi("confirm", "")}>{language.t("unvara.hub.action.cancel")}</Button>
-                      </Show>
-                    </div>
-                  )}
+                  {(model) => <InstalledRow model={model} />}
                 </For>
                 <Show when={state()?.settings.modelsDir}>
                   {(dir) => (
@@ -238,10 +199,78 @@ export function UnvaraHub() {
       </div>
     </div>
   )
+}
 
-  function contextLabel(tokens: number) {
-    return language.t("unvara.hub.context", { value: Math.round(tokens / 1024) })
+/** One installed model: size, context, measured speed, settings and removal. */
+function InstalledRow(props: { model: LocalModel }) {
+  const language = useLanguage()
+  const local = useLocalModels()
+  const [row, setRow] = createStore({ confirm: false, settings: false })
+  const measured = () => props.model.measured?.tokensPerSecond
+  // Far below the estimate usually means the GPU ran out of memory and Windows moved part of the model to shared RAM.
+  const slow = () => {
+    const shape = props.model.shape
+    const hardware = local.hardware()
+    const speed = measured()
+    if (!shape || !hardware || !props.model.size || !speed) return false
+    const fit = planFit(shape, { size: props.model.size }, hardware, {
+      targetContext: props.model.context,
+      minContext: props.model.context,
+    })
+    return fit.mode === "gpu" && speed < fit.tokensPerSecond * 0.4
   }
+  return (
+    <div class={CARD}>
+      <div class="flex items-center gap-4 p-4">
+        <div class="flex min-w-0 flex-1 flex-col gap-1">
+          <span class="text-[15px] font-[500] text-v2-text-text-base">{props.model.name}</span>
+          <span class="truncate text-[12.5px] text-v2-text-text-faint">
+            {[
+              props.model.size ? formatSize(language.intl(), props.model.size) : undefined,
+              language.t("unvara.hub.context", { value: Math.round(props.model.context / 1024) }),
+              measured() ? language.t("unvara.hub.measured", { value: Math.round(measured()!) }) : undefined,
+              props.model.path,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </span>
+          <Show when={slow()}>
+            <span class="text-[12.5px] text-(--v2-state-fg-warning)">{language.t("unvara.hub.slower")}</span>
+          </Show>
+        </div>
+        <Show
+          when={row.confirm}
+          fallback={
+            <div class="flex shrink-0 items-center gap-0.5">
+              <IconButton label={language.t("unvara.model.settings")} onClick={() => setRow("settings", !row.settings)}>
+                <UvIcon.Settings />
+              </IconButton>
+              <IconButton label={language.t("unvara.hub.action.remove")} onClick={() => setRow("confirm", true)}>
+                <UvIcon.Trash />
+              </IconButton>
+            </div>
+          }
+        >
+          <button
+            type="button"
+            class="rounded-(--uv-radius) bg-(--v2-state-bg-danger) px-3 py-1.5 text-[13px] text-(--v2-state-fg-danger)"
+            onClick={() => {
+              setRow("confirm", false)
+              void local.api?.removeModel(props.model.id)
+            }}
+          >
+            {language.t("unvara.hub.action.removeConfirm", {
+              size: formatSize(language.intl(), props.model.size ?? 0),
+            })}
+          </button>
+          <Button onClick={() => setRow("confirm", false)}>{language.t("unvara.hub.action.cancel")}</Button>
+        </Show>
+      </div>
+      <Show when={row.settings}>
+        <ModelSettings model={props.model} onClose={() => setRow("settings", false)} />
+      </Show>
+    </div>
+  )
 }
 
 function HardwareChip() {

@@ -122,7 +122,8 @@ function useLocalProviderRefresh() {
   const serverSync = useServerSync()
   const serverSdk = useServerSDK()
   const [refresh, setRefresh] = createStore({ pending: false })
-  const models = createMemo(() => local.store.state?.models.map((model) => model.id).join("\n"))
+  // OpenCode also takes each model's context limit from the manifest, so a new context counts as a change.
+  const models = createMemo(() => local.store.state?.models.map((model) => `${model.id}:${model.context}`).join("\n"))
   const working = () =>
     Object.values(serverSync().session.data.session_status).some((status) => status && status.type !== "idle")
 

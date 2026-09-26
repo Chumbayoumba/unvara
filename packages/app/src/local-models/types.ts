@@ -1,5 +1,6 @@
 /** Shared between the Electron main process (engine, router, downloads) and the app UI. */
 import type { Catalog, CatalogModel } from "./catalog"
+import type { ModelShape } from "./fit"
 import type { HubResult, HubSort } from "./huggingface"
 
 /** OpenCode provider id of the local llama.cpp models (the `unvara-local` plugin). */
@@ -60,12 +61,19 @@ export type LocalModel = {
   overrides?: Record<string, string | number | boolean>
   /** Where it came from, for models installed from the catalog. */
   source?: { catalogId: string; repo: string; quant: string }
+  /** Architecture facts for memory estimates when the context or KV cache changes. */
+  shape?: ModelShape
+  /** Real generation speed from recent replies, averaged per engine backend. */
+  measured?: { tokensPerSecond: number; backend?: EngineBackend; at: number }
   /** Files Unvara downloaded for it (shards + projector); deleted with the model. Imported models have none. */
   files?: string[]
   /** Bytes on disk (weights + projector). */
   size?: number
   installedAt?: number
 }
+
+/** What the model page can change; `overrides` replaces the whole set. */
+export type ModelSettings = Partial<Pick<LocalModel, "context" | "overrides" | "sampling">>
 
 /** `models.json` in the engine folder: the single source for the router presets and the OpenCode plugin. */
 export type LocalModelsManifest = { version: 1; models: LocalModel[] }
@@ -147,6 +155,8 @@ export type LocalModelsPlatform = {
   /** Stops and deletes partial files; for finished jobs only clears the entry. */
   cancelDownload: (id: string) => Promise<void>
   removeModel: (id: string) => Promise<void>
+  /** Saves a model's settings; they apply from the next reply. */
+  updateModel: (id: string, patch: ModelSettings) => Promise<void>
   /** Live Hugging Face search over GGUF repos. */
   searchHub: (query: string, sort: HubSort, uncensored: boolean) => Promise<HubResult[]>
   /** A repo's quants and GGUF dims in catalog form (its id is `hf:<repo>`), ready to fit and download. */

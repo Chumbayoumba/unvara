@@ -15,12 +15,14 @@ import type {
   LocalModel,
   LocalModelsSettings,
   LocalModelsState,
+  ModelSettings,
   SystemInfo,
 } from "@opencode-ai/app/local-models/types"
 import bundledCatalog from "../../../../../catalog/catalog.json"
 import { localDataRoot } from "../paths"
 import { createDownloadQueue } from "./downloads"
 import { findModels, importSources } from "./importer"
+import { createSpeedMeter } from "./speed"
 import { ENGINE_BUILD, engineDir, installedBackend, isInstalled, preferredBackend, provisionBackend } from "./engine"
 import { bestModelsDrive, detectSystem, listEngineDevices, pickDevice } from "./hardware"
 import { readManifest, readText, writeAtomic, writeManifest, writePresets } from "./presets"
@@ -49,7 +51,12 @@ export function createLocalModelsController(options: { userDataPath: string; log
   const state: LocalModelsState = {
     engine: { status: "absent" },
     router: { status: "stopped" },
-    models: readManifest(files.manifest).models,
+    // Catalog installs from before shapes were stored get theirs back from the catalog.
+    models: readManifest(files.manifest).models.map((model) =>
+      model.shape || !model.source
+        ? model
+        : { ...model, shape: catalog.models.find((item) => item.id === model.source?.catalogId)?.shape },
+    ),
     downloads: [],
     settings: readSettings(files.settings),
   }
@@ -63,6 +70,7 @@ export function createLocalModelsController(options: { userDataPath: string; log
   })
   state.downloads = queue.jobs()
   const hubModels = new Map<string, CatalogModel>()
+  const meter = createSpeedMeter(recordSpeed)
   const listeners = new Set<(state: LocalModelsState) => void>()
   const runtime = { router: undefined as Router | undefined, port: 0, apiKey: "" }
 
@@ -130,7 +138,10 @@ export function createLocalModelsController(options: { userDataPath: string; log
       cacheDir: files.cache,
       port: runtime.port,
       apiKey: runtime.apiKey,
-      log: options.routerLog,
+      log: (message, extra, level) => {
+        meter(message)
+        options.routerLog(message, extra, level)
+      },
       onState: (router) => emit({ router }),
     })
     runtime.router = router
@@ -179,6 +190,30 @@ export function createLocalModelsController(options: { userDataPath: string; log
     emit({ models })
     writePresets(files.presets, models, state.engine.status === "ready" ? state.engine.device : undefined)
     await runtime.router?.reload()
+  }
+
+  /** Keeps a smoothed real generation speed per model; a different engine backend starts a fresh average. */
+  function recordSpeed(id: string, tokensPerSecond: number) {
+    const backend = state.engine.status === "ready" ? state.engine.backend : undefined
+    const models = state.models.map((model) => {
+      if (model.id !== id) return model
+      const previous = model.measured?.backend === backend ? model.measured?.tokensPerSecond : undefined
+      const smoothed = previous ? previous * 0.7 + tokensPerSecond * 0.3 : tokensPerSecond
+      return { ...model, measured: { tokensPerSecond: smoothed, backend, at: Date.now() } }
+    })
+    // Speed doesn't change how models load, so presets and the router are left alone.
+    writeManifest(files.manifest, { version: 1, models })
+    emit({ models })
+  }
+
+  /** Applies the model page's settings; a loaded copy is unloaded so the next reply uses them. */
+  async function updateModel(id: string, patch: ModelSettings) {
+    const model = state.models.find((item) => item.id === id)
+    if (!model) return
+    const context = patch.context ?? model.context
+    const updated = { ...model, ...patch, context, output: Math.min(8192, Math.floor(context / 4)) }
+    await saveModels(state.models.map((item) => (item.id === id ? updated : item)))
+    if ("model" in state.router && state.router.model === id) await runtime.router?.unload(id)
   }
 
   /** Queues a catalog model (all shards plus its vision projector); resolves with the job id. */
@@ -249,6 +284,7 @@ export function createLocalModelsController(options: { userDataPath: string; log
         sampling: model.sampling,
         overrides: fit.kvType === "q8_0" ? { "cache-type-k": "q8_0", "cache-type-v": "q8_0" } : undefined,
         source: { catalogId: model.id, repo: model.repo, quant: job.quant },
+        shape: model.shape,
         files: job.files.map((file) => file.dest),
         size: job.total,
         installedAt: Date.now(),
@@ -301,6 +337,7 @@ export function createLocalModelsController(options: { userDataPath: string; log
           reasoning: /<think>|reasoning/.test(template),
           vision: Boolean(item.mmproj),
           overrides: fit.kvType === "q8_0" ? { "cache-type-k": "q8_0", "cache-type-v": "q8_0" } : undefined,
+          shape,
           size: item.size + (item.mmproj?.size ?? 0),
           installedAt: Date.now(),
         }
@@ -355,6 +392,7 @@ export function createLocalModelsController(options: { userDataPath: string; log
     hubDetails,
     importFolder,
     importSources,
+    updateModel,
     removeModel,
     updateSettings,
     getCatalog: () => catalog,
