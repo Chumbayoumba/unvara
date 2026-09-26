@@ -1,6 +1,7 @@
-import { open, readdir, stat } from "node:fs/promises"
+import { open, readdir, readFile, stat } from "node:fs/promises"
 import os from "node:os"
-import { basename, dirname, join } from "node:path"
+import { basename, dirname, join, relative, sep } from "node:path"
+import type { ImportSource } from "@opencode-ai/app/local-models/types"
 import { readGgufMetadataWith } from "@opencode-ai/app/local-models/gguf"
 import { isAuxiliaryGguf } from "@opencode-ai/app/local-models/quant"
 
@@ -9,6 +10,8 @@ export type FoundModel = {
   path: string
   /** Bytes of all shards. */
   size: number
+  /** Set when the store names models itself (Ollama's "qwen3:4b"); otherwise the file name is used. */
+  name?: string
   mmproj?: { path: string; size: number }
   metadata: Record<string, unknown>
 }
@@ -18,13 +21,19 @@ const MAX_DEPTH = 5
 const SHARD = /-(\d{5})-of-(\d{5})\.gguf$/i
 
 /** Folders where other apps keep GGUF models, if they exist on this PC. */
-export async function importSources() {
+export async function importSources(): Promise<ImportSource[]> {
   const home = os.homedir()
-  const candidates = [join(home, ".lmstudio", "models"), join(home, ".cache", "lm-studio", "models")]
+  const candidates: ImportSource[] = [
+    { app: "lmstudio", path: join(home, ".lmstudio", "models") },
+    { app: "lmstudio", path: join(home, ".cache", "lm-studio", "models") },
+    { app: "ollama", path: process.env.OLLAMA_MODELS ?? join(home, ".ollama", "models") },
+  ]
   const found = await Promise.all(
-    candidates.map(async (dir) => ((await stat(dir).catch(() => undefined))?.isDirectory() ? dir : undefined)),
+    candidates.map(async (source) =>
+      (await stat(source.path).catch(() => undefined))?.isDirectory() ? source : undefined,
+    ),
   )
-  return found.filter((dir) => dir !== undefined)
+  return found.filter((source) => source !== undefined)
 }
 
 /**
@@ -32,6 +41,8 @@ export async function importSources() {
  * from the same folder. Unreadable or non-model files are skipped.
  */
 export async function findModels(root: string, log: (message: string, extra?: Record<string, unknown>) => void) {
+  if ((await isDirectory(join(root, "manifests"))) && (await isDirectory(join(root, "blobs"))))
+    return findOllamaModels(root, log)
   const files = await walk(root, MAX_DEPTH)
   const ggufs = files.filter(
     (file) => file.path.toLowerCase().endsWith(".gguf") && !isAuxiliaryGguf(basename(file.path)),
@@ -56,6 +67,47 @@ export async function findModels(root: string, log: (message: string, extra?: Re
     }),
   )
   return found.filter((item) => item !== undefined)
+}
+
+/**
+ * Ollama stores GGUF weights as content-addressed blobs; its manifests (manifests/<registry>/<namespace>/<model>/<tag>)
+ * say which blob is the model and which the vision projector. Several tags can share one blob.
+ */
+async function findOllamaModels(root: string, log: (message: string, extra?: Record<string, unknown>) => void) {
+  const manifests = join(root, "manifests")
+  const found = await Promise.all(
+    (await walk(manifests, 4)).map(async (file): Promise<FoundModel | undefined> => {
+      const manifest = await readFile(file.path, "utf8")
+        .then((text) => JSON.parse(text) as { layers?: { mediaType?: string; digest?: string; size?: number }[] })
+        .catch(() => undefined)
+      const blob = (mediaType: string) => {
+        const layer = manifest?.layers?.find((item) => item.mediaType === mediaType)
+        if (!layer?.digest) return
+        return { path: join(root, "blobs", layer.digest.replace(":", "-")), size: layer.size ?? 0 }
+      }
+      const model = blob("application/vnd.ollama.image.model")
+      if (!model) return
+      const metadata = await readHeader(model.path).catch((error) => {
+        log("skipping unreadable ollama blob", { path: model.path, error: String(error) })
+        return undefined
+      })
+      if (!metadata || typeof metadata["general.architecture"] !== "string") return
+      const [tag, name, namespace] = relative(manifests, file.path).split(sep).toReversed()
+      return {
+        ...model,
+        name: namespace === "library" ? `${name}:${tag}` : `${namespace}/${name}:${tag}`,
+        mmproj: blob("application/vnd.ollama.image.projector"),
+        metadata,
+      }
+    }),
+  )
+  return found
+    .filter((item) => item !== undefined)
+    .filter((item, index, all) => all.findIndex((other) => other.path === item.path) === index)
+}
+
+async function isDirectory(path: string) {
+  return (await stat(path).catch(() => undefined))?.isDirectory() ?? false
 }
 
 async function walk(dir: string, depth: number): Promise<{ path: string; size: number }[]> {

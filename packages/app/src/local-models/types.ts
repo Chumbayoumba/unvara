@@ -87,6 +87,9 @@ export type RouterState =
   | { status: "crashed"; reason: string }
   | { status: "restarting"; attempt: number }
 
+/** Another app's model store that can be imported in place. */
+export type ImportSource = { app: "lmstudio" | "ollama"; path: string }
+
 export type DownloadStatus = "queued" | "downloading" | "paused" | "installing" | "done" | "failed"
 
 /** Codes, not messages: the UI turns them into translated text. */
@@ -148,8 +151,8 @@ export type LocalModelsPlatform = {
   searchHub: (query: string, sort: HubSort, uncensored: boolean) => Promise<HubResult[]>
   /** A repo's quants and GGUF dims in catalog form (its id is `hf:<repo>`), ready to fit and download. */
   hubDetails: (repo: string) => Promise<CatalogModel>
-  /** Folders other apps (LM Studio) keep GGUF models in, if present. */
-  importSources: () => Promise<string[]>
+  /** Folders other apps (LM Studio, Ollama) keep GGUF models in, if present. */
+  importSources: () => Promise<ImportSource[]>
   /** Registers GGUF models found under `dir` in place; resolves with how many it found. */
   importFolder: (dir: string) => Promise<number>
   updateSettings: (patch: Partial<LocalModelsSettings>) => Promise<LocalModelsSettings>

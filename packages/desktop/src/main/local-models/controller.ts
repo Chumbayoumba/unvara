@@ -281,7 +281,7 @@ export function createLocalModelsController(options: { userDataPath: string; log
         })
         const context = fit.mode === "none" ? Math.min(8192, shape.contextMax) : fit.context
         const template = String(metadata["tokenizer.chat_template"] ?? "")
-        const name = basename(item.path).replace(/(-\d{5}-of-\d{5})?\.gguf$/i, "")
+        const name = item.name ?? basename(item.path).replace(/(-\d{5}-of-\d{5})?\.gguf$/i, "")
         const id = uniqueId(
           name
             .toLowerCase()

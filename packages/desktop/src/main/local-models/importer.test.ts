@@ -58,3 +58,26 @@ describe("findModels", () => {
     expect(found[1].metadata["general.architecture"]).toBe("llama")
   })
 })
+
+describe("findModels in an Ollama store", () => {
+  test("names models by manifest, finds the projector layer and lists a shared blob once", async () => {
+    const store = join(dir, "ollama")
+    const blobs = join(store, "blobs")
+    const tags = join(store, "manifests", "registry.ollama.ai", "library", "qwen3")
+    mkdirSync(blobs, { recursive: true })
+    mkdirSync(tags, { recursive: true })
+    writeFileSync(join(blobs, "sha256-aaa"), gguf({ "general.architecture": "qwen3" }))
+    writeFileSync(join(blobs, "sha256-bbb"), gguf({ "general.architecture": "clip" }))
+    const layers = [
+      { mediaType: "application/vnd.ollama.image.model", digest: "sha256:aaa", size: 123 },
+      { mediaType: "application/vnd.ollama.image.projector", digest: "sha256:bbb", size: 45 },
+    ]
+    ;["4b", "latest"].forEach((tag) => writeFileSync(join(tags, tag), JSON.stringify({ schemaVersion: 2, layers })))
+
+    const found = await findModels(store, () => {})
+    expect(found).toHaveLength(1)
+    expect(found[0]).toMatchObject({ size: 123, mmproj: { size: 45 } })
+    expect(["qwen3:4b", "qwen3:latest"]).toContain(found[0].name!)
+    expect(found[0].path).toEndWith("sha256-aaa")
+  })
+})

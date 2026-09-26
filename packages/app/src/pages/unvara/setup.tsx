@@ -7,7 +7,7 @@ import { useModels } from "@/context/models"
 import { usePlatform } from "@/context/platform"
 import { useLocalModels } from "@/local-models/context"
 import { primaryGpu } from "@/local-models/fit"
-import { LOCAL_PROVIDER_ID, type EngineState } from "@/local-models/types"
+import { LOCAL_PROVIDER_ID, type EngineState, type ImportSource } from "@/local-models/types"
 import { Button, DownloadRow, formatMemory, formatSize, PickCard, SLOTS } from "./hub"
 import { UvIcon } from "./icons"
 import { UnvaraMark } from "./mark"
@@ -36,7 +36,7 @@ export function UnvaraSetup() {
     scanning: false,
     folderError: false,
     job: "",
-    sources: [] as string[],
+    sources: [] as ImportSource[],
     importing: false,
     imported: -1,
   })
@@ -303,11 +303,11 @@ export function UnvaraSetup() {
               <Title title={language.t("unvara.setup.import.title")} body={language.t("unvara.setup.import.body")} />
               <div class="flex flex-col gap-2">
                 <For each={store.sources}>
-                  {(dir) => (
+                  {(source) => (
                     <Choice
-                      title={language.t("unvara.setup.import.lmstudio")}
-                      body={dir}
-                      onClick={() => importFrom(dir)}
+                      title={language.t(`unvara.setup.import.${source.app}`)}
+                      body={source.path}
+                      onClick={() => importFrom(source.path)}
                     />
                   )}
                 </For>
