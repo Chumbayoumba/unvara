@@ -37,6 +37,14 @@ are there too if you want them.
 
 macOS and Linux builds are planned.
 
+## Download
+
+Get `unvara-win-x64.exe` from the [latest release](https://github.com/Chumbayoumba/unvara/releases/latest) and run it.
+Unvara updates itself from new releases.
+
+The installer is not code-signed yet, so Windows SmartScreen may say "Windows protected your PC". Click
+**More info → Run anyway**.
+
 ## Uncensored models
 
 Some models in the catalog have had their refusals removed ("abliterated", "heretic" or fine-tuned). They can
