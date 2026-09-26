@@ -1,6 +1,9 @@
 /** Shared between the Electron main process (engine, router, downloads) and the app UI. */
 import type { Catalog } from "./catalog"
 
+/** OpenCode provider id of the local llama.cpp models (the `unvara-local` plugin). */
+export const LOCAL_PROVIDER_ID = "unvara"
+
 export type EngineBackend = "cpu" | "vulkan" | "cuda-12.4" | "cuda-13.4"
 
 export type GpuInfo = {
@@ -47,6 +50,8 @@ export type LocalModel = {
   /** Max output tokens advertised to OpenCode. */
   output: number
   toolCall: boolean
+  /** Verified to drive the agent toolset at a long enough context; otherwise new chats start in Chat mode. */
+  agent?: boolean
   reasoning: boolean
   vision: boolean
   sampling?: { temperature?: number; topK?: number; topP?: number; minP?: number }

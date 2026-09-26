@@ -103,7 +103,8 @@ async function build(source: Source): Promise<CatalogModel> {
       cardData?: { license?: string }
     }>(`/api/models/${source.repo}?expand[]=gguf&expand[]=downloads&expand[]=lastModified&expand[]=cardData`),
   ])
-  const excluded = (name: string) => (source.exclude ?? []).some((part) => name.toLowerCase().includes(part.toLowerCase()))
+  const excluded = (name: string) =>
+    (source.exclude ?? []).some((part) => name.toLowerCase().includes(part.toLowerCase()))
   const ggufFiles = files.siblings.filter(
     (file) => file.rfilename.endsWith(".gguf") && !AUXILIARY.test(file.rfilename) && !excluded(file.rfilename),
   )

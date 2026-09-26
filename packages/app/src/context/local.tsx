@@ -7,6 +7,8 @@ import { useModels } from "@/context/models"
 import { useSettings } from "@/context/settings"
 import { useProviders } from "@/hooks/use-providers"
 import { resolveDefaultModel } from "@/hooks/provider-catalog"
+import { useLocalModels } from "@/local-models/context"
+import { LOCAL_PROVIDER_ID } from "@/local-models/types"
 import { Persist, persisted } from "@/utils/persist"
 import { hasCustomAgent, resolveAgent } from "./local-agent"
 import { cycleModelVariant, getConfiguredAgentVariant, resolveModelVariant } from "./model-variant"
@@ -66,6 +68,7 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
     const providers = useProviders(() => sdk().directory)
     const models = useModels()
     const settings = useSettings()
+    const localModels = useLocalModels()
 
     const id = createMemo(() => params.id || undefined)
     const list = createMemo(() => sync().data.agent.filter((item) => item.mode !== "subagent" && !item.hidden))
@@ -179,11 +182,20 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
 
     const fallback = createMemo<ModelKey | undefined>(() => configuredModel() ?? recentModel() ?? defaultModel())
 
+    const autoAgent = (model: ModelKey | undefined) => {
+      if (model?.providerID !== LOCAL_PROVIDER_ID) return "build"
+      return localModels.store.state?.models.find((item) => item.id === model.modelID)?.agent ? "build" : "chat"
+    }
+
     const agent = {
       list,
       visible: agentsVisible,
-      current() {
-        return pickAgent(agentsVisible() ? (scope()?.agent ?? store.current) : "build")
+      /** Pass the composer's selected model when it is known; drafts keep their model outside this scope. */
+      current(model?: ModelKey) {
+        if (agentsVisible()) return pickAgent(scope()?.agent ?? store.current)
+        // Without custom agents the composer offers Chat / Agent. Until the user picks one, local models that
+        // can't reliably drive tools start in Chat; everything else starts as the agent.
+        return pickAgent(scope()?.agent ?? autoAgent(model ?? firstModel(() => scope()?.model, fallback)))
       },
       set(name: string | undefined) {
         const item = pickAgent(name)
@@ -262,8 +274,9 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
     }
 
     const write = (next: Partial<State>) => {
+      // In Chat / Agent mode the agent is only pinned by an explicit choice, so picking a model re-runs the auto rule.
       const state = {
-        ...(scope() ?? { agent: agent.current()?.name }),
+        ...(scope() ?? (agentsVisible() ? { agent: agent.current()?.name } : {})),
         ...next,
       } satisfies State
 

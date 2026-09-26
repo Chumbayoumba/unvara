@@ -5,7 +5,7 @@ import { isAbsolute, join } from "node:path"
 import { net } from "electron"
 import { downloadUrl, type Catalog } from "@opencode-ai/app/local-models/catalog"
 import { hardwareProfile, planFit, primaryGpu } from "@opencode-ai/app/local-models/fit"
-import { AGENT_CONTEXT } from "@opencode-ai/app/local-models/recommend"
+import { AGENT_CONTEXT, agentReady } from "@opencode-ai/app/local-models/recommend"
 import type {
   DownloadJob,
   EngineBackend,
@@ -85,7 +85,9 @@ export function createLocalModelsController(options: { userDataPath: string; log
   async function scanHardware() {
     const system = await detectSystem()
     options.log("hardware scanned", {
-      gpus: system.gpus.map((gpu) => `${gpu.name} ${(gpu.vram / 1024 ** 3).toFixed(1)}GB${gpu.integrated ? " (integrated)" : ""}`),
+      gpus: system.gpus.map(
+        (gpu) => `${gpu.name} ${(gpu.vram / 1024 ** 3).toFixed(1)}GB${gpu.integrated ? " (integrated)" : ""}`,
+      ),
       ram: `${(system.ram.total / 1024 ** 3).toFixed(1)}GB total, ${(system.ram.available / 1024 ** 3).toFixed(1)}GB available, ${system.ram.bandwidth ?? "?"}GB/s`,
       cpu: `${system.cpu.name} x${system.cpu.cores}`,
       disks: system.disks.map((disk) => `${disk.letter}: ${disk.kind} ${(disk.free / 1e9).toFixed(0)}GB free`),
@@ -217,6 +219,7 @@ export function createLocalModelsController(options: { userDataPath: string; log
         context,
         output: Math.min(8192, Math.floor(context / 4)),
         toolCall: model.capabilities.tools,
+        agent: agentReady(model, fit),
         reasoning: model.capabilities.reasoning,
         vision: Boolean(mmproj),
         sampling: model.sampling,
@@ -255,7 +258,8 @@ export function createLocalModelsController(options: { userDataPath: string; log
   /** First run: the fastest drive with the most free space, at a short Latin path such as D:\Unvara\models. */
   function chooseModelsDir(system: SystemInfo) {
     const drive = bestModelsDrive(system.disks)
-    const modelsDir = drive && process.platform === "win32" ? `${drive.letter}:\\Unvara\\models` : join(localRoot, "models")
+    const modelsDir =
+      drive && process.platform === "win32" ? `${drive.letter}:\\Unvara\\models` : join(localRoot, "models")
     return updateSettings({ modelsDir }).modelsDir
   }
 
@@ -292,7 +296,11 @@ function upgradeCandidates(preferred: EngineBackend, current: EngineBackend): En
 
 function readSettings(file: string): LocalModelsSettings {
   const text = readText(file)
-  return { modelsDir: "", mirror: "https://huggingface.co", ...(text ? (JSON.parse(text) as Partial<LocalModelsSettings>) : {}) }
+  return {
+    modelsDir: "",
+    mirror: "https://huggingface.co",
+    ...(text ? (JSON.parse(text) as Partial<LocalModelsSettings>) : {}),
+  }
 }
 
 function freePort() {

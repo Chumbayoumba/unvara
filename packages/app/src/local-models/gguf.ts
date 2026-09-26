@@ -31,8 +31,17 @@ const enum Type {
 }
 
 const SIZE: Partial<Record<Type, number>> = {
-  [Type.U8]: 1, [Type.I8]: 1, [Type.BOOL]: 1, [Type.U16]: 2, [Type.I16]: 2, [Type.U32]: 4, [Type.I32]: 4,
-  [Type.F32]: 4, [Type.U64]: 8, [Type.I64]: 8, [Type.F64]: 8,
+  [Type.U8]: 1,
+  [Type.I8]: 1,
+  [Type.BOOL]: 1,
+  [Type.U16]: 2,
+  [Type.I16]: 2,
+  [Type.U32]: 4,
+  [Type.I32]: 4,
+  [Type.F32]: 4,
+  [Type.U64]: 8,
+  [Type.I64]: 8,
+  [Type.F64]: 8,
 }
 
 class NeedMore extends Error {}
@@ -142,7 +151,8 @@ export function ggufShape(metadata: Record<string, unknown>, params: { total: nu
   const cached = Array.from({ length: layers - Number(read("attention.shared_kv_layers") ?? 0) }, (_, index) => ({
     index,
     kv: Number(Array.isArray(kv) ? kv[index] : (kv ?? headCount)),
-    windowed: window > 0 && (Array.isArray(pattern) ? pattern[index] === true : every ? index % every < every - 1 : false),
+    windowed:
+      window > 0 && (Array.isArray(pattern) ? pattern[index] === true : every ? index % every < every - 1 : false),
     // Hybrid archs (Qwen3.5+) interleave linear-attention layers that keep no KV cache.
     linear: interval > 1 && (index + 1) % interval !== 0,
   })).filter((layer) => layer.kv > 0 && !layer.linear)

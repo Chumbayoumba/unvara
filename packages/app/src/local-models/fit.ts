@@ -143,8 +143,16 @@ function place(
 
   if (vram > 0 && need <= vram) {
     const ratio = need / vram
-    return { ...base, mode: "gpu", gpuLayers: shape.layers, ratio, ram: 0, vram: need, tier: ratio <= 0.85 ? "ideal" : "good",
-      tokensPerSecond: speed(perToken, 0, hardware) }
+    return {
+      ...base,
+      mode: "gpu",
+      gpuLayers: shape.layers,
+      ratio,
+      ram: 0,
+      vram: need,
+      tier: ratio <= 0.85 ? "ideal" : "good",
+      tokensPerSecond: speed(perToken, 0, hardware),
+    }
   }
 
   // MoE: attention, KV and as many experts as fit stay on the GPU; the rest of the experts live in RAM.
@@ -155,28 +163,53 @@ function place(
     if (onGpu > 0 && inRam <= ram) {
       const cpuShare = inRam / weights
       const tokensPerSecond = speed(perToken * (1 - cpuShare), perToken * cpuShare, hardware)
-      return { ...base, mode: "moe-offload", gpuLayers: shape.layers, ratio: inRam / Math.max(ram, 1), ram: inRam,
-        vram: need - inRam, tier: tokensPerSecond >= 8 ? "good" : "slow", tokensPerSecond }
+      return {
+        ...base,
+        mode: "moe-offload",
+        gpuLayers: shape.layers,
+        ratio: inRam / Math.max(ram, 1),
+        ram: inRam,
+        vram: need - inRam,
+        tier: tokensPerSecond >= 8 ? "good" : "slow",
+        tokensPerSecond,
+      }
     }
   }
 
   // Dense hybrid: whole layers (with their KV) on the GPU, the rest on the CPU.
   const layerSize = weights / (shape.layers + 2)
   const kvPerLayer = kv / shape.layers
-  const gpuLayers = vram > 0 ? Math.min(shape.layers, Math.floor((vram - COMPUTE_BUFFER) / (layerSize + kvPerLayer))) : 0
+  const gpuLayers =
+    vram > 0 ? Math.min(shape.layers, Math.floor((vram - COMPUTE_BUFFER) / (layerSize + kvPerLayer))) : 0
   if (gpuLayers >= 1) {
     const gpuShare = gpuLayers / shape.layers
     const inRam = (weights + kv) * (1 - gpuShare)
     if (inRam <= ram) {
       const tokensPerSecond = speed(perToken * gpuShare, perToken * (1 - gpuShare), hardware)
-      return { ...base, mode: "hybrid", gpuLayers, ratio: inRam / Math.max(ram, 1), ram: inRam, vram: need - inRam,
-        tier: gpuShare >= 0.7 && tokensPerSecond >= 8 ? "good" : "slow", tokensPerSecond }
+      return {
+        ...base,
+        mode: "hybrid",
+        gpuLayers,
+        ratio: inRam / Math.max(ram, 1),
+        ram: inRam,
+        vram: need - inRam,
+        tier: gpuShare >= 0.7 && tokensPerSecond >= 8 ? "good" : "slow",
+        tokensPerSecond,
+      }
     }
   }
 
   if (need <= ram) {
-    return { ...base, mode: "cpu", gpuLayers: 0, ratio: need / Math.max(ram, 1), ram: need, vram: 0, tier: "slow",
-      tokensPerSecond: speed(0, perToken, hardware) }
+    return {
+      ...base,
+      mode: "cpu",
+      gpuLayers: 0,
+      ratio: need / Math.max(ram, 1),
+      ram: need,
+      vram: 0,
+      tier: "slow",
+      tokensPerSecond: speed(0, perToken, hardware),
+    }
   }
 
   // Doesn't fit in VRAM + RAM: llama.cpp can still mmap the file and stream the rest from a fast SSD.
@@ -185,8 +218,16 @@ function place(
     const resident = Math.max(0, ram + vram - kv - COMPUTE_BUFFER)
     const streamed = Math.max(0, perToken - resident * activeShare)
     const ssd = (disk.kind === "nvme" ? 3 : 0.5) * GIB
-    return { ...base, mode: "ssd", gpuLayers: 0, ratio: 0, ram, vram: 0, tier: "extreme",
-      tokensPerSecond: 1 / (streamed / ssd + perToken / bandwidth(hardware, "ram")) }
+    return {
+      ...base,
+      mode: "ssd",
+      gpuLayers: 0,
+      ratio: 0,
+      ram,
+      vram: 0,
+      tier: "extreme",
+      tokensPerSecond: 1 / (streamed / ssd + perToken / bandwidth(hardware, "ram")),
+    }
   }
 
   return { ...base, mode: "none", gpuLayers: 0, ratio: 0, ram: 0, vram: 0, tier: "wont-run", tokensPerSecond: 0 }
@@ -225,7 +266,8 @@ function halvings(from: number, floor: number) {
 export function score(fit: Fit, model: { paramsActiveB: number; quant: string }, targetContext: number) {
   if (fit.tier === "wont-run") return 0
   const params = model.paramsActiveB
-  const base = params < 1 ? 30 : params < 3 ? 45 : params < 7 ? 60 : params < 10 ? 75 : params < 20 ? 82 : params < 40 ? 89 : 95
+  const base =
+    params < 1 ? 30 : params < 3 ? 45 : params < 7 ? 60 : params < 10 ? 75 : params < 20 ? 82 : params < 40 ? 89 : 95
   const quality = Math.max(0, base + qualityPenalty(model.quant))
   const speedScore = Math.min(100, (fit.tokensPerSecond / COMFORT_SPEED) * 100)
   const fitScore = fit.ratio <= 0.7 ? 100 : 100 * Math.exp(-0.5 * ((fit.ratio - 0.7) / 0.2) ** 2)

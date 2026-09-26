@@ -109,10 +109,21 @@ export function UnvaraSidebar(props: { onCollapse: () => void; header: JSX.Eleme
       </nav>
 
       <div class="uv-scroll mt-2 flex min-h-0 flex-1 flex-col overflow-y-auto px-2 pb-2">
-        <Group label={language.t("unvara.sidebar.projects")} actionLabel={language.t("unvara.sidebar.addProject")} onAction={addProject}>
+        <Group
+          label={language.t("unvara.sidebar.projects")}
+          actionLabel={language.t("unvara.sidebar.addProject")}
+          onAction={addProject}
+        >
           <For
             each={home.project.list()}
-            fallback={<Row icon={<UvIcon.FolderPlus />} label={language.t("unvara.sidebar.addProject")} muted onClick={addProject} />}
+            fallback={
+              <Row
+                icon={<UvIcon.FolderPlus />}
+                label={language.t("unvara.sidebar.addProject")}
+                muted
+                onClick={addProject}
+              />
+            }
           >
             {(project) => (
               <Row
@@ -128,7 +139,12 @@ export function UnvaraSidebar(props: { onCollapse: () => void; header: JSX.Eleme
         </Group>
 
         <Group label={language.t("unvara.sidebar.recents")}>
-          <For each={recents()} fallback={<p class="px-2.5 py-1.5 text-[13px] text-v2-text-text-faint">{language.t("unvara.sidebar.empty")}</p>}>
+          <For
+            each={recents()}
+            fallback={
+              <p class="px-2.5 py-1.5 text-[13px] text-v2-text-text-faint">{language.t("unvara.sidebar.empty")}</p>
+            }
+          >
             {(record) => (
               <Row
                 label={record.session.title || language.t("command.session.new")}

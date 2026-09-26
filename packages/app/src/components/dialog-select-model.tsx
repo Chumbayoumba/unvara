@@ -25,6 +25,7 @@ import { matchesModelSearch } from "./dialog-select-model-search"
 import { useNavigate } from "@solidjs/router"
 import { usePlatform } from "@/context/platform"
 import { UvIcon } from "@/pages/unvara/icons"
+import { LOCAL_PROVIDER_ID } from "@/local-models/types"
 
 const isFree = (provider: string, cost: { input: number } | undefined) =>
   provider === "opencode" && (!cost || cost.input === 0)
@@ -35,11 +36,10 @@ type ModelItem = ReturnType<ModelState["list"]>[number]
 const modelKey = (model: ModelItem) => `${model.provider.id}:${model.id}`
 const manageKey = "action:manage"
 const moreKey = "action:more"
-// Unvara's own llama.cpp provider: local models always come before cloud ones.
-const LOCAL_PROVIDER = "unvara"
 
 const sortModelGroups = (a: { category: string; items: ModelItem[] }, b: { category: string; items: ModelItem[] }) => {
-  if ((a.category === LOCAL_PROVIDER) !== (b.category === LOCAL_PROVIDER)) return a.category === LOCAL_PROVIDER ? -1 : 1
+  if ((a.category === LOCAL_PROVIDER_ID) !== (b.category === LOCAL_PROVIDER_ID))
+    return a.category === LOCAL_PROVIDER_ID ? -1 : 1
   const aIndex = popularProviders.indexOf(a.category)
   const bIndex = popularProviders.indexOf(b.category)
   const aPopular = aIndex >= 0
@@ -82,7 +82,8 @@ const ModelList: Component<{
       sortGroupsBy={(a, b) => {
         const aProvider = a.items[0].provider.id
         const bProvider = b.items[0].provider.id
-        if ((aProvider === LOCAL_PROVIDER) !== (bProvider === LOCAL_PROVIDER)) return aProvider === LOCAL_PROVIDER ? -1 : 1
+        if ((aProvider === LOCAL_PROVIDER_ID) !== (bProvider === LOCAL_PROVIDER_ID))
+          return aProvider === LOCAL_PROVIDER_ID ? -1 : 1
         if (popularProviders.includes(aProvider) && !popularProviders.includes(bProvider)) return -1
         if (!popularProviders.includes(aProvider) && popularProviders.includes(bProvider)) return 1
         return popularProviders.indexOf(aProvider) - popularProviders.indexOf(bProvider)

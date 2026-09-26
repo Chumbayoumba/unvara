@@ -27,7 +27,11 @@ export function fitModel(model: CatalogModel, hardware: HardwareProfile): ModelF
     const fit = planFit(model.shape, { size: quant.size, mmprojSize: model.mmproj?.size }, hardware, {
       targetContext: AGENT_CONTEXT,
     })
-    return { quant, fit, score: score(fit, { paramsActiveB: effectiveParams(model) / 1e9, quant: quant.quant }, AGENT_CONTEXT) }
+    return {
+      quant,
+      fit,
+      score: score(fit, { paramsActiveB: effectiveParams(model) / 1e9, quant: quant.quant }, AGENT_CONTEXT),
+    }
   })
   return { model, quants, best: bestQuant(model, quants) }
 }
@@ -71,20 +75,19 @@ function pick(fits: ModelFit[]): Picks {
   const fast = first(
     (capable.length ? capable : runs).toSorted((a, b) => b.best.fit.tokensPerSecond - a.best.fit.tokensPerSecond),
   )
-  const balanced = first(
-    runs.filter((item) => distinct(item, [fast])).toSorted((a, b) => b.best.score - a.best.score),
-  )
+  const balanced = first(runs.filter((item) => distinct(item, [fast])).toSorted((a, b) => b.best.score - a.best.score))
   const smartest = fits
     .filter((item) => distinct(item, [fast, balanced]) && usable(item))
     .toSorted((a, b) => effectiveParams(b.model) - effectiveParams(a.model))
-  const quality =
-    first(smartest.filter((item) => TIER_RANK[item.best.fit.tier] <= TIER_RANK.good)) ?? first(smartest)
+  const quality = first(smartest.filter((item) => TIER_RANK[item.best.fit.tier] <= TIER_RANK.good)) ?? first(smartest)
   return { fast, balanced, quality }
 }
 
 /** Not already picked, and not the official twin of a picked uncensored model (same base). */
 function distinct(item: ModelFit, picked: (ModelFit | undefined)[]) {
-  return !picked.some((other) => other && (other === item || (other.model.base && other.model.base === item.model.base)))
+  return !picked.some(
+    (other) => other && (other === item || (other.model.base && other.model.base === item.model.base)),
+  )
 }
 
 function usable(item: ModelFit) {

@@ -55,7 +55,7 @@ export default function UnvaraLayout(props: ParentProps) {
       data-component="unvara-shell"
       class="relative flex min-h-0 min-w-0 flex-1 flex-row bg-v2-background-bg-base text-v2-text-text-base select-none [&_input]:select-text [&_textarea]:select-text [&_[contenteditable]]:select-text"
     >
-      <div classList={{ "hidden": state.collapsed, "flex h-full": !state.collapsed }}>
+      <div classList={{ hidden: state.collapsed, "flex h-full": !state.collapsed }}>
         <UnvaraSidebar
           onCollapse={() => setState("collapsed", true)}
           header={

@@ -159,14 +159,20 @@ export function UnvaraHub() {
               <div class="flex flex-col gap-3">
                 <For
                   each={state()?.models ?? []}
-                  fallback={<p class="text-[14px] text-v2-text-text-faint">{language.t("unvara.hub.empty.installed")}</p>}
+                  fallback={
+                    <p class="text-[14px] text-v2-text-text-faint">{language.t("unvara.hub.empty.installed")}</p>
+                  }
                 >
                   {(model) => (
                     <div class={`${CARD} flex items-center gap-4 p-4`}>
                       <div class="flex min-w-0 flex-1 flex-col gap-1">
                         <span class="text-[15px] font-[500] text-v2-text-text-base">{model.name}</span>
                         <span class="truncate text-[12.5px] text-v2-text-text-faint">
-                          {[model.size ? formatSize(language.intl(), model.size) : undefined, contextLabel(model.context), model.path]
+                          {[
+                            model.size ? formatSize(language.intl(), model.size) : undefined,
+                            contextLabel(model.context),
+                            model.path,
+                          ]
                             .filter(Boolean)
                             .join(" · ")}
                         </span>
@@ -174,7 +180,10 @@ export function UnvaraHub() {
                       <Show
                         when={ui.confirm === model.id}
                         fallback={
-                          <IconButton label={language.t("unvara.hub.action.remove")} onClick={() => setUi("confirm", model.id)}>
+                          <IconButton
+                            label={language.t("unvara.hub.action.remove")}
+                            onClick={() => setUi("confirm", model.id)}
+                          >
                             <UvIcon.Trash />
                           </IconButton>
                         }
@@ -197,7 +206,11 @@ export function UnvaraHub() {
                   )}
                 </For>
                 <Show when={state()?.settings.modelsDir}>
-                  {(dir) => <p class="text-[12.5px] text-v2-text-text-faint">{language.t("unvara.hub.location", { path: dir() })}</p>}
+                  {(dir) => (
+                    <p class="text-[12.5px] text-v2-text-text-faint">
+                      {language.t("unvara.hub.location", { path: dir() })}
+                    </p>
+                  )}
                 </Show>
               </div>
             </Match>
@@ -206,7 +219,9 @@ export function UnvaraHub() {
               <div class="flex flex-col gap-3">
                 <For
                   each={state()?.downloads.toReversed() ?? []}
-                  fallback={<p class="text-[14px] text-v2-text-text-faint">{language.t("unvara.hub.empty.downloads")}</p>}
+                  fallback={
+                    <p class="text-[14px] text-v2-text-text-faint">{language.t("unvara.hub.empty.downloads")}</p>
+                  }
                 >
                   {(job) => <DownloadRow job={job} />}
                 </For>
@@ -321,7 +336,10 @@ function CatalogRow(props: { item: ModelFit; open: boolean; onToggle: () => void
               onClick={props.onToggle}
             >
               {language.t("unvara.hub.action.details")}
-              <UvIcon.ChevronDown size={14} class={props.open ? "rotate-180 transition-transform" : "transition-transform"} />
+              <UvIcon.ChevronDown
+                size={14}
+                class={props.open ? "rotate-180 transition-transform" : "transition-transform"}
+              />
             </button>
           </div>
           <CloseAppsHint fit={best().fit} />
@@ -354,7 +372,9 @@ function CatalogRow(props: { item: ModelFit; open: boolean; onToggle: () => void
                     <TierPill tier={quant.fit.tier} />
                   </td>
                   <td class="px-2 py-2">
-                    <Show when={quant.fit.tier !== "wont-run"}>{formatTokens(language, quant.fit.tokensPerSecond)}</Show>
+                    <Show when={quant.fit.tier !== "wont-run"}>
+                      {formatTokens(language, quant.fit.tokensPerSecond)}
+                    </Show>
                   </td>
                   <td class="px-4 py-2 text-right">
                     <ModelAction model={props.item.model} quant={quant.quant.quant} compact />
@@ -382,7 +402,11 @@ function ModelAction(props: { model: CatalogModel; quant: string; primary?: bool
   return (
     <Switch
       fallback={
-        <Button primary={props.primary} compact={props.compact} onClick={() => void local.api?.download(props.model.id, props.quant)}>
+        <Button
+          primary={props.primary}
+          compact={props.compact}
+          onClick={() => void local.api?.download(props.model.id, props.quant)}
+        >
           <UvIcon.Download size={16} />
           <Show when={!props.compact}>{language.t("unvara.hub.action.download")}</Show>
         </Button>
@@ -398,7 +422,10 @@ function ModelAction(props: { model: CatalogModel; quant: string; primary?: bool
         {(job) => (
           <span class="inline-flex items-center gap-2 text-[12.5px] text-v2-text-text-muted">
             <span class="relative h-1.5 w-16 overflow-hidden rounded-full bg-v2-background-bg-layer-02">
-              <span class="absolute inset-y-0 left-0 rounded-full bg-(--uv-ember)" style={{ width: `${percent(job())}%` }} />
+              <span
+                class="absolute inset-y-0 left-0 rounded-full bg-(--uv-ember)"
+                style={{ width: `${percent(job())}%` }}
+              />
             </span>
             {percent(job())}%
           </span>
@@ -417,7 +444,10 @@ function DownloadRow(props: { job: DownloadJob }) {
     if (job.status === "failed") return language.t(`unvara.hub.error.${job.error?.code ?? "unknown"}`)
     if (job.status === "downloading")
       return [
-        language.t("unvara.hub.progress", { received: formatSize(intl(), job.received), total: formatSize(intl(), job.total) }),
+        language.t("unvara.hub.progress", {
+          received: formatSize(intl(), job.received),
+          total: formatSize(intl(), job.total),
+        }),
         job.speed ? formatSpeed(intl(), job.speed) : undefined,
         job.speed ? eta(job) : undefined,
       ]
@@ -463,7 +493,10 @@ function DownloadRow(props: { job: DownloadJob }) {
       </div>
       <div class="flex shrink-0 items-center gap-0.5">
         <Show when={props.job.status === "downloading" || props.job.status === "queued"}>
-          <IconButton label={language.t("unvara.hub.action.pause")} onClick={() => void local.api?.pauseDownload(props.job.id)}>
+          <IconButton
+            label={language.t("unvara.hub.action.pause")}
+            onClick={() => void local.api?.pauseDownload(props.job.id)}
+          >
             <UvIcon.Pause />
           </IconButton>
         </Show>
@@ -476,7 +509,10 @@ function DownloadRow(props: { job: DownloadJob }) {
           </IconButton>
         </Show>
         <Show when={props.job.status !== "installing"}>
-          <IconButton label={language.t("unvara.hub.action.cancel")} onClick={() => void local.api?.cancelDownload(props.job.id)}>
+          <IconButton
+            label={language.t("unvara.hub.action.cancel")}
+            onClick={() => void local.api?.cancelDownload(props.job.id)}
+          >
             <UvIcon.Close />
           </IconButton>
         </Show>

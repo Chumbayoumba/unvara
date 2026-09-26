@@ -6,7 +6,8 @@ import { Icon } from "@opencode-ai/ui/v2/icon"
 import { KeybindV2 } from "@opencode-ai/ui/v2/keybind-v2"
 import { TooltipV2 } from "@opencode-ai/ui/v2/tooltip-v2"
 import type { ReferenceInfo } from "@opencode-ai/sdk/v2/client"
-import { createEffect, createMemo, on, Show } from "solid-js"
+import { createEffect, createMemo, For, on, Show } from "solid-js"
+import { useLocal } from "@/context/local"
 import { ModelSelectorPopoverV2 } from "@/components/dialog-select-model"
 import { DialogSelectModelUnpaidV2 } from "@/components/dialog-select-model-unpaid-v2"
 import type { PromptInputProps } from "@/components/prompt-input/contracts"
@@ -59,22 +60,68 @@ export function PromptInputV2Composer(props: PromptInputV2ComposerProps) {
         attachKeybind={command.keybindParts("file.attach")}
         attachShortcut={command.keybind("file.attach")}
         modelControl={
-          <PromptInputV2ModelControl
-            loading={props.controller.model.loading}
-            paid={props.controller.model.paid}
-            title={language.t("command.model.choose")}
-            keybind={command.keybindParts("model.choose")}
-            model={props.controller.model.selection}
-            providerID={props.controller.model.selection.current()?.provider?.id}
-            modelName={props.controller.model.selection.current()?.name ?? language.t("dialog.model.select.title")}
-            onClose={props.controller.restoreFocus}
-            onUnpaidClick={() =>
-              dialog.show(() => <DialogSelectModelUnpaidV2 model={props.controller.model.selection} />)
-            }
-          />
+          <>
+            <ModeToggle model={props.controller.model.selection} />
+            <PromptInputV2ModelControl
+              loading={props.controller.model.loading}
+              paid={props.controller.model.paid}
+              title={language.t("command.model.choose")}
+              keybind={command.keybindParts("model.choose")}
+              model={props.controller.model.selection}
+              providerID={props.controller.model.selection.current()?.provider?.id}
+              modelName={props.controller.model.selection.current()?.name ?? language.t("dialog.model.select.title")}
+              onClose={props.controller.restoreFocus}
+              onUnpaidClick={() =>
+                dialog.show(() => <DialogSelectModelUnpaidV2 model={props.controller.model.selection} />)
+              }
+            />
+          </>
         }
       />
     </div>
+  )
+}
+
+const MODES = [
+  { agent: "chat", label: "unvara.mode.chat", hint: "unvara.mode.chat.hint" },
+  { agent: "build", label: "unvara.mode.agent", hint: "unvara.mode.agent.hint" },
+] as const
+
+/** Chat / Agent switch shown instead of the agent picker when there are no custom agents. */
+function ModeToggle(props: { model: PromptInputProps["controls"]["model"]["selection"] }) {
+  const local = useLocal()
+  const language = useLanguage()
+  const current = () => {
+    const model = props.model.current()
+    return local.agent.current(model ? { providerID: model.provider.id, modelID: model.id } : undefined)?.name
+  }
+  return (
+    <Show when={!local.agent.visible() && local.agent.list().some((agent) => agent.name === "chat")}>
+      <div
+        role="radiogroup"
+        class="flex h-7 shrink-0 items-center rounded-(--uv-radius) bg-v2-background-bg-layer-02 p-0.5 text-[12.5px]"
+      >
+        <For each={MODES}>
+          {(mode) => (
+            <button
+              type="button"
+              role="radio"
+              aria-checked={current() === mode.agent}
+              title={language.t(mode.hint)}
+              class="h-6 rounded-(--uv-radius-xs) px-2.5 transition-colors duration-(--uv-dur-fast)"
+              classList={{
+                "bg-v2-background-bg-base text-v2-text-text-base shadow-[0_0_0_1px_var(--v2-border-border-muted)]":
+                  current() === mode.agent,
+                "text-v2-text-text-faint hover:text-v2-text-text-muted": current() !== mode.agent,
+              }}
+              onClick={() => local.agent.set(mode.agent)}
+            >
+              {language.t(mode.label)}
+            </button>
+          )}
+        </For>
+      </div>
+    </Show>
   )
 }
 
