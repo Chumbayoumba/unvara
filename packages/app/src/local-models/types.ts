@@ -75,6 +75,8 @@ export type RouterState =
 
 export type LocalModelsState = {
   engine: EngineState
+  /** A faster backend (e.g. CUDA) being provisioned while the current engine keeps serving. */
+  engineUpgrade?: EngineState
   router: RouterState
   models: LocalModel[]
   system?: SystemInfo
