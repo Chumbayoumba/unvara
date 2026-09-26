@@ -202,8 +202,13 @@ const main = Effect.gen(function* () {
   app.commandLine.appendSwitch("proxy-bypass-list", "<-loopback>")
   const features = app.commandLine.getSwitchValue("enable-features")
   app.commandLine.appendSwitch("enable-features", features ? `${jsCallStackFeature},${features}` : jsCallStackFeature)
-  // 9222 is Chrome's default debugging port and is often already taken by the user's browser.
-  if (!app.isPackaged) app.commandLine.appendSwitch("remote-debugging-port", "9333")
+  // Fixed ports clash with the user's browser (9222) or WSL mirrored networking; with 0 Chromium picks a free
+  // port and writes it to <userData>/DevToolsActivePort.
+  if (!app.isPackaged) {
+    app.commandLine.appendSwitch("remote-debugging-port", "0")
+    // Keep painting while other windows cover it, so dev tooling can screenshot without raising the window.
+    app.commandLine.appendSwitch("disable-features", "CalculateNativeWinOcclusion")
+  }
 
   if (!app.requestSingleInstanceLock()) {
     app.quit()

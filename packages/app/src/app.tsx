@@ -57,6 +57,7 @@ import { SettingsProvider, useSettings } from "@/context/settings"
 import { TabsProvider, useTabs, type DraftTab } from "@/context/tabs"
 import { SDKProvider, useSDK } from "@/context/sdk"
 import { WslServersProvider } from "@/wsl/context"
+import { LocalModelsProvider } from "@/local-models/context"
 import DirectoryLayout, { DirectoryDataProvider } from "@/pages/directory-layout"
 import LegacyLayout from "@/pages/layout"
 import UnvaraLayout from "@/pages/unvara/layout"
@@ -67,6 +68,7 @@ import { createSessionLineage } from "@/pages/session/session-lineage"
 
 import { SessionPage, SessionRouteErrorBoundary, TargetSessionRouteContent } from "@/pages/session"
 import { UnvaraHome } from "@/pages/unvara/home"
+import { UnvaraHub } from "@/pages/unvara/hub"
 import { LegacyHome } from "@/pages/home/legacy-home"
 
 const NewSession = lazy(() => import("@/pages/new-session"))
@@ -414,9 +416,11 @@ export function AppBaseProviders(
             >
               <QueryProvider>
                 <WslServersProvider>
-                  <DialogProvider>
-                    <FileComponentProvider component={File}>{props.children}</FileComponentProvider>
-                  </DialogProvider>
+                  <LocalModelsProvider>
+                    <DialogProvider>
+                      <FileComponentProvider component={File}>{props.children}</FileComponentProvider>
+                    </DialogProvider>
+                  </LocalModelsProvider>
                 </WslServersProvider>
               </QueryProvider>
             </ErrorBoundary>
@@ -637,6 +641,7 @@ function Routes(props: { serverScoped?: JSX.Element }) {
       </Route>
       <Show when={settings.general.newLayoutDesigns()}>
         <Route path="/" component={UnvaraHome} />
+        <Route path="/models" component={UnvaraHub} />
         <Route path="/:dir/session/:id" component={NewLayoutLegacySessionRedirect} />
         <Route path="/server/:serverKey/session/:id" component={TargetSessionRoute} />
       </Show>

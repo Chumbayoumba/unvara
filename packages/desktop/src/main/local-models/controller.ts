@@ -1,14 +1,30 @@
 import { randomUUID } from "node:crypto"
-import { mkdirSync } from "node:fs"
+import { mkdirSync, rmSync } from "node:fs"
 import { createServer } from "node:net"
-import { join } from "node:path"
+import { isAbsolute, join } from "node:path"
 import { net } from "electron"
-import type { EngineBackend, GpuInfo, LocalModel, LocalModelsState } from "@opencode-ai/app/local-models/types"
+import { downloadUrl, type Catalog } from "@opencode-ai/app/local-models/catalog"
+import { hardwareProfile, planFit, primaryGpu } from "@opencode-ai/app/local-models/fit"
+import { AGENT_CONTEXT } from "@opencode-ai/app/local-models/recommend"
+import type {
+  DownloadJob,
+  EngineBackend,
+  GpuInfo,
+  LocalModel,
+  LocalModelsSettings,
+  LocalModelsState,
+  SystemInfo,
+} from "@opencode-ai/app/local-models/types"
+import bundledCatalog from "../../../../../catalog/catalog.json"
 import { localDataRoot } from "../paths"
+import { createDownloadQueue } from "./downloads"
 import { ENGINE_BUILD, engineDir, installedBackend, isInstalled, preferredBackend, provisionBackend } from "./engine"
-import { detectSystem, listEngineDevices, pickDevice, primaryGpu } from "./hardware"
-import { readManifest, writeManifest, writePresets } from "./presets"
+import { bestModelsDrive, detectSystem, listEngineDevices, pickDevice } from "./hardware"
+import { readManifest, readText, writeAtomic, writeManifest, writePresets } from "./presets"
 import { createRouter, type Router } from "./router"
+
+// The snapshot shipped with this build; a signed remote copy will replace it once releases publish one.
+const catalog = bundledCatalog as Catalog
 
 type Logger = (message: string, extra?: Record<string, unknown>, level?: "info" | "warn" | "error") => void
 
@@ -24,12 +40,25 @@ export function createLocalModelsController(options: { userDataPath: string; log
     presets: join(engineRoot, "models.ini"),
     pid: join(engineRoot, "router.pid"),
     cache: join(engineRoot, "cache"),
+    downloads: join(localRoot, "downloads.json"),
+    settings: join(localRoot, "settings.json"),
   }
   const state: LocalModelsState = {
     engine: { status: "absent" },
     router: { status: "stopped" },
     models: readManifest(files.manifest).models,
+    downloads: [],
+    settings: readSettings(files.settings),
   }
+  const queue = createDownloadQueue({
+    file: files.downloads,
+    fetch: net.fetch,
+    log: options.log,
+    onChange: (downloads) => emit({ downloads }),
+    install,
+    inUse: (path) => state.models.some((model) => [model.path, model.mmproj, ...(model.files ?? [])].includes(path)),
+  })
+  state.downloads = queue.jobs()
   const listeners = new Set<(state: LocalModelsState) => void>()
   const runtime = { router: undefined as Router | undefined, port: 0, apiKey: "" }
 
@@ -67,6 +96,9 @@ export function createLocalModelsController(options: { userDataPath: string; log
 
   async function start() {
     const system = await scanHardware()
+    if (!state.settings.modelsDir) chooseModelsDir(system)
+    // Downloads don't need the engine, so an interrupted one resumes even if the engine fails to start.
+    queue.start()
     const gpu = primaryGpu(system.gpus)
     const current = installedBackend(localRoot, gpu)
     await launch(current, gpu)
@@ -135,21 +167,109 @@ export function createLocalModelsController(options: { userDataPath: string; log
     }
   }
 
-  /** Registers (or replaces) a model and makes the router pick it up without a restart. */
-  async function upsertModel(model: LocalModel) {
-    const models = [...state.models.filter((item) => item.id !== model.id), model]
+  /** Writes the installed-models list and makes the router pick it up without a restart. */
+  async function saveModels(models: LocalModel[]) {
     writeManifest(files.manifest, { version: 1, models })
     emit({ models })
-    const device = state.engine.status === "ready" ? state.engine.device : undefined
-    writePresets(files.presets, models, device)
+    writePresets(files.presets, models, state.engine.status === "ready" ? state.engine.device : undefined)
     await runtime.router?.reload()
+  }
+
+  /** Queues a catalog model (all shards plus its vision projector); resolves with the job id. */
+  async function download(catalogId: string, quant: string) {
+    const model = catalog.models.find((item) => item.id === catalogId)
+    const choice = model?.quants.find((item) => item.quant === quant)
+    if (!model || !choice) throw new Error(`unknown catalog model ${catalogId}@${quant}`)
+    const modelsDir = state.settings.modelsDir || chooseModelsDir(state.system ?? (await scanHardware()))
+    // The projector goes last, so install() can tell it from the weights.
+    const files = [...choice.files, ...(model.mmproj ? [model.mmproj] : [])].map((file) => ({
+      url: downloadUrl(model.repo, file.name, state.settings.mirror),
+      dest: join(modelsDir, ...model.repo.split("/"), ...file.name.split("/")),
+      size: file.size,
+      sha256: file.sha256,
+    }))
+    return queue.add({ id: `${catalogId}@${quant}`, catalogId, quant, name: model.name, files })
+  }
+
+  /** Registers finished files as a model, with the context this PC can hold at agent size. */
+  async function install(job: DownloadJob) {
+    const model = catalog.models.find((item) => item.id === job.catalogId)
+    const choice = model?.quants.find((item) => item.quant === job.quant)
+    if (!model || !choice) throw new Error(`unknown catalog model ${job.id}`)
+    const system = state.system ?? (await scanHardware())
+    const fit = planFit(
+      model.shape,
+      { size: choice.size, mmprojSize: model.mmproj?.size },
+      hardwareProfile(system, preferredBackend(primaryGpu(system.gpus)), job.files[0].dest),
+      { targetContext: AGENT_CONTEXT },
+    )
+    // A model that doesn't fit is still registered: llama.cpp's --fit may cope, and the UI shows the tier.
+    const context = fit.mode === "none" ? Math.min(8192, model.contextMax) : fit.context
+    const mmproj = model.mmproj ? job.files.at(-1)?.dest : undefined
+    const id = `${model.id}-${job.quant.toLowerCase()}`
+    await saveModels([
+      ...state.models.filter((item) => item.id !== id),
+      {
+        id,
+        name: `${model.name} ${job.quant}`,
+        path: job.files[0].dest,
+        mmproj,
+        context,
+        output: Math.min(8192, Math.floor(context / 4)),
+        toolCall: model.capabilities.tools,
+        reasoning: model.capabilities.reasoning,
+        vision: Boolean(mmproj),
+        sampling: model.sampling,
+        overrides: fit.kvType === "q8_0" ? { "cache-type-k": "q8_0", "cache-type-v": "q8_0" } : undefined,
+        source: { catalogId: model.id, repo: model.repo, quant: job.quant },
+        files: job.files.map((file) => file.dest),
+        size: job.total,
+        installedAt: Date.now(),
+      },
+    ])
+    options.log("model installed", { id, context, kvType: fit.kvType, mode: fit.mode, tier: fit.tier })
+  }
+
+  async function removeModel(id: string) {
+    const model = state.models.find((item) => item.id === id)
+    if (!model) return
+    // Windows can't delete a file llama.cpp still has mapped.
+    if ("model" in state.router && state.router.model === id) await runtime.router?.unload(id)
+    const models = state.models.filter((item) => item.id !== id)
+    await saveModels(models)
+    const kept = new Set(models.flatMap((item) => [item.path, item.mmproj, ...(item.files ?? [])]))
+    ;(model.files ?? []).filter((file) => !kept.has(file)).forEach((file) => rmSync(file, { force: true }))
+    if (model.source) queue.cancel(`${model.source.catalogId}@${model.source.quant}`)
+  }
+
+  function updateSettings(patch: Partial<LocalModelsSettings>) {
+    const settings = { ...state.settings, ...patch }
+    // llama.cpp on Windows opens files through the ANSI code page, so model folders must stay ASCII.
+    if (!/^[\x20-\x7e]+$/.test(settings.modelsDir) || !isAbsolute(settings.modelsDir))
+      throw new Error(`models folder must be an absolute ASCII path: ${settings.modelsDir}`)
+    writeAtomic(files.settings, JSON.stringify(settings, null, 2))
+    emit({ settings })
+    return settings
+  }
+
+  /** First run: the fastest drive with the most free space, at a short Latin path such as D:\Unvara\models. */
+  function chooseModelsDir(system: SystemInfo) {
+    const drive = bestModelsDrive(system.disks)
+    const modelsDir = drive && process.platform === "win32" ? `${drive.letter}:\\Unvara\\models` : join(localRoot, "models")
+    return updateSettings({ modelsDir }).modelsDir
   }
 
   return {
     prepare,
     start,
     scanHardware,
-    upsertModel,
+    download,
+    removeModel,
+    updateSettings,
+    getCatalog: () => catalog,
+    pauseDownload: queue.pause,
+    resumeDownload: queue.resume,
+    cancelDownload: queue.cancel,
     stopSync: () => runtime.router?.stopSync(),
     load: (model: string) => runtime.router?.load(model),
     getState: () => state,
@@ -168,6 +288,11 @@ function upgradeCandidates(preferred: EngineBackend, current: EngineBackend): En
   if (preferred === "cuda-13.4") return current === "cuda-12.4" ? [] : ["cuda-13.4", "cuda-12.4"]
   if (preferred === "cuda-12.4") return ["cuda-12.4"]
   return []
+}
+
+function readSettings(file: string): LocalModelsSettings {
+  const text = readText(file)
+  return { modelsDir: "", mirror: "https://huggingface.co", ...(text ? (JSON.parse(text) as Partial<LocalModelsSettings>) : {}) }
 }
 
 function freePort() {

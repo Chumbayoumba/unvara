@@ -50,14 +50,14 @@ function section(name: string, values: Record<string, string | number | boolean>
   return [`[${name}]`, ...lines, ""].join("\n")
 }
 
-function writeAtomic(file: string, text: string) {
+export function writeAtomic(file: string, text: string) {
   mkdirSync(dirname(file), { recursive: true })
   const temp = `${file}.${process.pid}.tmp`
   writeFileSync(temp, text, "utf8")
   renameSync(temp, file)
 }
 
-function readText(file: string) {
+export function readText(file: string) {
   try {
     return readFileSync(file, "utf8")
   } catch {

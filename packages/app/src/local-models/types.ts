@@ -1,4 +1,5 @@
 /** Shared between the Electron main process (engine, router, downloads) and the app UI. */
+import type { Catalog } from "./catalog"
 
 export type EngineBackend = "cpu" | "vulkan" | "cuda-12.4" | "cuda-13.4"
 
@@ -51,6 +52,13 @@ export type LocalModel = {
   sampling?: { temperature?: number; topK?: number; topP?: number; minP?: number }
   /** Advanced overrides written verbatim into the router preset section. */
   overrides?: Record<string, string | number | boolean>
+  /** Where it came from, for models installed from the catalog. */
+  source?: { catalogId: string; repo: string; quant: string }
+  /** Files Unvara downloaded for it (shards + projector); deleted with the model. Imported models have none. */
+  files?: string[]
+  /** Bytes on disk (weights + projector). */
+  size?: number
+  installedAt?: number
 }
 
 /** `models.json` in the engine folder: the single source for the router presets and the OpenCode plugin. */
@@ -73,12 +81,45 @@ export type RouterState =
   | { status: "crashed"; reason: string }
   | { status: "restarting"; attempt: number }
 
+export type DownloadStatus = "queued" | "downloading" | "paused" | "installing" | "done" | "failed"
+
+/** Codes, not messages: the UI turns them into translated text. */
+export type DownloadError = { code: "disk-full" | "integrity" | "network" | "install" | "unknown"; detail?: string }
+
+export type DownloadFile = { url: string; dest: string; size: number; sha256: string }
+
+/** One model download (all shards plus the vision projector); the queue survives restarts. */
+export type DownloadJob = {
+  /** `<catalogId>@<quant>` */
+  id: string
+  catalogId: string
+  quant: string
+  name: string
+  files: DownloadFile[]
+  total: number
+  received: number
+  /** Smoothed bytes per second while downloading. */
+  speed: number
+  status: DownloadStatus
+  error?: DownloadError
+  createdAt: number
+}
+
+export type LocalModelsSettings = {
+  /** Folder for model files; `<modelsDir>/<publisher>/<repo>/<file>.gguf`. Latin-only path. */
+  modelsDir: string
+  /** Hugging Face endpoint (https://huggingface.co or a mirror such as https://hf-mirror.com). */
+  mirror: string
+}
+
 export type LocalModelsState = {
   engine: EngineState
   /** A faster backend (e.g. CUDA) being provisioned while the current engine keeps serving. */
   engineUpgrade?: EngineState
   router: RouterState
   models: LocalModel[]
+  downloads: DownloadJob[]
+  settings: LocalModelsSettings
   system?: SystemInfo
 }
 
@@ -87,4 +128,13 @@ export type LocalModelsPlatform = {
   getState: () => Promise<LocalModelsState>
   subscribe: (callback: (state: LocalModelsState) => void) => () => void
   scanHardware: () => Promise<SystemInfo>
+  getCatalog: () => Promise<Catalog>
+  /** Queues a catalog model; resolves with the job id. */
+  download: (catalogId: string, quant: string) => Promise<string>
+  pauseDownload: (id: string) => Promise<void>
+  resumeDownload: (id: string) => Promise<void>
+  /** Stops and deletes partial files; for finished jobs only clears the entry. */
+  cancelDownload: (id: string) => Promise<void>
+  removeModel: (id: string) => Promise<void>
+  updateSettings: (patch: Partial<LocalModelsSettings>) => Promise<LocalModelsSettings>
 }

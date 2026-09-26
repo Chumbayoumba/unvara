@@ -5,14 +5,19 @@
  */
 import { gpuBandwidth } from "./gpu-bandwidth"
 import { qualityPenalty } from "./quant"
-import type { EngineBackend } from "./types"
+import type { EngineBackend, GpuInfo, SystemInfo } from "./types"
 
 const GIB = 1024 ** 3
 const VRAM_RESERVE = 1 * GIB // = llama.cpp --fit-target default
+const DESKTOP_VRAM = 1 * GIB
 const RAM_RESERVE = 2 * GIB
 const COMPUTE_BUFFER = 0.5 * GIB
 const EFFICIENCY = 0.55 // llmfit: achieved share of theoretical bandwidth
 const MIN_CONTEXT = 4096
+const COMFORT_CONTEXT = 8192
+const MODE_ORDER = ["gpu", "moe-offload", "hybrid", "cpu", "ssd"] as const
+// Faster than reading speed adds little, so the score's speed term saturates here (llmfit uses 40).
+const COMFORT_SPEED = 20
 
 export type HardwareProfile = {
   gpu?: { name: string; vram: number; vramFree?: number; backend: EngineBackend }
@@ -55,6 +60,9 @@ export type Fit = {
   tokensPerSecond: number
   /** need / usable budget of the limiting pool; 0 when nothing fits. */
   ratio: number
+  /** Bytes that must sit in system RAM / on the GPU, so the UI can ask to close apps when either is short now. */
+  ram: number
+  vram: number
 }
 
 export function kvBytesPerToken(shape: ModelShape, kvType: KvType) {
@@ -83,17 +91,33 @@ export function planFit(
   const attempts = contexts.flatMap((context) =>
     (["f16", "q8_0"] as const).map((kvType) => place(shape, file, hardware, context, kvType)),
   )
-  // Best placement wins; among equals prefer the larger context, then f16 KV.
+  // Best placement wins; among equals prefer the larger context, then f16 KV. A context below 8k is too short
+  // for real use, so it only counts when nothing fits at 8k or more.
+  const byMode = (fits: Fit[]) => MODE_ORDER.map((mode) => fits.find((fit) => fit.mode === mode)).find(Boolean)
   const best =
-    attempts.find((fit) => fit.mode === "gpu") ??
-    attempts.find((fit) => fit.mode === "moe-offload") ??
-    attempts.find((fit) => fit.mode === "hybrid") ??
-    attempts.find((fit) => fit.mode === "cpu") ??
-    attempts.find((fit) => fit.mode === "ssd") ??
+    byMode(attempts.filter((fit) => fit.context >= Math.min(COMFORT_CONTEXT, target))) ??
+    byMode(attempts) ??
     attempts[attempts.length - 1]
   // A model that only fits by shrinking the context below the target is never "ideal".
   if (best.tier === "ideal" && best.context < target) return { ...best, tier: "good" }
   return best
+}
+
+/** The discrete GPU models run on; integrated and tiny adapters are never used. */
+export function primaryGpu(gpus: GpuInfo[]) {
+  return gpus.find((gpu) => !gpu.integrated && gpu.vram >= 2 * GIB)
+}
+
+/** The fit engine's view of a scanned PC running `backend`, with models stored on `drive`. */
+export function hardwareProfile(system: SystemInfo, backend: EngineBackend, drive?: string): HardwareProfile {
+  const gpu = primaryGpu(system.gpus)
+  const disk = system.disks.find((item) => item.letter === drive?.slice(0, 1).toUpperCase())
+  return {
+    gpu: gpu && backend !== "cpu" ? { name: gpu.name, vram: gpu.vram, vramFree: gpu.vramFree, backend } : undefined,
+    ram: system.ram,
+    cpu: { cores: system.cpu.cores },
+    disk: disk ? { free: disk.free, kind: disk.kind } : undefined,
+  }
 }
 
 function place(
@@ -106,7 +130,10 @@ function place(
   const weights = file.size + (file.mmprojSize ?? 0)
   const kv = kvBytes(shape, context, kvType)
   const need = weights + kv + COMPUTE_BUFFER
-  const vram = hardware.gpu ? Math.max(0, (hardware.gpu.vramFree ?? hardware.gpu.vram) - VRAM_RESERVE) : 0
+  // Like RAM, VRAM is planned for a PC with other apps closed: browsers and chat apps often hold several GB that
+  // Windows hands back, while the desktop itself keeps roughly DESKTOP_VRAM (the UI asks to close apps when short).
+  const gpu = hardware.gpu
+  const vram = gpu ? Math.max(0, Math.max(gpu.vramFree ?? gpu.vram, gpu.vram - DESKTOP_VRAM) - VRAM_RESERVE) : 0
   // Recommendations assume the user can close other apps: plan against at least 75 % of total RAM rather than
   // whatever happens to be free right now (the UI warns separately when current free memory is short).
   const ram = Math.max(0, Math.max(hardware.ram.available, hardware.ram.total * 0.75) - RAM_RESERVE)
@@ -116,7 +143,7 @@ function place(
 
   if (vram > 0 && need <= vram) {
     const ratio = need / vram
-    return { ...base, mode: "gpu", gpuLayers: shape.layers, ratio, tier: ratio <= 0.85 ? "ideal" : "good",
+    return { ...base, mode: "gpu", gpuLayers: shape.layers, ratio, ram: 0, vram: need, tier: ratio <= 0.85 ? "ideal" : "good",
       tokensPerSecond: speed(perToken, 0, hardware) }
   }
 
@@ -128,8 +155,8 @@ function place(
     if (onGpu > 0 && inRam <= ram) {
       const cpuShare = inRam / weights
       const tokensPerSecond = speed(perToken * (1 - cpuShare), perToken * cpuShare, hardware)
-      return { ...base, mode: "moe-offload", gpuLayers: shape.layers, ratio: inRam / Math.max(ram, 1),
-        tier: tokensPerSecond >= 8 ? "good" : "slow", tokensPerSecond }
+      return { ...base, mode: "moe-offload", gpuLayers: shape.layers, ratio: inRam / Math.max(ram, 1), ram: inRam,
+        vram: need - inRam, tier: tokensPerSecond >= 8 ? "good" : "slow", tokensPerSecond }
     }
   }
 
@@ -142,13 +169,13 @@ function place(
     const inRam = (weights + kv) * (1 - gpuShare)
     if (inRam <= ram) {
       const tokensPerSecond = speed(perToken * gpuShare, perToken * (1 - gpuShare), hardware)
-      return { ...base, mode: "hybrid", gpuLayers, ratio: inRam / Math.max(ram, 1),
+      return { ...base, mode: "hybrid", gpuLayers, ratio: inRam / Math.max(ram, 1), ram: inRam, vram: need - inRam,
         tier: gpuShare >= 0.7 && tokensPerSecond >= 8 ? "good" : "slow", tokensPerSecond }
     }
   }
 
   if (need <= ram) {
-    return { ...base, mode: "cpu", gpuLayers: 0, ratio: need / Math.max(ram, 1), tier: "slow",
+    return { ...base, mode: "cpu", gpuLayers: 0, ratio: need / Math.max(ram, 1), ram: need, vram: 0, tier: "slow",
       tokensPerSecond: speed(0, perToken, hardware) }
   }
 
@@ -158,11 +185,11 @@ function place(
     const resident = Math.max(0, ram + vram - kv - COMPUTE_BUFFER)
     const streamed = Math.max(0, perToken - resident * activeShare)
     const ssd = (disk.kind === "nvme" ? 3 : 0.5) * GIB
-    return { ...base, mode: "ssd", gpuLayers: 0, ratio: 0, tier: "extreme",
+    return { ...base, mode: "ssd", gpuLayers: 0, ratio: 0, ram, vram: 0, tier: "extreme",
       tokensPerSecond: 1 / (streamed / ssd + perToken / bandwidth(hardware, "ram")) }
   }
 
-  return { ...base, mode: "none", gpuLayers: 0, ratio: 0, tier: "wont-run", tokensPerSecond: 0 }
+  return { ...base, mode: "none", gpuLayers: 0, ratio: 0, ram: 0, vram: 0, tier: "wont-run", tokensPerSecond: 0 }
 }
 
 /** Bandwidth roofline: every generated token reads the active weights once from wherever they live. */
@@ -200,7 +227,7 @@ export function score(fit: Fit, model: { paramsActiveB: number; quant: string },
   const params = model.paramsActiveB
   const base = params < 1 ? 30 : params < 3 ? 45 : params < 7 ? 60 : params < 10 ? 75 : params < 20 ? 82 : params < 40 ? 89 : 95
   const quality = Math.max(0, base + qualityPenalty(model.quant))
-  const speedScore = Math.min(100, (fit.tokensPerSecond / 40) * 100)
+  const speedScore = Math.min(100, (fit.tokensPerSecond / COMFORT_SPEED) * 100)
   const fitScore = fit.ratio <= 0.7 ? 100 : 100 * Math.exp(-0.5 * ((fit.ratio - 0.7) / 0.2) ** 2)
   const contextScore = fit.context >= targetContext ? 100 : fit.context >= targetContext / 2 ? 70 : 30
   return quality * 0.4 + speedScore * 0.35 + fitScore * 0.15 + contextScore * 0.1

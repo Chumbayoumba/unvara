@@ -1,4 +1,6 @@
+import { useLocation, useNavigate } from "@solidjs/router"
 import { createMemo, For, Show, type JSX } from "solid-js"
+import { usePlatform } from "@/context/platform"
 import { useCommand } from "@/context/command"
 import { useLanguage } from "@/context/language"
 import { useLayout } from "@/context/layout"
@@ -23,10 +25,14 @@ export function UnvaraSidebar(props: { onCollapse: () => void; header: JSX.Eleme
   const sessions = createHomeSessionsController(home)
   const openModels = useSettingsDialog("models")
   const openDraft = useOpenDraft()
+  const platform = usePlatform()
+  const navigate = useNavigate()
+  const location = useLocation()
 
   const route = () => layout.route()
   const recents = createMemo(() => sessions.data.records().slice(0, RECENT_LIMIT))
-  const creating = () => route().type === "draft" || route().type === "home"
+  const hub = () => location.pathname === "/models"
+  const creating = () => !hub() && (route().type === "draft" || route().type === "home")
 
   const newChat = () => {
     const conn = home.server.focused()
@@ -89,7 +95,12 @@ export function UnvaraSidebar(props: { onCollapse: () => void; header: JSX.Eleme
           hint={command.keybind("command.palette")}
           onClick={() => command.trigger("command.palette")}
         />
-        <Row icon={<UvIcon.Models />} label={language.t("unvara.sidebar.models")} onClick={openModels} />
+        <Row
+          icon={<UvIcon.Models />}
+          label={language.t("unvara.sidebar.models")}
+          selected={hub()}
+          onClick={() => (platform.localModels ? navigate("/models") : openModels())}
+        />
         <Row
           icon={<UvIcon.Customize />}
           label={language.t("unvara.sidebar.customize")}

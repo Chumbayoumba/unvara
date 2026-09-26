@@ -22,6 +22,9 @@ import { handleDocumentSearchKeydown } from "@/utils/search-keydown"
 import { createMenuDismissController } from "@/utils/menu-dismiss-controller"
 import { createEventListener } from "@solid-primitives/event-listener"
 import { matchesModelSearch } from "./dialog-select-model-search"
+import { useNavigate } from "@solidjs/router"
+import { usePlatform } from "@/context/platform"
+import { UvIcon } from "@/pages/unvara/icons"
 
 const isFree = (provider: string, cost: { input: number } | undefined) =>
   provider === "opencode" && (!cost || cost.input === 0)
@@ -31,8 +34,12 @@ type ModelItem = ReturnType<ModelState["list"]>[number]
 
 const modelKey = (model: ModelItem) => `${model.provider.id}:${model.id}`
 const manageKey = "action:manage"
+const moreKey = "action:more"
+// Unvara's own llama.cpp provider: local models always come before cloud ones.
+const LOCAL_PROVIDER = "unvara"
 
 const sortModelGroups = (a: { category: string; items: ModelItem[] }, b: { category: string; items: ModelItem[] }) => {
+  if ((a.category === LOCAL_PROVIDER) !== (b.category === LOCAL_PROVIDER)) return a.category === LOCAL_PROVIDER ? -1 : 1
   const aIndex = popularProviders.indexOf(a.category)
   const bIndex = popularProviders.indexOf(b.category)
   const aPopular = aIndex >= 0
@@ -75,6 +82,7 @@ const ModelList: Component<{
       sortGroupsBy={(a, b) => {
         const aProvider = a.items[0].provider.id
         const bProvider = b.items[0].provider.id
+        if ((aProvider === LOCAL_PROVIDER) !== (bProvider === LOCAL_PROVIDER)) return aProvider === LOCAL_PROVIDER ? -1 : 1
         if (popularProviders.includes(aProvider) && !popularProviders.includes(bProvider)) return -1
         if (!popularProviders.includes(aProvider) && popularProviders.includes(bProvider)) return 1
         return popularProviders.indexOf(aProvider) - popularProviders.indexOf(bProvider)
@@ -229,6 +237,8 @@ export function ModelSelectorPopoverV2(props: {
   onClose?: () => void
 }) {
   const dialog = useDialog()
+  const platform = usePlatform()
+  const navigate = useNavigate()
   const controller = createModelSelectorController({
     model: props.model,
     provider: () => props.provider,
@@ -242,6 +252,7 @@ export function ModelSelectorPopoverV2(props: {
       groups={controller.groups}
       current={controller.current}
       select={controller.select}
+      onMore={platform.localModels ? () => navigate("/models") : undefined}
       onManage={() => {
         void import("./dialog-manage-models").then((module) => {
           void dialog.show(() => <module.DialogManageModelsV2 />)
@@ -298,6 +309,8 @@ function ModelSelectorPopoverV2View(props: {
   current: () => string | undefined
   select: (item: ModelItem) => void
   onManage: () => void
+  /** Opens the local models hub; only in the desktop app. */
+  onMore?: () => void
   onClose: () => void
 }) {
   const language = useLanguage()
@@ -308,7 +321,7 @@ function ModelSelectorPopoverV2View(props: {
 
   const models = createMemo(() => props.models(store.search))
   const groups = createMemo(() => props.groups(models()))
-  const keys = () => [...models().map(modelKey), manageKey]
+  const keys = () => [...models().map(modelKey), ...(props.onMore ? [moreKey] : []), manageKey]
   const initialActive = () => {
     const selected = props.current()
     const options = keys()
@@ -341,12 +354,18 @@ function ModelSelectorPopoverV2View(props: {
     setOpen(false)
     dismiss.afterClose(props.onManage)
   }
+  const more = () => {
+    dismiss.preventTriggerRestore()
+    setOpen(false)
+    if (props.onMore) dismiss.afterClose(props.onMore)
+  }
   const selectActive = () => {
     const item = models().find((item) => modelKey(item) === store.active)
     if (item) {
       selectModel(item)
       return
     }
+    if (store.active === moreKey) more()
     if (store.active === manageKey) manage()
   }
   const moveActive = (delta: number) => {
@@ -502,6 +521,20 @@ function ModelSelectorPopoverV2View(props: {
           </ScrollView>
           <div class="h-px bg-v2-border-border-muted" />
           <div class="flex flex-col p-0.5">
+            <Show when={props.onMore}>
+              <MenuV2.Item
+                data-option-key={moreKey}
+                classList={{ "!bg-v2-overlay-simple-overlay-hover": store.active === moreKey }}
+                onMouseEnter={() => {
+                  setStore("active", moreKey)
+                  setTimeout(() => searchRef?.focus())
+                }}
+                onSelect={more}
+              >
+                <UvIcon.Download size={16} />
+                <span class="min-w-0 flex-1 truncate leading-5">{language.t("unvara.picker.more")}</span>
+              </MenuV2.Item>
+            </Show>
             <MenuV2.Item
               data-option-key={manageKey}
               classList={{ "!bg-v2-overlay-simple-overlay-hover": store.active === manageKey }}

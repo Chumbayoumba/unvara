@@ -49,6 +49,13 @@ const api: ElectronAPI = {
       }
     },
     scanHardware: () => ipcRenderer.invoke("local-models-scan-hardware"),
+    getCatalog: () => ipcRenderer.invoke("local-models-catalog"),
+    download: (catalogId, quant) => ipcRenderer.invoke("local-models-download", catalogId, quant),
+    pauseDownload: (id) => ipcRenderer.invoke("local-models-download-pause", id),
+    resumeDownload: (id) => ipcRenderer.invoke("local-models-download-resume", id),
+    cancelDownload: (id) => ipcRenderer.invoke("local-models-download-cancel", id),
+    removeModel: (id) => ipcRenderer.invoke("local-models-remove", id),
+    updateSettings: (patch) => ipcRenderer.invoke("local-models-update-settings", patch),
   },
   updater: {
     subscribe: async (cb) => {

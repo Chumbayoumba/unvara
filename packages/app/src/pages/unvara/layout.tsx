@@ -1,9 +1,12 @@
-import { createEffect, Show, Suspense, type ParentProps } from "solid-js"
+import { createEffect, createMemo, on, Show, Suspense, type ParentProps } from "solid-js"
 import { createStore } from "solid-js/store"
 import { WindowsAppMenu } from "@/components/windows-app-menu"
 import { useCommand } from "@/context/command"
 import { useLanguage } from "@/context/language"
 import { usePlatform } from "@/context/platform"
+import { useServerSDK } from "@/context/server-sdk"
+import { useServerSync } from "@/context/server-sync"
+import { useLocalModels } from "@/local-models/context"
 import { Persist, persisted } from "@/utils/persist"
 import { setV2Toast, ToastRegion } from "@/utils/toast"
 import { UvIcon } from "./icons"
@@ -24,6 +27,7 @@ export default function UnvaraLayout(props: ParentProps) {
   const mac = () => platform.platform === "desktop" && platform.os === "macos"
 
   createEffect(() => setV2Toast(true))
+  useLocalProviderRefresh()
 
   command.register("unvara-layout", () => [
     {
@@ -97,4 +101,31 @@ export default function UnvaraLayout(props: ParentProps) {
       <ToastRegion v2 />
     </div>
   )
+}
+
+/**
+ * Installed or removed local models reach OpenCode's provider list only when its instances are rebuilt, which
+ * interrupts running sessions, so the rebuild waits until no session is working.
+ */
+function useLocalProviderRefresh() {
+  const local = useLocalModels()
+  const serverSync = useServerSync()
+  const serverSdk = useServerSDK()
+  const [refresh, setRefresh] = createStore({ pending: false })
+  const models = createMemo(() => local.store.state?.models.map((model) => model.id).join("\n"))
+  const working = () =>
+    Object.values(serverSync().session.data.session_status).some((status) => status && status.type !== "idle")
+
+  createEffect(
+    on(models, (next, previous) => {
+      if (previous !== undefined && next !== previous) setRefresh("pending", true)
+    }),
+  )
+  createEffect(() => {
+    if (!refresh.pending || working()) return
+    setRefresh("pending", false)
+    void serverSdk()
+      .client.global.dispose()
+      .then(() => serverSync().refreshProviders())
+  })
 }

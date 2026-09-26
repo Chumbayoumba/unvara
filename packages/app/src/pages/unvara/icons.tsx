@@ -103,4 +103,39 @@ export const UvIcon = {
       <circle cx="10" cy="10" r="2.5" fill="currentColor" />
     </svg>
   ),
+  Download: (props: IconProps) => (
+    <Svg {...props}>
+      <path d="M10 3.75v9M6.25 9.25 10 13l3.75-3.75M4.25 16.25h11.5" />
+    </Svg>
+  ),
+  Pause: (props: IconProps) => (
+    <Svg {...props}>
+      <path d="M7.25 5.5v9M12.75 5.5v9" />
+    </Svg>
+  ),
+  Resume: (props: IconProps) => (
+    <Svg {...props}>
+      <path d="M7 5.1v9.8a.6.6 0 0 0 .9.5l7.6-4.9a.6.6 0 0 0 0-1L7.9 4.6a.6.6 0 0 0-.9.5z" />
+    </Svg>
+  ),
+  Close: (props: IconProps) => (
+    <Svg {...props}>
+      <path d="M5.75 5.75l8.5 8.5M14.25 5.75l-8.5 8.5" />
+    </Svg>
+  ),
+  Check: (props: IconProps) => (
+    <Svg {...props}>
+      <path d="M4.75 10.5 8.25 14l7-8" />
+    </Svg>
+  ),
+  Trash: (props: IconProps) => (
+    <Svg {...props}>
+      <path d="M4.25 5.75h11.5M8 5.75V4.5a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 .75.75v1.25M5.75 5.75l.7 9.6a1 1 0 0 0 1 .9h5.1a1 1 0 0 0 1-.9l.7-9.6" />
+    </Svg>
+  ),
+  Refresh: (props: IconProps) => (
+    <Svg {...props}>
+      <path d="M15.25 10a5.25 5.25 0 1 1-1.54-3.71M15.25 3.75v3h-3" />
+    </Svg>
+  ),
 }

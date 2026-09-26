@@ -111,11 +111,6 @@ export async function detectGpus(): Promise<GpuInfo[]> {
   return gpus.toSorted((a, b) => Number(a.integrated) - Number(b.integrated) || b.vram - a.vram)
 }
 
-/** The GPU models should run on: the discrete card with the most VRAM, if any. */
-export function primaryGpu(gpus: GpuInfo[]) {
-  return gpus.find((gpu) => !gpu.integrated && gpu.vram >= 2 * GIB)
-}
-
 /** Parses `llama-server --list-devices`, e.g. `Vulkan0: NVIDIA GeForce RTX 3070 Ti (8017 MiB, 7249 MiB free)`. */
 export async function listEngineDevices(binary: string): Promise<EngineDevice[]> {
   const output = await run(binary, ["--list-devices"])
