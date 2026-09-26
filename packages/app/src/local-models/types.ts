@@ -129,6 +129,12 @@ export type LocalModelsSettings = {
   mirror: string
   /** Set when the first-launch wizard is finished or skipped. */
   setupCompletedAt?: number
+  /** Engine choice; "auto" (default) picks the fastest backend for this GPU. */
+  backend?: EngineBackend | "auto"
+  /** Unload the model after this many idle minutes to give VRAM back; 0 keeps it loaded. Default 15. */
+  idleMinutes?: number
+  /** Hugging Face access token for gated repos; only ever sent to huggingface.co. */
+  hfToken?: string
 }
 
 export type LocalModelsState = {
@@ -166,4 +172,6 @@ export type LocalModelsPlatform = {
   /** Registers GGUF models found under `dir` in place; resolves with how many it found. */
   importFolder: (dir: string) => Promise<number>
   updateSettings: (patch: Partial<LocalModelsSettings>) => Promise<LocalModelsSettings>
+  /** Switches the engine (installing it if needed) and restarts the router on it. */
+  setBackend: (backend: EngineBackend | "auto") => Promise<void>
 }

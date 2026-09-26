@@ -61,6 +61,7 @@ const api: ElectronAPI = {
     importSources: () => ipcRenderer.invoke("local-models-import-sources"),
     importFolder: (dir) => ipcRenderer.invoke("local-models-import-folder", dir),
     updateSettings: (patch) => ipcRenderer.invoke("local-models-update-settings", patch),
+    setBackend: (backend) => ipcRenderer.invoke("local-models-set-backend", backend),
   },
   updater: {
     subscribe: async (cb) => {

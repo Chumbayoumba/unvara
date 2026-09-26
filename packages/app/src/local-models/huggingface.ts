@@ -7,7 +7,7 @@ import { ggufShape, readGgufMetadata } from "./gguf"
 import { defaultQuant, isAuxiliaryGguf, parseQuant } from "./quant"
 
 type Fetcher = (url: string, init?: RequestInit) => Promise<Response>
-type Options = { fetch?: Fetcher; mirror?: string }
+type Options = { fetch?: Fetcher; mirror?: string; headers?: Record<string, string> }
 
 /** One entry of catalog/sources.yaml; live search synthesizes one per repo. */
 export type CatalogSource = {
@@ -160,6 +160,7 @@ export async function buildCatalogModel(source: CatalogSource, options: Options 
   const recommended = quants.find((quant) => quant.quant === recommendedQuant) ?? quants[0]
   const metadata = await readGgufMetadata(downloadUrl(source.repo, recommended.files[0].name, options.mirror), {
     fetch: options.fetch,
+    headers: options.headers,
   })
   const arch = String(metadata["general.architecture"] ?? info.gguf?.architecture ?? "unknown")
   const expertCount = Number(metadata[`${arch}.expert_count`] ?? 0)
@@ -259,7 +260,7 @@ function chatModel(item: RawResult) {
 }
 
 async function api<T>(path: string, options: Options): Promise<T> {
-  const response = await (options.fetch ?? fetch)(`${options.mirror ?? HF}${path}`)
+  const response = await (options.fetch ?? fetch)(`${options.mirror ?? HF}${path}`, { headers: options.headers })
   if (!response.ok) throw new Error(`Hugging Face ${response.status} for ${path}`)
   return response.json() as Promise<T>
 }

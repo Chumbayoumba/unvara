@@ -213,7 +213,7 @@ export function UnvaraSetup() {
                     <Row label={language.t("unvara.setup.hw.cpu")} value={system().cpu.name} />
                     <Row
                       label={language.t("unvara.setup.hw.engine")}
-                      value={engineStatus(state()?.engine, state()?.engineUpgrade)}
+                      value={engineStatus(language, state()?.engine, state()?.engineUpgrade)}
                     />
                     <Row
                       label={language.t("unvara.setup.hw.folder")}
@@ -356,22 +356,27 @@ export function UnvaraSetup() {
     if (vram >= 3.5 || system.ram.total >= 15 * GIB) return language.t("unvara.setup.verdict.ok")
     return language.t("unvara.setup.verdict.basic")
   }
-
-  function engineStatus(engine: EngineState | undefined, upgrade: EngineState | undefined) {
-    if (upgrade?.status === "downloading")
-      return language.t("unvara.setup.engine.installing", {
-        backend: backendName(upgrade.backend),
-        percent: upgrade.total ? Math.floor((upgrade.received / upgrade.total) * 100) : 0,
-      })
-    if (upgrade?.status === "testing" || upgrade?.status === "verifying")
-      return language.t("unvara.setup.engine.testing", { backend: backendName(upgrade.backend) })
-    if (engine?.status === "ready")
-      return language.t("unvara.setup.engine.ready", { backend: backendName(engine.backend) })
-    return language.t("unvara.setup.engine.preparing")
-  }
 }
 
-function backendName(backend: string) {
+/** "CUDA 13.4, ready", or install progress while a faster engine is being fetched. */
+export function engineStatus(
+  language: ReturnType<typeof useLanguage>,
+  engine: EngineState | undefined,
+  upgrade: EngineState | undefined,
+) {
+  if (upgrade?.status === "downloading")
+    return language.t("unvara.setup.engine.installing", {
+      backend: backendName(upgrade.backend),
+      percent: upgrade.total ? Math.floor((upgrade.received / upgrade.total) * 100) : 0,
+    })
+  if (upgrade?.status === "testing" || upgrade?.status === "verifying")
+    return language.t("unvara.setup.engine.testing", { backend: backendName(upgrade.backend) })
+  if (engine?.status === "ready")
+    return language.t("unvara.setup.engine.ready", { backend: backendName(engine.backend) })
+  return language.t("unvara.setup.engine.preparing")
+}
+
+export function backendName(backend: string) {
   if (backend === "cpu") return "CPU"
   if (backend === "vulkan") return "Vulkan"
   return backend.replace("cuda-", "CUDA ")

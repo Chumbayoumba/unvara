@@ -1167,6 +1167,24 @@ export const dict = {
   "unvara.welcome.action": "Choose a folder",
   "unvara.welcome.body": "Unvara works inside a folder on this computer. Your chats and files never leave it.",
   "unvara.picker.more": "Get more models",
+  "unvara.settings.localAi.title": "Local AI",
+  "unvara.settings.hardware.title": "This computer",
+  "unvara.settings.engine.title": "AI engine",
+  "unvara.settings.engine.auto": "Automatic (recommended)",
+  "unvara.settings.idle.title": "Free graphics memory when idle",
+  "unvara.settings.idle.description":
+    "Unloads the model after a while without messages, so games and other apps get the GPU back.",
+  "unvara.settings.idle.minutes": "After {{count}} min",
+  "unvara.settings.idle.hour": "After 1 hour",
+  "unvara.settings.idle.never": "Never",
+  "unvara.settings.section.downloads": "Downloads",
+  "unvara.settings.folder.change": "Change…",
+  "unvara.settings.mirror.title": "Download source",
+  "unvara.settings.mirror.description":
+    "Where models are downloaded from. The mirror can be faster when Hugging Face is slow in your region.",
+  "unvara.settings.token.title": "Hugging Face token",
+  "unvara.settings.token.description":
+    "Only needed for gated models. It is sent to huggingface.co only, never to a mirror.",
   "unvara.setup.welcome.title": "Welcome to Unvara",
   "unvara.setup.welcome.body":
     "Private AI that runs on your own computer. No account and no filters, and nothing leaves your PC unless you connect a cloud model.",

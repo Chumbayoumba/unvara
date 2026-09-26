@@ -5,7 +5,7 @@ import type { CatalogModel } from "@/local-models/catalog"
 import { useLocalModels } from "@/local-models/context"
 import { planFit, primaryGpu, type Fit, type Tier } from "@/local-models/fit"
 import { agentReady, tierRank, type ModelFit } from "@/local-models/recommend"
-import type { DownloadJob, LocalModel } from "@/local-models/types"
+import type { DownloadJob, LocalModel, SystemInfo } from "@/local-models/types"
 import { HubSearch } from "./hub-search"
 import { ModelSettings } from "./model-settings"
 import { UvIcon } from "./icons"
@@ -276,27 +276,28 @@ function InstalledRow(props: { model: LocalModel }) {
 function HardwareChip() {
   const language = useLanguage()
   const local = useLocalModels()
-  const summary = () => {
-    const system = local.store.state?.system
-    if (!system) return language.t("unvara.hub.hardware.scanning")
-    const gpu = primaryGpu(system.gpus)
-    const memory = (bytes: number) => formatMemory(language.intl(), bytes)
-    return [
-      gpu
-        ? `${gpu.name.replace(/^(NVIDIA|AMD|Intel\(R\))\s+(GeForce\s+)?/i, "")} · ${language.t("unvara.hub.hardware.vram", { size: memory(gpu.vram) })}`
-        : language.t("unvara.hub.hardware.noGpu"),
-      language.t("unvara.hub.hardware.ram", { size: memory(system.ram.total) }),
-    ].join(" · ")
-  }
   return (
     <div class="flex h-9 items-center gap-2 rounded-full bg-v2-background-bg-layer-01 pl-3 pr-0.5 text-[13px] text-v2-text-text-muted shadow-[0_0_0_1px_var(--v2-border-border-muted)]">
       <UvIcon.Chip size={16} class="text-v2-icon-icon-muted" />
-      <span>{summary()}</span>
+      <span>{hardwareSummary(language, local.store.state?.system)}</span>
       <IconButton label={language.t("unvara.hub.hardware.rescan")} onClick={() => void local.api?.scanHardware()}>
         <UvIcon.Refresh size={16} />
       </IconButton>
     </div>
   )
+}
+
+/** "RTX 3070 Ti · 8 GB VRAM · 32 GB RAM" */
+export function hardwareSummary(language: ReturnType<typeof useLanguage>, system: SystemInfo | undefined) {
+  if (!system) return language.t("unvara.hub.hardware.scanning")
+  const gpu = primaryGpu(system.gpus)
+  const memory = (bytes: number) => formatMemory(language.intl(), bytes)
+  return [
+    gpu
+      ? `${gpu.name.replace(/^(NVIDIA|AMD|Intel\(R\))\s+(GeForce\s+)?/i, "")} · ${language.t("unvara.hub.hardware.vram", { size: memory(gpu.vram) })}`
+      : language.t("unvara.hub.hardware.noGpu"),
+    language.t("unvara.hub.hardware.ram", { size: memory(system.ram.total) }),
+  ].join(" · ")
 }
 
 export function PickCard(props: { slot: (typeof SLOTS)[number]; item: ModelFit; onStart?: (job: string) => void }) {

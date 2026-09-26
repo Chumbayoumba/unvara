@@ -10,6 +10,8 @@ type RouterOptions = {
   cacheDir: string
   port: number
   apiKey: string
+  /** Unload the model after this long without requests; -1 keeps it loaded. */
+  idleSeconds: number
   log: (message: string, extra?: Record<string, unknown>, level?: "info" | "warn" | "error") => void
   onState: (state: RouterState) => void
 }
@@ -42,7 +44,7 @@ export function createRouter(options: RouterOptions) {
         String(options.port),
         "--no-webui",
         "--sleep-idle-seconds",
-        "900",
+        String(options.idleSeconds),
       ],
       {
         cwd: options.binaryDir,

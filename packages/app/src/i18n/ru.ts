@@ -1279,6 +1279,24 @@ export const dict = {
   "unvara.welcome.action": "Выбрать папку",
   "unvara.welcome.body": "Unvara работает с папкой на этом компьютере. Чаты и файлы никуда не уходят.",
   "unvara.picker.more": "Больше моделей",
+  "unvara.settings.localAi.title": "Локальный ИИ",
+  "unvara.settings.hardware.title": "Этот компьютер",
+  "unvara.settings.engine.title": "Движок ИИ",
+  "unvara.settings.engine.auto": "Автоматически (рекомендуется)",
+  "unvara.settings.idle.title": "Освобождать видеопамять при простое",
+  "unvara.settings.idle.description":
+    "Выгружает модель после паузы без сообщений, чтобы игры и другие программы снова получили видеокарту.",
+  "unvara.settings.idle.minutes": "Через {{count}} мин",
+  "unvara.settings.idle.hour": "Через 1 час",
+  "unvara.settings.idle.never": "Никогда",
+  "unvara.settings.section.downloads": "Загрузки",
+  "unvara.settings.folder.change": "Изменить…",
+  "unvara.settings.mirror.title": "Источник загрузки",
+  "unvara.settings.mirror.description":
+    "Откуда скачиваются модели. Зеркало может быть быстрее, если Hugging Face в вашем регионе работает медленно.",
+  "unvara.settings.token.title": "Токен Hugging Face",
+  "unvara.settings.token.description":
+    "Нужен только для закрытых моделей. Отправляется только на huggingface.co и никогда — на зеркало.",
   "unvara.setup.welcome.title": "Добро пожаловать в Unvara",
   "unvara.setup.welcome.body":
     "Приватный ИИ, который работает на вашем компьютере. Без аккаунта и без фильтров, и ничего не уходит с ПК, если вы сами не подключите облачную модель.",

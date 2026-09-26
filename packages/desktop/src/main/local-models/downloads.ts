@@ -16,6 +16,8 @@ const SPARE_SPACE = 1024 ** 3
 export function createDownloadQueue(options: {
   file: string
   fetch: Fetcher
+  /** Extra request headers for a file URL (a Hugging Face token for gated repos). */
+  headers?: (url: string) => Record<string, string>
   log: Logger
   onChange: (jobs: DownloadJob[]) => void
   /** Registers the finished files as a model; a failure marks the job failed. */
@@ -97,6 +99,7 @@ export function createDownloadQueue(options: {
           size: file.size,
           sha256: file.sha256 || undefined,
           fetch: options.fetch,
+          headers: options.headers?.(file.url),
           signal: controller.signal,
           onProgress: (received) => {
             const now = Date.now()

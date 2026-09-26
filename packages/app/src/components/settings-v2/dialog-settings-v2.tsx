@@ -1,4 +1,5 @@
-import { Component, createMemo, createSignal, startTransition } from "solid-js"
+import { Component, createMemo, createSignal, Show, startTransition } from "solid-js"
+import { SettingsLocalAI } from "./local-ai"
 import { Dialog } from "@opencode-ai/ui/v2/dialog-v2"
 import { TabsV2 } from "@opencode-ai/ui/v2/tabs-v2"
 import { Icon } from "@opencode-ai/ui/icon"
@@ -65,6 +66,12 @@ export const DialogSettings: Component<{
                       <Icon name="keyboard" />
                       {language.t("settings.tab.shortcuts")}
                     </TabsV2.Trigger>
+                    <Show when={platform.localModels}>
+                      <TabsV2.Trigger value="local-ai">
+                        <Icon name="brain" />
+                        {language.t("unvara.settings.localAi.title")}
+                      </TabsV2.Trigger>
+                    </Show>
                   </div>
                 </div>
 
@@ -98,6 +105,9 @@ export const DialogSettings: Component<{
         </TabsV2.Content>
         <TabsV2.Content value="shortcuts" class="settings-v2-panel">
           <SettingsKeybinds v2 />
+        </TabsV2.Content>
+        <TabsV2.Content value="local-ai" class="settings-v2-panel">
+          <SettingsLocalAI />
         </TabsV2.Content>
         <TabsV2.Content value="servers" class="settings-v2-panel">
           <SettingsServersV2 />

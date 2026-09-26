@@ -30,6 +30,8 @@ import { createRouter, type Router } from "./router"
 
 // The snapshot shipped with this build; a signed remote copy will replace it once releases publish one.
 const catalog = bundledCatalog as Catalog
+// Keeps VRAM free for games and other apps when Unvara sits unused.
+const DEFAULT_IDLE_MINUTES = 15
 
 type Logger = (message: string, extra?: Record<string, unknown>, level?: "info" | "warn" | "error") => void
 
@@ -63,6 +65,7 @@ export function createLocalModelsController(options: { userDataPath: string; log
   const queue = createDownloadQueue({
     file: files.downloads,
     fetch: net.fetch,
+    headers: (url) => hfHeaders(url),
     log: options.log,
     onChange: (downloads) => emit({ downloads }),
     install,
@@ -114,12 +117,40 @@ export function createLocalModelsController(options: { userDataPath: string; log
     // Downloads don't need the engine, so an interrupted one resumes even if the engine fails to start.
     queue.start()
     const gpu = primaryGpu(system.gpus)
+    const chosen = state.settings.backend
+    if (chosen && chosen !== "auto") return useBackend(chosen, gpu)
     const current = installedBackend(localRoot, gpu)
     await launch(current, gpu)
     // Local AI works right away on what ships with the installer; a faster backend (CUDA) is fetched in the
     // background and swapped in without changing the endpoint OpenCode talks to.
     const upgrades = upgradeCandidates(preferredBackend(gpu), current)
     if (upgrades.length) void upgrade(upgrades, gpu)
+  }
+
+  /** Engine choice from settings: "auto" uses the best backend for this GPU, anything else exactly that one. */
+  async function setBackend(backend: EngineBackend | "auto") {
+    updateSettings({ backend })
+    const system = state.system ?? (await scanHardware())
+    const gpu = primaryGpu(system.gpus)
+    await useBackend(backend === "auto" ? preferredBackend(gpu) : backend, gpu)
+  }
+
+  /** Installs `backend` if needed, checks it sees the GPU, then restarts the router on it (same endpoint). */
+  async function useBackend(backend: EngineBackend, gpu: GpuInfo | undefined) {
+    // The CPU build has no devices to check; GPU builds must see the card they are meant for.
+    if (backend !== "cpu" && !(await provisionAndVerify(backend, gpu))) return
+    await launch(backend, gpu)
+    emit({ engineUpgrade: undefined })
+  }
+
+  function idleMinutes() {
+    return state.settings.idleMinutes ?? DEFAULT_IDLE_MINUTES
+  }
+
+  /** The HF token only ever goes to huggingface.co itself, never to a third-party mirror. */
+  function hfHeaders(url = state.settings.mirror): Record<string, string> {
+    const token = state.settings.hfToken
+    return token && new URL(url).hostname === "huggingface.co" ? { authorization: `Bearer ${token}` } : {}
   }
 
   async function launch(backend: EngineBackend, gpu: GpuInfo | undefined) {
@@ -138,6 +169,7 @@ export function createLocalModelsController(options: { userDataPath: string; log
       cacheDir: files.cache,
       port: runtime.port,
       apiKey: runtime.apiKey,
+      idleSeconds: idleMinutes() > 0 ? idleMinutes() * 60 : -1,
       log: (message, extra, level) => {
         meter(message)
         options.routerLog(message, extra, level)
@@ -219,12 +251,16 @@ export function createLocalModelsController(options: { userDataPath: string; log
   /** Queues a catalog model (all shards plus its vision projector); resolves with the job id. */
   /** Live Hugging Face search; results go through `hubDetails` before they can be fitted or downloaded. */
   function searchHuggingFace(query: string, sort: HubSort, uncensored: boolean) {
-    return searchHub(query, { sort, uncensored, fetch: net.fetch, mirror: state.settings.mirror })
+    return searchHub(query, { sort, uncensored, fetch: net.fetch, mirror: state.settings.mirror, headers: hfHeaders() })
   }
 
   /** Files, quants and GGUF dims of any repo, in catalog form; cached so a download can find it again. */
   async function hubDetails(repo: string) {
-    const model = await buildCatalogModel(hubSource(repo), { fetch: net.fetch, mirror: state.settings.mirror })
+    const model = await buildCatalogModel(hubSource(repo), {
+      fetch: net.fetch,
+      mirror: state.settings.mirror,
+      headers: hfHeaders(),
+    })
     hubModels.set(model.id, model)
     return model
   }
@@ -372,6 +408,9 @@ export function createLocalModelsController(options: { userDataPath: string; log
       throw new Error(`models folder must be an absolute ASCII path: ${settings.modelsDir}`)
     writeAtomic(files.settings, JSON.stringify(settings, null, 2))
     emit({ settings })
+    // A new idle timeout needs a router restart; do it right away only while no model is loaded.
+    if (patch.idleMinutes !== undefined && state.engine.status === "ready" && state.router.status === "idle")
+      void launch(state.engine.backend, primaryGpu(state.system?.gpus ?? []))
     return settings
   }
 
@@ -394,6 +433,7 @@ export function createLocalModelsController(options: { userDataPath: string; log
     importSources,
     updateModel,
     removeModel,
+    setBackend,
     updateSettings,
     getCatalog: () => catalog,
     pauseDownload: queue.pause,
