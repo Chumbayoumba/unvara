@@ -1,5 +1,5 @@
 import { createSimpleContext } from "@opencode-ai/ui/context"
-import { createMemo, onCleanup } from "solid-js"
+import { createEffect, createMemo, on, onCleanup } from "solid-js"
 import { createStore, reconcile } from "solid-js/store"
 import { usePlatform } from "@/context/platform"
 import type { Catalog } from "./catalog"
@@ -18,6 +18,14 @@ export const { use: useLocalModels, provider: LocalModelsProvider } = createSimp
       void api.getState().then((state) => setStore("state", reconcile(state)))
       void api.getCatalog().then((catalog) => setStore("catalog", catalog))
       onCleanup(api.subscribe((state) => setStore("state", reconcile(state))))
+      // A newer signed catalog can arrive while the app runs.
+      createEffect(
+        on(
+          () => store.state?.catalogUpdatedAt,
+          (updated) => updated && void api.getCatalog().then((catalog) => setStore("catalog", catalog)),
+          { defer: true },
+        ),
+      )
     }
 
     const hardware = createMemo(() => {

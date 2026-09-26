@@ -150,6 +150,8 @@ export type LocalModelsState = {
   runtimes?: Partial<Record<"bun" | "uv", RuntimeState>>
   /** MCP connectors added in Unvara; OpenCode merges them into its `mcp` config. */
   connectors: Record<string, Connector>
+  /** Set when a newer catalog arrives during the session, so the UI fetches it again. */
+  catalogUpdatedAt?: string
 }
 
 /** An MCP connector added in Unvara (same shape as OpenCode's `mcp` config entries). */

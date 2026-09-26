@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto"
 import { existsSync, mkdirSync, readdirSync, rmdirSync, rmSync } from "node:fs"
 import { createServer } from "node:net"
 import { basename, dirname, isAbsolute, join } from "node:path"
-import { net } from "electron"
+import { app, net } from "electron"
 import { downloadUrl, type Catalog, type CatalogModel } from "@opencode-ai/app/local-models/catalog"
 import { buildCatalogModel, hubSource, searchHub, type HubSort } from "@opencode-ai/app/local-models/huggingface"
 import { hardwareProfile, planFit, primaryGpu } from "@opencode-ai/app/local-models/fit"
@@ -21,6 +21,7 @@ import type {
 } from "@opencode-ai/app/local-models/types"
 import bundledCatalog from "../../../../../catalog/catalog.json"
 import { localDataRoot } from "../paths"
+import { cachedCatalog, refreshCatalog } from "./catalog-source"
 import { createDownloadQueue } from "./downloads"
 import { findModels, importSources } from "./importer"
 import { installRuntime, neededRuntime, runtimesDir } from "./runtimes"
@@ -30,8 +31,8 @@ import { bestModelsDrive, detectSystem, listEngineDevices, pickDevice } from "./
 import { readManifest, readText, writeAtomic, writeManifest, writePresets } from "./presets"
 import { createRouter, type Router } from "./router"
 
-// The snapshot shipped with this build; a signed remote copy will replace it once releases publish one.
-const catalog = bundledCatalog as Catalog
+// The snapshot shipped with this build; a newer signed copy from the repo replaces it (catalog-source.ts).
+const bundled = bundledCatalog as Catalog
 // Keeps VRAM free for games and other apps when Unvara sits unused.
 const DEFAULT_IDLE_MINUTES = 15
 
@@ -52,6 +53,7 @@ export function createLocalModelsController(options: { userDataPath: string; log
     downloads: join(localRoot, "downloads.json"),
     settings: join(localRoot, "settings.json"),
     connectors: join(options.userDataPath, "connectors.json"),
+    catalog: join(localRoot, "catalog.json"),
   }
   const state: LocalModelsState = {
     engine: { status: "absent" },
@@ -60,7 +62,7 @@ export function createLocalModelsController(options: { userDataPath: string; log
     models: readManifest(files.manifest).models.map((model) =>
       model.shape || !model.source
         ? model
-        : { ...model, shape: catalog.models.find((item) => item.id === model.source?.catalogId)?.shape },
+        : { ...model, shape: bundled.models.find((item) => item.id === model.source?.catalogId)?.shape },
     ),
     downloads: [],
     settings: readSettings(files.settings),
@@ -77,6 +79,7 @@ export function createLocalModelsController(options: { userDataPath: string; log
   })
   state.downloads = queue.jobs()
   const hubModels = new Map<string, CatalogModel>()
+  const catalog = { current: cachedCatalog(files.catalog, bundled, app.getVersion()) }
   // OpenCode's requests make the router load models on demand; the logs are how the UI learns about it.
   const meter = createRouterLogObserver({
     loading: (model) => emit({ router: { status: "loading", model } }),
@@ -159,6 +162,18 @@ export function createLocalModelsController(options: { userDataPath: string; log
     if (!state.settings.modelsDir) chooseModelsDir(system)
     // Downloads don't need the engine, so an interrupted one resumes even if the engine fails to start.
     queue.start()
+    void refreshCatalog({
+      file: files.catalog,
+      current: catalog.current,
+      appVersion: app.getVersion(),
+      fetch: net.fetch,
+    })
+      .then((fresh) => {
+        if (!fresh) return
+        catalog.current = fresh
+        emit({ catalogUpdatedAt: fresh.generatedAt })
+      })
+      .catch((error) => options.log("catalog refresh failed", { error: String(error) }, "warn"))
     const gpu = primaryGpu(system.gpus)
     const chosen = state.settings.backend
     if (chosen && chosen !== "auto") return useBackend(chosen, gpu)
@@ -310,7 +325,7 @@ export function createLocalModelsController(options: { userDataPath: string; log
 
   /** Curated entries first; `hf:` ids are rebuilt from Hugging Face when a queued job outlives the session. */
   async function findModel(id: string) {
-    const known = catalog.models.find((item) => item.id === id) ?? hubModels.get(id)
+    const known = catalog.current.models.find((item) => item.id === id) ?? hubModels.get(id)
     if (known || !id.startsWith("hf:")) return known
     return hubDetails(id.slice("hf:".length))
   }
@@ -480,7 +495,7 @@ export function createLocalModelsController(options: { userDataPath: string; log
     ensureConnectorRuntime,
     setConnector,
     updateSettings,
-    getCatalog: () => catalog,
+    getCatalog: () => catalog.current,
     pauseDownload: queue.pause,
     resumeDownload: queue.resume,
     cancelDownload: queue.cancel,

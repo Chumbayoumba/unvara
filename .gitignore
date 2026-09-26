@@ -35,3 +35,7 @@ tsconfig.tsbuildinfo
 
 # local tooling
 .playwright-mcp/
+
+# Unvara release signing keys never belong in the repo
+*.pem
+catalog-signing-key*
