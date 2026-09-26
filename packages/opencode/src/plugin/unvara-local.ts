@@ -24,6 +24,10 @@ export async function UnvaraLocalPlugin(_input: PluginInput): Promise<Hooks> {
     config: async (config) => {
       const manifest = process.env.UNVARA_MODELS_MANIFEST
       if (!process.env.UNVARA_LLAMA_URL || !manifest) return
+      // Unvara is local-first: OpenCode's free cloud (Zen) would otherwise be the fallback model before any local
+      // model is installed, silently sending prompts to opencode.ai. It stays available once the user enables it
+      // in Providers, which writes their own disabled_providers list.
+      config.disabled_providers ??= ["opencode", "opencode-go"]
       config.provider = {
         ...config.provider,
         unvara: {

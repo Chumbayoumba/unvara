@@ -165,7 +165,9 @@ export const { use: useHighlights, provider: HighlightsProvider } = createSimple
     }
 
     const start = (previous: string) => {
-      if (!settings.general.releaseNotes()) {
+      // Unvara: the feed is OpenCode's changelog on opencode.ai, which neither describes Unvara nor should be
+      // contacted on startup. Release notes come back once Unvara publishes its own feed.
+      if (!settings.general.releaseNotes() || CHANGELOG_URL.includes("opencode.ai")) {
         markSeen()
         return
       }

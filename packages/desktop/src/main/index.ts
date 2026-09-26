@@ -51,6 +51,7 @@ import { migrate } from "./migrate"
 import { cleanupStoreFiles } from "./store-cleanup"
 import { startBackgroundCli } from "./background-cli"
 import { setNativeTranslations } from "./native-translations"
+import opencodePackage from "../../../opencode/package.json"
 
 const APP_NAMES: Record<string, string> = {
   dev: "Unvara Dev",
@@ -153,7 +154,8 @@ const main = Effect.gen(function* () {
   initCrashReporter()
 
   const wslServers = createWslServersController(
-    app.getVersion(),
+    // WSL servers run OpenCode itself, so they are matched to the bundled server's version, not Unvara's.
+    opencodePackage.version,
     async (distro) => {
       logger.log("spawning wsl sidecar", { distro })
       return spawnWslSidecar(distro, {

@@ -84,6 +84,9 @@ export function serveUIEffect(
     const path = new URL(request.url, "http://localhost").pathname
 
     if (embeddedWebUI) return yield* serveEmbeddedUIEffect(path, services.fs, embeddedWebUI)
+    // Unvara: the desktop app ships its own UI, so an unknown path is a 404 — never a request (with the user's
+    // credentials) forwarded to app.opencode.ai.
+    if (process.env.OPENCODE_CLIENT === "desktop") return notFound()
 
     const response = yield* services.client.execute(
       HttpClientRequest.make(request.method)(upstreamURL(path), {

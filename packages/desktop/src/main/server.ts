@@ -57,14 +57,22 @@ export function preferAppEnv(userDataPath: string) {
   // Unvara must never read, write or reuse an installed OpenCode: drop OpenCode switches inherited from the
   // user's environment and point every XDG base dir at Unvara's own folders.
   inheritedOpenCodeEnv.forEach((key) => delete process.env[key])
+  // A developer's global OpenTelemetry endpoint would otherwise receive Unvara's logs and traces.
+  Object.keys(process.env)
+    .filter((key) => key.startsWith("OTEL_"))
+    .forEach((key) => delete process.env[key])
   Object.assign(process.env, {
-    ...Object.fromEntries(Object.entries(shellEnv ?? {}).filter(([key]) => !key.startsWith("OPENCODE_"))),
+    ...Object.fromEntries(
+      Object.entries(shellEnv ?? {}).filter(([key]) => !key.startsWith("OPENCODE_") && !key.startsWith("OTEL_")),
+    ),
     // Tools spawned by the agent (bash, MCP servers) get these back so git/gh/uv keep using the user's own dirs.
     ...Object.fromEntries(XDG_KEYS.map((key) => [`UNVARA_USER_${key}`, process.env[key] ?? ""])),
     OPENCODE_EXPERIMENTAL_ICON_DISCOVERY: "true",
     OPENCODE_EXPERIMENTAL_FILEWATCHER: "true",
     OPENCODE_CLIENT: "desktop",
     OPENCODE_DISABLE_CLAUDE_CODE: "1",
+    // Privacy: the cloud model list ships inside the app; don't refresh it from models.opencode.ai in the background.
+    OPENCODE_DISABLE_MODELS_FETCH: "1",
     XDG_CONFIG_HOME: join(userDataPath, "config"),
     XDG_STATE_HOME: userDataPath,
     XDG_DATA_HOME: join(localRoot, "data"),

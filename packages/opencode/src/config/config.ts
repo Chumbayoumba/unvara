@@ -453,6 +453,17 @@ const layer = Layer.effect(
 
           yield* ensureGitignore(dir).pipe(Effect.orDie)
 
+          result.command = mergeDeep(result.command ?? {}, yield* Effect.promise(() => ConfigCommand.load(dir)))
+          result.agent = mergeDeep(result.agent ?? {}, yield* Effect.promise(() => ConfigAgent.load(dir)))
+          result.agent = mergeDeep(result.agent ?? {}, yield* Effect.promise(() => ConfigAgent.loadMode(dir)))
+          // Auto-discovered plugins under `.opencode/plugin(s)` are already local files, so ConfigPlugin.load
+          // returns normalized Specs and we only need to attach origin metadata here.
+          const list = yield* Effect.promise(() => ConfigPlugin.load(dir))
+          yield* mergePluginOrigins(dir, list)
+
+          // Unvara: only folders with plugins need @opencode-ai/plugin, so a fresh profile doesn't reach out to the
+          // npm registry on first launch.
+          if (list.length === 0) continue
           const dep = yield* npmSvc
             .install(dir, {
               add: [
@@ -473,14 +484,6 @@ const layer = Layer.effect(
               Effect.forkDetach,
             )
           deps.push(dep)
-
-          result.command = mergeDeep(result.command ?? {}, yield* Effect.promise(() => ConfigCommand.load(dir)))
-          result.agent = mergeDeep(result.agent ?? {}, yield* Effect.promise(() => ConfigAgent.load(dir)))
-          result.agent = mergeDeep(result.agent ?? {}, yield* Effect.promise(() => ConfigAgent.loadMode(dir)))
-          // Auto-discovered plugins under `.opencode/plugin(s)` are already local files, so ConfigPlugin.load
-          // returns normalized Specs and we only need to attach origin metadata here.
-          const list = yield* Effect.promise(() => ConfigPlugin.load(dir))
-          yield* mergePluginOrigins(dir, list)
         }
 
         if (process.env.OPENCODE_CONFIG_CONTENT) {

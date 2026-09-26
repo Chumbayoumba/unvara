@@ -45,9 +45,12 @@ responsible for how you use these models.
 
 ## Privacy
 
-Models run on your computer and your chats stay on it. Unvara goes online only to download models (from Hugging Face
-or a mirror you choose), the engine and connector runtimes (from GitHub), and — only if you connect one — to the cloud
-provider you picked.
+Models run on your computer and your chats stay on it. There is no telemetry and no account. Unvara goes online only to:
+
+- download models you pick, from Hugging Face or a mirror you choose (search runs when you open it);
+- download the engine for your graphics card, file-search tools and connector runtimes, from GitHub, when needed;
+- check for a newer model catalog (a signed file from this repository, via jsDelivr or GitHub) at startup;
+- talk to a cloud provider — only if you connect one. OpenCode's free cloud models are off until you turn them on.
 
 ## Building from source
 
