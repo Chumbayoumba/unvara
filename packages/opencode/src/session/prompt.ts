@@ -215,6 +215,18 @@ const layer = Layer.effect(
 
       const ag = yield* agents.get("title")
       if (!ag) return
+      // Unvara: a local model serves one request at a time, so a title request would hold up the first answer.
+      // Name the chat after the first line of the message instead, unless a title model is configured.
+      if (!ag.model && input.providerID === "unvara") {
+        const line = firstUser.parts
+          .flatMap((part) => (part.type === "text" && !part.synthetic ? part.text.split("\n") : []))
+          .map((text) => text.trim())
+          .find((text) => text.length > 0)
+        if (!line) return
+        return yield* sessions
+          .setTitle({ sessionID: input.session.id, title: line.length > 60 ? line.substring(0, 57) + "..." : line })
+          .pipe(Effect.catchCause((cause) => Effect.logError("failed to set title", { error: Cause.squash(cause) })))
+      }
       const mdl = ag.model
         ? yield* provider.getModel(ag.model.providerID, ag.model.modelID)
         : ((yield* provider.getSmallModel(input.providerID)) ??
@@ -1265,12 +1277,7 @@ const layer = Layer.effect(
             const system =
               agent.name === "chat"
                 ? []
-                : [
-                    ...env,
-                    ...instructions,
-                    ...(mcpInstructions ? [mcpInstructions] : []),
-                    ...(skills ? [skills] : []),
-                  ]
+                : [...env, ...instructions, ...(mcpInstructions ? [mcpInstructions] : []), ...(skills ? [skills] : [])]
             const format = lastUser.format ?? { type: "text" as const }
             if (format.type === "json_schema") system.push(STRUCTURED_OUTPUT_SYSTEM_PROMPT)
             const result = yield* handle.process({
