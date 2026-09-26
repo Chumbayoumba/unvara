@@ -1,0 +1,40 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun
+
+      - name: Typecheck
+        run: |
+          for dir in core opencode app desktop; do
+            (cd packages/$dir && bun run typecheck)
+          done
+
+      - name: Test local AI (app)
+        working-directory: packages/app
+        run: bun test --conditions=solid --preload ./happydom.ts src/local-models
+
+      - name: Test local AI (desktop)
+        working-directory: packages/desktop
+        run: bun test src/main/local-models
+
+      - name: Test Unvara server changes
+        working-directory: packages/opencode
+        run: bun test test/session/unvara-tools.test.ts test/config/config.test.ts
+
+      - name: Test core
+        working-directory: packages/core
+        run: bun test test/util/user-env.test.ts

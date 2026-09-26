@@ -50,6 +50,7 @@ Models run on your computer and your chats stay on it. There is no telemetry and
 - download models you pick, from Hugging Face or a mirror you choose (search runs when you open it);
 - download the engine for your graphics card, file-search tools and connector runtimes, from GitHub, when needed;
 - check for a newer model catalog (a signed file from this repository, via jsDelivr or GitHub) at startup;
+- check this repository's GitHub Releases for app updates;
 - talk to a cloud provider — only if you connect one. OpenCode's free cloud models are off until you turn them on.
 
 ## Building from source

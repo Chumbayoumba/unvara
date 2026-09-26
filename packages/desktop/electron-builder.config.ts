@@ -153,6 +153,8 @@ function getConfig() {
         appId,
         productName: "Unvara",
         protocols: { name: "Unvara", schemes: ["unvara"] },
+        // The installed app reads its update feed (latest.yml) from these GitHub Releases.
+        publish: [{ provider: "github", owner: "Chumbayoumba", repo: "unvara", releaseType: "release" }],
         deb: { fpm: [metainfoFpm(appId), legacyDesktopEntryFpm] },
         rpm: { packageName: "opencode", fpm: [metainfoFpm(appId), legacyDesktopEntryFpm] },
       }

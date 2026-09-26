@@ -1,0 +1,33 @@
+name: Bug report / Сообщить об ошибке
+description: Something doesn't work / Что-то не работает
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened? / Что случилось?
+      description: What you did, what you expected and what happened instead. / Что вы делали, чего ждали и что вышло.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Unvara version / Версия Unvara
+      description: Settings → bottom of the menu. / Настройки → внизу меню.
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Computer / Компьютер
+      description: Windows version, graphics card, memory, and the model you used. / Версия Windows, видеокарта, память и модель.
+      placeholder: "Windows 11, RTX 3060 12 GB, 32 GB RAM, Qwen3.6 35B A3B Q4_K_M"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Логи
+      description: >
+        Zip the folder %APPDATA%\ai.unvara.desktop\logs and attach it here (paste the path into the Explorer address bar).
+        / Заархивируйте папку %APPDATA%\ai.unvara.desktop\logs и прикрепите сюда (вставьте путь в адресную строку проводника).

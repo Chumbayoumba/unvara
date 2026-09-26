@@ -1,0 +1,72 @@
+name: release
+
+# Push a tag like v0.1.1 to build the Windows installer and open a draft release with it. Publish the draft after
+# testing; the installed app updates from the latest published release (latest.yml).
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    env:
+      OPENCODE_CHANNEL: prod
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun
+
+      - name: Build
+        working-directory: packages/desktop
+        run: bun run build
+
+      - name: Package
+        working-directory: packages/desktop
+        run: bun run package:win --publish never
+
+      # Code signing through SignPath's free open-source program. Until the SignPath project is set up (repository
+      # variable SIGNPATH_ORGANIZATION_ID and secret SIGNPATH_API_TOKEN), releases ship unsigned.
+      - name: Upload installer for signing
+        id: unsigned
+        if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-installer
+          path: packages/desktop/dist/unvara-win-x64.exe
+
+      - name: Sign with SignPath
+        if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+        uses: signpath/github-action-submit-signing-request@v2
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: unvara
+          signing-policy-slug: release-signing
+          github-artifact-id: ${{ steps.unsigned.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: packages/desktop/dist/signed
+
+      - name: Use the signed installer
+        if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+        shell: bash
+        working-directory: packages/desktop/dist
+        run: |
+          mv signed/unvara-win-x64.exe unvara-win-x64.exe
+          rm -f unvara-win-x64.exe.blockmap
+          bun ../scripts/rehash-latest-yml.ts .
+
+      - name: Draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          generate_release_notes: true
+          files: |
+            packages/desktop/dist/unvara-win-x64.exe
+            packages/desktop/dist/unvara-win-x64.exe.blockmap
+            packages/desktop/dist/latest.yml
