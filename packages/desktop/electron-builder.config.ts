@@ -59,6 +59,9 @@ const getBase = (appId: string): Configuration => ({
   extraResources: [
     // Pinned llama.cpp CPU + Vulkan builds (scripts/fetch-engine.ts) — the offline safety net for local AI.
     { from: "resources/engine/", to: "engine/", filter: ["**/*"] },
+    // MIT and third-party license texts must travel with the binaries.
+    { from: "../../LICENSE", to: "LICENSE.txt" },
+    { from: "../../THIRD_PARTY_NOTICES.md", to: "THIRD_PARTY_NOTICES.md" },
     ...(channel === "dev"
       ? [
           {
