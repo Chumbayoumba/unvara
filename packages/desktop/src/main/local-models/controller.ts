@@ -5,7 +5,7 @@ import { join } from "node:path"
 import type { LocalModel, LocalModelsState } from "@opencode-ai/app/local-models/types"
 import { localDataRoot } from "../paths"
 import { ENGINE_BUILD, engineDir, installedBackend } from "./engine"
-import { detectGpus, listEngineDevices, pickDevice, primaryGpu } from "./hardware"
+import { detectSystem, listEngineDevices, pickDevice, primaryGpu } from "./hardware"
 import { readManifest, writeManifest, writePresets } from "./presets"
 import { createRouter, type Router } from "./router"
 
@@ -28,7 +28,6 @@ export function createLocalModelsController(options: { userDataPath: string; log
     engine: { status: "absent" },
     router: { status: "stopped" },
     models: readManifest(files.manifest).models,
-    gpus: [],
   }
   const listeners = new Set<(state: LocalModelsState) => void>()
   const runtime = { router: undefined as Router | undefined, port: 0, apiKey: "" }
@@ -53,14 +52,26 @@ export function createLocalModelsController(options: { userDataPath: string; log
     })
   }
 
+  async function scanHardware() {
+    const system = await detectSystem()
+    options.log("hardware scanned", {
+      gpus: system.gpus.map((gpu) => `${gpu.name} ${(gpu.vram / 1024 ** 3).toFixed(1)}GB${gpu.integrated ? " (integrated)" : ""}`),
+      ram: `${(system.ram.total / 1024 ** 3).toFixed(1)}GB total, ${(system.ram.available / 1024 ** 3).toFixed(1)}GB available, ${system.ram.bandwidth ?? "?"}GB/s`,
+      cpu: `${system.cpu.name} x${system.cpu.cores}`,
+      disks: system.disks.map((disk) => `${disk.letter}: ${disk.kind} ${(disk.free / 1e9).toFixed(0)}GB free`),
+    })
+    emit({ system })
+    return system
+  }
+
   async function start() {
-    const gpus = await detectGpus()
-    const gpu = primaryGpu(gpus)
+    const system = await scanHardware()
+    const gpu = primaryGpu(system.gpus)
     const backend = installedBackend(localRoot, gpu)
     const binaryDir = engineDir(localRoot, backend)
     const device = backend === "cpu" ? undefined : pickDevice(await listEngineDevices(join(binaryDir, "llama-server.exe")), gpu)
     options.log("local engine selected", { backend, build: ENGINE_BUILD, gpu: gpu?.name, device: device?.id })
-    emit({ gpus, engine: { status: "ready", backend, build: ENGINE_BUILD, device } })
+    emit({ engine: { status: "ready", backend, build: ENGINE_BUILD, device } })
     writePresets(files.presets, state.models, device)
     const router = createRouter({
       binaryDir,
@@ -89,6 +100,7 @@ export function createLocalModelsController(options: { userDataPath: string; log
   return {
     prepare,
     start,
+    scanHardware,
     upsertModel,
     stopSync: () => runtime.router?.stopSync(),
     load: (model: string) => runtime.router?.load(model),

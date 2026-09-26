@@ -44,6 +44,7 @@ import {
 } from "./windows"
 import { createWslServersController } from "./wsl/servers"
 import { createLocalModelsController } from "./local-models/controller"
+import { registerLocalModelsIpcHandlers } from "./local-models/ipc"
 import { registerWslIpcHandlers } from "./wsl/ipc"
 import { spawnWslSidecar } from "./wsl/sidecar"
 import { migrate } from "./migrate"
@@ -321,6 +322,7 @@ const main = Effect.gen(function* () {
     },
   })
   registerWslIpcHandlers(wslServers)
+  registerLocalModelsIpcHandlers(localModels)
   void updater.start()
   const updateTimer = setInterval(() => void updater.check(), 10 * 60 * 1000)
   updateTimer.unref()

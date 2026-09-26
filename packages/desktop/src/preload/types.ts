@@ -1,5 +1,6 @@
 import type { DesktopMenuAction } from "@opencode-ai/app/desktop-menu"
 import type { WslServersPlatform } from "@opencode-ai/app/wsl/types"
+import type { LocalModelsPlatform } from "@opencode-ai/app/local-models/types"
 import type { UpdaterState } from "@opencode-ai/app/updater"
 import type { DesktopNativeBundle } from "@opencode-ai/app/i18n/desktop-native"
 export type {
@@ -47,6 +48,7 @@ export type ElectronAPI = {
   installCli: () => Promise<string>
   awaitInitialization: () => Promise<ServerReadyData>
   wslServers: WslServersAPI
+  localModels: LocalModelsPlatform
   updater: UpdaterAPI
   consumeInitialDeepLinks: () => Promise<string[]>
   getDefaultServerUrl: () => Promise<string | null>

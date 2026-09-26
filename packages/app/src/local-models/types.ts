@@ -15,6 +15,23 @@ export type GpuInfo = {
   integrated: boolean
 }
 
+export type DiskInfo = {
+  /** Drive letter without colon, e.g. "D". */
+  letter: string
+  free: number
+  size: number
+  kind: "nvme" | "ssd" | "hdd" | "unknown"
+}
+
+export type SystemInfo = {
+  gpus: GpuInfo[]
+  ram: { total: number; available: number; /** GB/s, measured */ bandwidth?: number }
+  cpu: { name: string; cores: number }
+  disks: DiskInfo[]
+  os: string
+  scannedAt: number
+}
+
 /** A llama.cpp device as reported by `llama-server --list-devices`, e.g. `Vulkan0`. */
 export type EngineDevice = { id: string; name: string; total: number; free: number }
 
@@ -60,5 +77,12 @@ export type LocalModelsState = {
   engine: EngineState
   router: RouterState
   models: LocalModel[]
-  gpus: GpuInfo[]
+  system?: SystemInfo
+}
+
+/** Renderer-facing API exposed by the desktop preload as `window.api.localModels` and via `platform.localModels`. */
+export type LocalModelsPlatform = {
+  getState: () => Promise<LocalModelsState>
+  subscribe: (callback: (state: LocalModelsState) => void) => () => void
+  scanHardware: () => Promise<SystemInfo>
 }

@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer, webUtils } from "electron"
 import type { ElectronAPI, WslServersEvent } from "./types"
 import type { UpdaterState } from "@opencode-ai/app/updater"
+import type { LocalModelsState } from "@opencode-ai/app/local-models/types"
 
 const updaterCallbacks = new Set<(state: UpdaterState) => void>()
 let updaterState: UpdaterState | undefined
@@ -35,6 +36,19 @@ const api: ElectronAPI = {
     addServer: (distro) => ipcRenderer.invoke("wsl-servers-add", distro),
     removeServer: (id) => ipcRenderer.invoke("wsl-servers-remove", id),
     startServer: (id) => ipcRenderer.invoke("wsl-servers-start", id),
+  },
+  localModels: {
+    getState: () => ipcRenderer.invoke("local-models-get-state"),
+    subscribe: (cb) => {
+      const handler = (_: unknown, state: LocalModelsState) => cb(state)
+      ipcRenderer.on("local-models-event", handler)
+      void ipcRenderer.invoke("local-models-subscribe")
+      return () => {
+        ipcRenderer.removeListener("local-models-event", handler)
+        void ipcRenderer.invoke("local-models-unsubscribe")
+      }
+    },
+    scanHardware: () => ipcRenderer.invoke("local-models-scan-hardware"),
   },
   updater: {
     subscribe: async (cb) => {

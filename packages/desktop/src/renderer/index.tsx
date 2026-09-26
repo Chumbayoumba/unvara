@@ -283,6 +283,7 @@ const createPlatform = (windowState: DesktopWindowState): Platform => {
     },
 
     wslServers: wslServersApi,
+    localModels: window.api.localModels,
 
     getDisplayBackend: async () => {
       return window.api.getDisplayBackend().catch(() => null)
