@@ -11,6 +11,7 @@ import { Persist, persisted } from "@/utils/persist"
 import { setV2Toast, ToastRegion } from "@/utils/toast"
 import { UvIcon } from "./icons"
 import { UnvaraWordmark } from "./mark"
+import { useQueuedConfig } from "./queued-config"
 import { UnvaraSetup } from "./setup"
 import { IconButton, UnvaraSidebar } from "./sidebar"
 
@@ -29,6 +30,7 @@ export default function UnvaraLayout(props: ParentProps) {
 
   createEffect(() => setV2Toast(true))
   useLocalProviderRefresh()
+  useQueuedConfig()
   const localModels = useLocalModels()
   // Desktop only: the first-launch wizard covers the window until it is finished or skipped.
   const setupPending = () => {

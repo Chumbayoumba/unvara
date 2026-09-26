@@ -1,5 +1,6 @@
 import { Component, createMemo, createSignal, Show, startTransition } from "solid-js"
 import { SettingsLocalAI } from "./local-ai"
+import { SettingsPermissions } from "./permissions"
 import { Dialog } from "@opencode-ai/ui/v2/dialog-v2"
 import { TabsV2 } from "@opencode-ai/ui/v2/tabs-v2"
 import { Icon } from "@opencode-ai/ui/icon"
@@ -72,6 +73,10 @@ export const DialogSettings: Component<{
                         {language.t("unvara.settings.localAi.title")}
                       </TabsV2.Trigger>
                     </Show>
+                    <TabsV2.Trigger value="permissions">
+                      <Icon name="shield" />
+                      {language.t("unvara.permissions.title")}
+                    </TabsV2.Trigger>
                   </div>
                 </div>
 
@@ -108,6 +113,9 @@ export const DialogSettings: Component<{
         </TabsV2.Content>
         <TabsV2.Content value="local-ai" class="settings-v2-panel">
           <SettingsLocalAI />
+        </TabsV2.Content>
+        <TabsV2.Content value="permissions" class="settings-v2-panel">
+          <SettingsPermissions />
         </TabsV2.Content>
         <TabsV2.Content value="servers" class="settings-v2-panel">
           <SettingsServersV2 />
