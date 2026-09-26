@@ -89,18 +89,26 @@ export function PromptInputV2Composer(props: PromptInputV2ComposerProps) {
 function ModelLoadingNote(props: { model: PromptInputProps["controls"]["model"]["selection"] }) {
   const language = useLanguage()
   const local = useLocalModels()
-  const loading = () => {
+  const note = () => {
     const router = local.store.state?.router
     const model = props.model.current()
-    if (router?.status !== "loading" || model?.provider.id !== LOCAL_PROVIDER_ID || model.id !== router.model) return
-    return model.name
+    if (!router || !("model" in router) || model?.provider.id !== LOCAL_PROVIDER_ID) return
+    if (router.status === "loading" && router.model === model.id)
+      return { busy: true, text: language.t("unvara.composer.loading", { name: model.name }) }
+    // Only one local model fits in memory at a time, so sending to another one swaps them.
+    if (router.status === "ready" && router.model !== model.id) {
+      const loaded = local.store.state?.models.find((item) => item.id === router.model)?.name ?? router.model
+      return { busy: false, text: language.t("unvara.composer.swap", { loaded, name: model.name }) }
+    }
   }
   return (
-    <Show when={loading()}>
-      {(name) => (
+    <Show when={note()}>
+      {(current) => (
         <div class="flex items-center justify-center gap-2 text-[12.5px] text-v2-text-text-faint">
-          <span class="size-3 animate-spin rounded-full border-[1.5px] border-current border-t-transparent" />
-          {language.t("unvara.composer.loading", { name: name() })}
+          <Show when={current().busy}>
+            <span class="size-3 animate-spin rounded-full border-[1.5px] border-current border-t-transparent" />
+          </Show>
+          {current().text}
         </div>
       )}
     </Show>

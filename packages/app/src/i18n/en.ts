@@ -1164,6 +1164,7 @@ export const dict = {
   "unvara.greeting.night": "Working late?",
   "unvara.composer.placeholder": "How can I help you today?",
   "unvara.composer.loading": "Loading {{name}} into memory… The first answer takes a moment.",
+  "unvara.composer.swap": "{{loaded}} is in memory now. Sending will unload it and load {{name}}.",
   "unvara.welcome.title": "Let's get started",
   "unvara.welcome.action": "Choose a folder",
   "unvara.welcome.body": "Unvara works inside a folder on this computer. Your chats and files never leave it.",
