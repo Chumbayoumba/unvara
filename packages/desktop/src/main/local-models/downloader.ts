@@ -1,5 +1,16 @@
+import { execFile } from "node:child_process"
 import { createHash, type Hash } from "node:crypto"
-import { createReadStream, createWriteStream, existsSync, mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs"
+import {
+  createReadStream,
+  createWriteStream,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs"
 import { dirname } from "node:path"
 
 export type DownloadRequest = {
@@ -44,6 +55,14 @@ export async function download(request: DownloadRequest) {
 
 export class IntegrityError extends Error {}
 
+/** Unpacks a downloaded .zip or .tar archive into `dir`. */
+export function extract(archive: string, dir: string) {
+  return new Promise<void>((resolve, reject) => {
+    // Windows 10+ ships bsdtar, which reads zip archives.
+    execFile("tar", ["-xf", archive, "-C", dir], { windowsHide: true }, (error) => (error ? reject(error) : resolve()))
+  })
+}
+
 async function attemptDownload(request: DownloadRequest) {
   const part = `${request.dest}.part`
   const metaFile = `${part}.json`
@@ -64,7 +83,15 @@ async function attemptDownload(request: DownloadRequest) {
   const offset = resumed ? existing : 0
   const length = Number(response.headers.get("content-length") ?? NaN)
   const total = request.size ?? (Number.isFinite(length) ? offset + length : undefined)
-  writeFileSync(metaFile, JSON.stringify({ url: request.url, size: total, sha256: request.sha256, etag: response.headers.get("etag") ?? undefined } satisfies PartMeta))
+  writeFileSync(
+    metaFile,
+    JSON.stringify({
+      url: request.url,
+      size: total,
+      sha256: request.sha256,
+      etag: response.headers.get("etag") ?? undefined,
+    } satisfies PartMeta),
+  )
 
   const hash = createHash("sha256")
   if (resumed) await hashFile(part, hash)
@@ -86,7 +113,8 @@ async function attemptDownload(request: DownloadRequest) {
   }
   request.onProgress?.(state.received, total)
 
-  if (total !== undefined && state.received !== total) throw new Error(`incomplete download: ${state.received}/${total}`)
+  if (total !== undefined && state.received !== total)
+    throw new Error(`incomplete download: ${state.received}/${total}`)
   const digest = hash.digest("hex")
   if (request.sha256 && digest !== request.sha256.toLowerCase()) {
     rmSync(part, { force: true })

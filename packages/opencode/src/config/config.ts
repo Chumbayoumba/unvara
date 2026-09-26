@@ -24,6 +24,7 @@ import { EffectFlock } from "@opencode-ai/core/util/effect-flock"
 import { containsPath, type InstanceContext } from "../project/instance-context"
 import { ConfigV1 } from "@opencode-ai/core/v1/config/config"
 import { RemoteAuthError } from "@opencode-ai/core/v1/config/error"
+import { ConfigMCPV1 } from "@opencode-ai/core/v1/config/mcp"
 import { ConfigPermissionV1 } from "@opencode-ai/core/v1/config/permission"
 import { ConfigPluginV1 } from "@opencode-ai/core/v1/config/plugin"
 import { ConfigAgent } from "./agent"
@@ -39,6 +40,9 @@ import { withTransientReadRetry } from "@/util/effect-http-client"
 
 // Custom merge function that concatenates array fields instead of replacing them
 // Keep remeda's deep conditional merge type out of hot config-loading paths; TS profiling showed it dominates here.
+// Unvara desktop's connectors file: `{ "<name>": <mcp entry> }` as JSON.
+const UnvaraConnectors = Schema.fromJsonString(Schema.Record(Schema.String, ConfigMCPV1.Info))
+
 function mergeConfig(target: Info, source: Info): Info {
   return mergeDeep(target, source) as Info
 }
@@ -562,6 +566,15 @@ const layer = Layer.effect(
           } catch (err) {
             yield* Effect.logWarning("OPENCODE_PERMISSION contains invalid JSON, skipping", { err })
           }
+        }
+
+        // Unvara: connectors added in the desktop app live in their own file, so removing one is a plain delete (the
+        // global config can only be merged into). Entries in the user's own config win on a name clash.
+        const connectors = process.env.UNVARA_CONNECTORS
+        if (connectors) {
+          const decoded = Schema.decodeUnknownOption(UnvaraConnectors)((yield* readConfigFile(connectors)) ?? "{}")
+          if (Option.isSome(decoded)) result.mcp = { ...decoded.value, ...result.mcp }
+          else yield* Effect.logWarning("UNVARA_CONNECTORS is not a valid connectors file, skipping", { connectors })
         }
 
         if (result.tools) {

@@ -62,6 +62,8 @@ const api: ElectronAPI = {
     importFolder: (dir) => ipcRenderer.invoke("local-models-import-folder", dir),
     updateSettings: (patch) => ipcRenderer.invoke("local-models-update-settings", patch),
     setBackend: (backend) => ipcRenderer.invoke("local-models-set-backend", backend),
+    ensureConnectorRuntime: (command) => ipcRenderer.invoke("local-models-ensure-runtime", command),
+    setConnector: (name, connector) => ipcRenderer.invoke("local-models-set-connector", name, connector),
   },
   updater: {
     subscribe: async (cb) => {

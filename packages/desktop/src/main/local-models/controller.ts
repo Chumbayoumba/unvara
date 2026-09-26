@@ -9,6 +9,7 @@ import { hardwareProfile, planFit, primaryGpu } from "@opencode-ai/app/local-mod
 import { ggufShape } from "@opencode-ai/app/local-models/gguf"
 import { AGENT_CONTEXT, agentReady } from "@opencode-ai/app/local-models/recommend"
 import type {
+  Connector,
   DownloadJob,
   EngineBackend,
   GpuInfo,
@@ -22,6 +23,7 @@ import bundledCatalog from "../../../../../catalog/catalog.json"
 import { localDataRoot } from "../paths"
 import { createDownloadQueue } from "./downloads"
 import { findModels, importSources } from "./importer"
+import { installRuntime, neededRuntime, runtimesDir } from "./runtimes"
 import { createRouterLogObserver } from "./speed"
 import { ENGINE_BUILD, engineDir, installedBackend, isInstalled, preferredBackend, provisionBackend } from "./engine"
 import { bestModelsDrive, detectSystem, listEngineDevices, pickDevice } from "./hardware"
@@ -49,6 +51,7 @@ export function createLocalModelsController(options: { userDataPath: string; log
     cache: join(engineRoot, "cache"),
     downloads: join(localRoot, "downloads.json"),
     settings: join(localRoot, "settings.json"),
+    connectors: join(options.userDataPath, "connectors.json"),
   }
   const state: LocalModelsState = {
     engine: { status: "absent" },
@@ -61,6 +64,7 @@ export function createLocalModelsController(options: { userDataPath: string; log
     ),
     downloads: [],
     settings: readSettings(files.settings),
+    connectors: JSON.parse(readText(files.connectors) ?? "{}") as Record<string, Connector>,
   }
   const queue = createDownloadQueue({
     file: files.downloads,
@@ -99,7 +103,41 @@ export function createLocalModelsController(options: { userDataPath: string; log
       UNVARA_LLAMA_URL: `http://127.0.0.1:${runtime.port}/v1`,
       UNVARA_LLAMA_KEY: runtime.apiKey,
       UNVARA_MODELS_MANIFEST: files.manifest,
+      UNVARA_RUNTIMES: runtimesDir(localRoot),
+      UNVARA_CONNECTORS: files.connectors,
     })
+  }
+
+  function setConnector(name: string, connector: Connector | undefined) {
+    const connectors = Object.fromEntries(
+      Object.entries({ ...state.connectors, [name]: connector }).filter(
+        (entry): entry is [string, Connector] => entry[1] !== undefined,
+      ),
+    )
+    writeAtomic(files.connectors, JSON.stringify(connectors, null, 2))
+    emit({ connectors })
+  }
+
+  /**
+   * Makes sure an npx / uvx connector can start: installs bun or uv unless the PC already has the real tool.
+   * Resolves false when the install fails.
+   */
+  async function ensureConnectorRuntime(command: string) {
+    const needed = await neededRuntime(localRoot, command)
+    if (!needed) return true
+    const progress = (received: number, total: number) =>
+      emit({ runtimes: { ...state.runtimes, [needed]: { status: "installing", received, total } } })
+    progress(0, 0)
+    return installRuntime(localRoot, needed, { fetch: net.fetch, onProgress: progress })
+      .then(() => {
+        emit({ runtimes: { ...state.runtimes, [needed]: { status: "ready" } } })
+        return true
+      })
+      .catch((error) => {
+        options.log("runtime install failed", { runtime: needed, error: String(error) }, "error")
+        emit({ runtimes: { ...state.runtimes, [needed]: { status: "failed", reason: String(error) } } })
+        return false
+      })
   }
 
   async function scanHardware() {
@@ -439,6 +477,8 @@ export function createLocalModelsController(options: { userDataPath: string; log
     updateModel,
     removeModel,
     setBackend,
+    ensureConnectorRuntime,
+    setConnector,
     updateSettings,
     getCatalog: () => catalog,
     pauseDownload: queue.pause,

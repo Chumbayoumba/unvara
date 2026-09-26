@@ -146,7 +146,21 @@ export type LocalModelsState = {
   downloads: DownloadJob[]
   settings: LocalModelsSettings
   system?: SystemInfo
+  /** bun / uv installs for MCP connectors, while they happen. */
+  runtimes?: Partial<Record<"bun" | "uv", RuntimeState>>
+  /** MCP connectors added in Unvara; OpenCode merges them into its `mcp` config. */
+  connectors: Record<string, Connector>
 }
+
+/** An MCP connector added in Unvara (same shape as OpenCode's `mcp` config entries). */
+export type Connector =
+  | { type: "local"; command: string[]; environment?: Record<string, string>; enabled?: boolean }
+  | { type: "remote"; url: string; headers?: Record<string, string>; enabled?: boolean }
+
+export type RuntimeState =
+  | { status: "installing"; received: number; total: number }
+  | { status: "ready" }
+  | { status: "failed"; reason: string }
 
 /** Renderer-facing API exposed by the desktop preload as `window.api.localModels` and via `platform.localModels`. */
 export type LocalModelsPlatform = {
@@ -174,4 +188,8 @@ export type LocalModelsPlatform = {
   updateSettings: (patch: Partial<LocalModelsSettings>) => Promise<LocalModelsSettings>
   /** Switches the engine (installing it if needed) and restarts the router on it. */
   setBackend: (backend: EngineBackend | "auto") => Promise<void>
+  /** Installs bun / uv for an npx / uvx connector unless the PC has the real tool; false if that failed. */
+  ensureConnectorRuntime: (command: string) => Promise<boolean>
+  /** Adds or replaces a connector; undefined removes it. OpenCode picks it up once it reloads its config. */
+  setConnector: (name: string, connector: Connector | undefined) => Promise<void>
 }

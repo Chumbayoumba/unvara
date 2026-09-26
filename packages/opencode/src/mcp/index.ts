@@ -342,7 +342,7 @@ const layer = Layer.effect(
       key: string,
       mcp: ConfigMCPV1.Info & { type: "local" },
     ) {
-      const [cmd, ...args] = mcp.command
+      const [cmd, ...args] = UserEnv.connectorCommand(mcp.command)
       const baseDir = yield* InstanceState.directory
       const cwd = mcp.cwd ? path.resolve(baseDir, mcp.cwd) : baseDir
       const transport = new StdioClientTransport({

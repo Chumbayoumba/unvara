@@ -2086,6 +2086,32 @@ describe("OPENCODE_PERMISSION env var", () => {
   )
 })
 
+describe("UNVARA_CONNECTORS", () => {
+  const memory = { type: "local" as const, command: ["npx", "-y", "@modelcontextprotocol/server-memory"] }
+  const connectorsFile = (content: string) =>
+    Effect.promise(async () => {
+      const file = path.join(await fs.mkdtemp(path.join(os.tmpdir(), "unvara-connectors-")), "connectors.json")
+      await fs.writeFile(file, content)
+      return file
+    })
+
+  it.instance("adds the desktop app's connectors to mcp", () =>
+    Effect.gen(function* () {
+      const file = yield* connectorsFile(JSON.stringify({ memory }))
+      const config = yield* withProcessEnv("UNVARA_CONNECTORS", file, Config.use.get())
+      expect(config.mcp?.memory).toMatchObject(memory)
+    }),
+  )
+
+  it.instance("skips a connectors file that isn't valid", () =>
+    Effect.gen(function* () {
+      const file = yield* connectorsFile(JSON.stringify({ memory: { type: "local", command: "not a list" } }))
+      const config = yield* withProcessEnv("UNVARA_CONNECTORS", file, Config.use.get())
+      expect(config.mcp?.memory).toBeUndefined()
+    }),
+  )
+})
+
 describe("OPENCODE_CONFIG_CONTENT token substitution", () => {
   it.instance("substitutes {env:} tokens in OPENCODE_CONFIG_CONTENT", () =>
     withProcessEnv(

@@ -1,0 +1,16 @@
+{
+  "bun": {
+    "version": "1.4.2",
+    "url": "https://github.com/oven-sh/bun/releases/download/bun-v1.4.2/bun-windows-x64-baseline.zip",
+    "size": 39807490,
+    "sha256": "78c221c2376f79731ccf4e4af0b3bb46d81fefa3296c5abee09ad8a1b21e68c6",
+    "files": ["bun.exe"]
+  },
+  "uv": {
+    "version": "0.12.19",
+    "url": "https://github.com/astral-sh/uv/releases/download/0.12.19/uv-x86_64-pc-windows-msvc.zip",
+    "size": 17955780,
+    "sha256": "6dbb02d79e419522f1c500f0adb1cddcff0cda7d59b0d66ea7f5e3b4a1b2f5f0",
+    "files": ["uv.exe", "uvx.exe"]
+  }
+}

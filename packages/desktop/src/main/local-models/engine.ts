@@ -1,11 +1,10 @@
-import { execFile } from "node:child_process"
 import { existsSync, mkdirSync, renameSync, rmSync, writeFileSync } from "node:fs"
 import { basename, dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { app } from "electron"
 import type { EngineBackend, GpuInfo } from "@opencode-ai/app/local-models/types"
 import manifest from "../../../engine.manifest.json"
-import { download, type Fetcher } from "./downloader"
+import { download, extract, type Fetcher } from "./downloader"
 
 const root = dirname(fileURLToPath(import.meta.url))
 
@@ -13,9 +12,7 @@ export const ENGINE_BUILD = manifest.build
 
 /** Backends shipped inside the installer (CPU + Vulkan) live in resources/engine/<backend>. */
 export function bundledEngineDir(backend: EngineBackend) {
-  return app.isPackaged
-    ? join(process.resourcesPath, "engine", backend)
-    : join(root, "../../resources/engine", backend)
+  return app.isPackaged ? join(process.resourcesPath, "engine", backend) : join(root, "../../resources/engine", backend)
 }
 
 /** Downloaded backends (CUDA) live next to the models' engine data, versioned by build. */
@@ -49,8 +46,16 @@ export function preferredBackend(gpu: GpuInfo | undefined): EngineBackend {
   const driver = Number.parseFloat(gpu.driver ?? "")
   const cap = gpu.computeCap ?? 0
   if (!Number.isFinite(driver) || driver > 1000) return "vulkan" // registry format: nvidia-smi was unavailable
-  if (cap >= Number(manifest.backends["cuda-13.4"].minComputeCap) && driver >= Number(manifest.backends["cuda-13.4"].minDriver)) return "cuda-13.4"
-  if (cap >= Number(manifest.backends["cuda-12.4"].minComputeCap) && driver >= Number(manifest.backends["cuda-12.4"].minDriver)) return "cuda-12.4"
+  if (
+    cap >= Number(manifest.backends["cuda-13.4"].minComputeCap) &&
+    driver >= Number(manifest.backends["cuda-13.4"].minDriver)
+  )
+    return "cuda-13.4"
+  if (
+    cap >= Number(manifest.backends["cuda-12.4"].minComputeCap) &&
+    driver >= Number(manifest.backends["cuda-12.4"].minDriver)
+  )
+    return "cuda-12.4"
   return "vulkan"
 }
 
@@ -86,13 +91,6 @@ export async function provisionBackend(
   rmSync(target, { recursive: true, force: true })
   renameSync(staging, target)
   return target
-}
-
-function extract(archive: string, dir: string) {
-  return new Promise<void>((resolve, reject) => {
-    // Windows 10+ ships bsdtar, which reads zip archives.
-    execFile("tar", ["-xf", archive, "-C", dir], { windowsHide: true }, (error) => (error ? reject(error) : resolve()))
-  })
 }
 
 function supports(backend: EngineBackend, gpu: GpuInfo | undefined) {

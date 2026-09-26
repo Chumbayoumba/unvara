@@ -124,8 +124,13 @@ function useLocalProviderRefresh() {
   const serverSync = useServerSync()
   const serverSdk = useServerSDK()
   const [refresh, setRefresh] = createStore({ pending: false })
-  // OpenCode also takes each model's context limit from the manifest, so a new context counts as a change.
-  const models = createMemo(() => local.store.state?.models.map((model) => `${model.id}:${model.context}`).join("\n"))
+  // OpenCode also takes each model's context limit from the manifest, so a new context counts as a change; so do
+  // connectors, which it merges into its MCP config on reload.
+  const models = createMemo(() => {
+    const state = local.store.state
+    if (!state) return
+    return [...state.models.map((model) => `${model.id}:${model.context}`), JSON.stringify(state.connectors)].join("\n")
+  })
   const working = () =>
     Object.values(serverSync().session.data.session_status).some((status) => status && status.type !== "idle")
 
