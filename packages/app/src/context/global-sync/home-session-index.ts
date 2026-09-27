@@ -88,6 +88,9 @@ export function createHomeSessionIndexCache(queryClient: QueryClient, server: st
   const removed = new Set<string>()
 
   return {
+    // Readers must query through this client: session events are applied here, and the router shell provides a
+    // different QueryClient than the one server sync runs under.
+    queryClient,
     indexKey,
     eventsKey,
     eventSequence() {
