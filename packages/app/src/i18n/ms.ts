@@ -639,7 +639,7 @@ export const dict = {
   "error.page.action.updateTo": "Kemas kini ke {{version}}",
   "error.page.circular": "[Bersepusing]",
   "error.page.report.prefix": "Sila laporkan ralat ini kepada pasukan OpenCode",
-  "error.page.report.discord": "di Discord",
+  "error.page.report.discord": "di GitHub",
   "error.page.version": "Versi: {{version}}",
   "error.dev.rootNotFound":
     "Elemen root tidak ditemui. Adakah anda terlupa menambahnya ke index.html anda? Atau mungkin atribut id telah tersalah eja?",

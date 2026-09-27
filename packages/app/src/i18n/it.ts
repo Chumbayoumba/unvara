@@ -555,7 +555,7 @@ export const dict = {
   "error.page.action.updateTo": "Aggiorna a {{version}}",
   "error.page.circular": "[Circular]",
   "error.page.report.prefix": "Segnala questo errore al team OpenCode",
-  "error.page.report.discord": "su Discord",
+  "error.page.report.discord": "su GitHub",
   "error.page.version": "Versione: {{version}}",
   "error.dev.rootNotFound":
     "Elemento radice non trovato. Hai dimenticato di aggiungerlo al tuo index.html? O forse l'attributo id è stato scritto in modo errato?",

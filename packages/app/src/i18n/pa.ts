@@ -650,7 +650,7 @@ export const dict = {
   "error.page.action.updateTo": "{{version}} تے اپ ڈیٹ کرو",
   "error.page.circular": "[چکری]",
   "error.page.report.prefix": "مہربانی کر کے اس غلطی دی اطلاع OpenCode ٹیم نوں دیو",
-  "error.page.report.discord": "Discord تے",
+  "error.page.report.discord": "GitHub تے",
   "error.page.version": "ورژن: {{version}}",
   "error.dev.rootNotFound":
     "عنصر نئیں لبیا۔ کی تسی ایہنوں اپنے index.html چ شامل کرنا بھل گئے او؟ یا شاید id وصف غلط ہجے ہو گیا اے؟",

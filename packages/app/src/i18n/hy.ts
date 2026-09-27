@@ -643,7 +643,7 @@ export const dict = {
   "error.page.action.updateTo": "Թարմացնել {{version}}",
   "error.page.circular": "[Circular]",
   "error.page.report.prefix": "Խնդրում ենք հայտնել այս սխալի մասին OpenCode թիմին",
-  "error.page.report.discord": "Discord",
+  "error.page.report.discord": "GitHub",
   "error.page.version": "Տարբերակ՝ {{version}}",
   "error.dev.rootNotFound":
     "Արմատային տարրը չի գտնվել։ Մոռացե՞լ եք այն ավելացնել ձեր index.html-ում: Կամ գուցե id հատկանիշը սխալ է գրվել:",

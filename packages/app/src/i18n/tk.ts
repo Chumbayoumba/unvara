@@ -640,7 +640,7 @@ export const dict = {
   "error.page.action.updateTo": "{{version}} täzeläň",
   "error.page.circular": "[Tegelek]",
   "error.page.report.prefix": "Bu ýalňyşlygy OpenCode toparyna habar bermegiňizi haýyş edýäris",
-  "error.page.report.discord": "Diskord",
+  "error.page.report.discord": "GitHub-da",
   "error.page.version": "Wersiýa: {{version}}",
   "error.dev.rootNotFound":
     "Kök elementi tapylmady index.html-e goşmagy ýatdan çykardyňyzmy? Ora-da id atributynyň ýalňyş ýazylan bolmagy mümkin?",

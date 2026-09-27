@@ -65,6 +65,9 @@ const appLocales = [
   "uz",
 ] as const
 const desktopLocales = appLocales
+// Unvara's own screens are translated into these languages; the other inherited locales fall back to English there.
+const unvaraLocales = new Set<string>(["ru", "zh", "ja", "es", "br", "de", "fr"])
+const unvaraKey = (locale: string, key: string) => key.startsWith("unvara.") && !unvaraLocales.has(locale)
 const pluralCategories = new Map(
   appLocales.map(
     (locale) =>
@@ -102,7 +105,7 @@ describe("i18n parity", () => {
       const source = await dictionary(domain.source)
       for (const locale of domain.locales) {
         const target = await dictionary(domain.target(locale))
-        const missing = Object.keys(source).filter((key) => !Object.hasOwn(target, key))
+        const missing = Object.keys(source).filter((key) => !Object.hasOwn(target, key) && !unvaraKey(locale, key))
         const extra = Object.keys(target)
           .filter((key) => !Object.hasOwn(source, key))
           .sort()

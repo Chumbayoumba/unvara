@@ -639,7 +639,7 @@ export const dict = {
   "error.page.action.updateTo": "განახლება {{version}}",
   "error.page.circular": "[Circular]",
   "error.page.report.prefix": "გთხოვთ, შეატყობინოთ ეს შეცდომა OpenCode გუნდს",
-  "error.page.report.discord": "Discord",
+  "error.page.report.discord": "GitHub",
   "error.page.version": "ვერსია: {{version}}",
   "error.dev.rootNotFound":
     "ძირის ელემენტი ვერ მოიძებნა. დაგავიწყდათ მისი დამატება თქვენს index.html-ში? ან იქნებ id ატრიბუტი არასწორად არის დაწერილი?",

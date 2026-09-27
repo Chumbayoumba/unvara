@@ -647,7 +647,7 @@ export const dict = {
   "error.page.action.updateTo": "{{version}} versiyasına yenilə",
   "error.page.circular": "[Dairəvi]",
   "error.page.report.prefix": "Bu xətanı OpenCode komandasına",
-  "error.page.report.discord": "Discord-da bildirin",
+  "error.page.report.discord": "GitHub-da bildirin",
   "error.page.version": "Versiya: {{version}}",
   "error.dev.rootNotFound":
     "Kök element tapılmadı. index.html-ə əlavə etməyi unutmusunuz? Yoxsa id atributu səhv yazılıb?",

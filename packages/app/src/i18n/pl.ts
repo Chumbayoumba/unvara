@@ -639,7 +639,7 @@ export const dict = {
   "error.page.action.checkUpdates": "Sprawdź aktualizacje",
   "error.page.action.updateTo": "Zaktualizuj do {{version}}",
   "error.page.report.prefix": "Proszę zgłosić ten błąd do zespołu OpenCode",
-  "error.page.report.discord": "na Discordzie",
+  "error.page.report.discord": "na GitHubzie",
   "error.page.version": "Wersja: {{version}}",
   "error.dev.rootNotFound":
     "Nie znaleziono elementu głównego. Czy zapomniałeś dodać go do swojego index.html? A może atrybut id został błędnie wpisany?",

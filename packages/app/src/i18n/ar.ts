@@ -635,7 +635,7 @@ export const dict = {
   "error.page.action.checkUpdates": "التحقق من وجود تحديثات",
   "error.page.action.updateTo": "تحديث إلى {{version}}",
   "error.page.report.prefix": "يرجى الإبلاغ عن هذا الخطأ لفريق OpenCode",
-  "error.page.report.discord": "على Discord",
+  "error.page.report.discord": "على GitHub",
   "error.page.version": "الإصدار: {{version}}",
   "error.dev.rootNotFound":
     "لم يتم العثور على العنصر الجذري. هل نسيت إضافته إلى index.html؟ أو ربما تمت كتابة سمة id بشكل خاطئ؟",
