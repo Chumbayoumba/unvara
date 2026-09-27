@@ -1,1 +1,5 @@
 blank_issues_enabled: true
+contact_links:
+  - name: Question or idea / Вопрос или идея
+    url: https://github.com/Chumbayoumba/unvara/discussions
+    about: Ask in Discussions — others may have the same question. / Спросите в обсуждениях — у других может быть тот же вопрос.
