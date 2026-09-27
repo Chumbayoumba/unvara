@@ -23,9 +23,9 @@ jobs:
             (cd packages/$dir && bun run typecheck)
           done
 
-      - name: Test local AI (app)
+      - name: Test app (local AI, translations, settings, session index)
         working-directory: packages/app
-        run: bun test --conditions=solid --preload ./happydom.ts src/local-models
+        run: bun test --conditions=solid --preload ./happydom.ts src/local-models src/i18n src/context/settings.test.ts src/context/global-sync
 
       - name: Test local AI (desktop)
         working-directory: packages/desktop

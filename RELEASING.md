@@ -21,13 +21,25 @@
 Без подписи Windows показывает окно SmartScreen «Windows защитила компьютер». SignPath бесплатно подписывает
 открытые проекты.
 
-1. Подайте заявку: <https://signpath.org/apply> (нужен публичный репозиторий, лицензия MIT уже есть).
-2. После одобрения в SignPath создайте проект со slug `unvara` и политику подписи `release-signing`,
+1. Включите двухфакторную аутентификацию на GitHub (SignPath требует её от всех участников).
+2. Подайте заявку: <https://signpath.org/apply>. Ответы для формы:
+   - Repository: `https://github.com/Chumbayoumba/unvara`
+   - Homepage: `https://github.com/Chumbayoumba/unvara`
+   - Download page: `https://github.com/Chumbayoumba/unvara/releases`
+   - Privacy policy: `https://github.com/Chumbayoumba/unvara/blob/main/PRIVACY.md`
+   - Code signing policy: `https://github.com/Chumbayoumba/unvara/blob/main/CODE_SIGNING.md`
+   - One-liner: `Unvara is an open-source Windows desktop app for running AI models locally: it picks models for
+     your hardware, downloads them and runs them with llama.cpp, with a chat and a coding agent.`
+   - Build system: GitHub Actions (`.github/workflows/release.yml`, windows-latest, electron-builder, NSIS installer
+     `unvara-win-x64.exe`).
+   - License: MIT.
+   Рассмотрение ручное, обычно 1–2 недели; могут прийти уточняющие вопросы на почту.
+3. После одобрения в SignPath создайте проект со slug `unvara` и политику подписи `release-signing`,
    подключите к нему этот репозиторий как доверенный источник сборок (GitHub).
-3. В репозитории на GitHub: **Settings → Secrets and variables → Actions**
+4. В репозитории на GitHub: **Settings → Secrets and variables → Actions**
    - переменная (Variables) `SIGNPATH_ORGANIZATION_ID` — ID организации из SignPath;
    - секрет (Secrets) `SIGNPATH_API_TOKEN` — API-токен пользователя SignPath с правом отправки запросов.
-4. Всё. Следующий тег соберётся уже с подписью: workflow сам отправит установщик в SignPath, заберёт подписанный
+5. Уберите из `CODE_SIGNING.md` и README пометку «заявка в работе». Следующий тег соберётся уже с подписью: workflow сам отправит установщик в SignPath, заберёт подписанный
    и пересчитает `latest.yml`. Пока переменная не задана, релизы выходят без подписи.
 
 ## Каталог моделей
