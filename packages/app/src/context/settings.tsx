@@ -94,9 +94,11 @@ export function hasExistingWebState(settings: Promise<string> | string | null, p
   return settings !== null || previousVersion !== undefined
 }
 
-export function initialAgentVisibility(initialized: boolean | undefined, existing: boolean, previousVersion?: string) {
+// Unvara has no users of the old agent picker to carry over, so only a profile that existed before this build shows
+// it. A remembered app version is not enough: a first launch closed before onboarding finished already records one.
+export function initialAgentVisibility(initialized: boolean | undefined, existing: boolean) {
   if (initialized === true) return
-  return existing || previousVersion !== undefined
+  return existing
 }
 
 export function shouldEnableNewLayout(previous: string | undefined, current: string | undefined) {
@@ -279,7 +281,7 @@ export const { use: useSettings, provider: SettingsProvider } = createSimpleCont
     })
     const visible = (preference: () => boolean) => createMemo(() => !newLayoutDesigns() || preference())
     const initializeAgentVisibility = (existing: boolean) => {
-      const initial = initialAgentVisibility(store.general?.agentVisibilityInitialized, existing, launchState.previous)
+      const initial = initialAgentVisibility(store.general?.agentVisibilityInitialized, existing)
       if (initial === undefined) return
       batch(() => {
         setStore("general", "showCustomAgents", initial)
