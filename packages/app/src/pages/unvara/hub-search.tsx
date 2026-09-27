@@ -68,6 +68,8 @@ export function HubSearch() {
           <UvIcon.Search size={16} class="shrink-0 text-v2-icon-icon-muted" />
           <input
             type="search"
+            spellcheck={false}
+            autocomplete="off"
             class="min-w-0 flex-1 bg-transparent text-[14px] text-v2-text-text-base outline-none placeholder:text-v2-text-text-faint"
             placeholder={language.t("unvara.hub.search.placeholder")}
             value={store.query}

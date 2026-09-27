@@ -44,6 +44,7 @@ export const Splash = (props: Pick<ComponentProps<"svg">, "ref" | "class">) => {
 }
 
 export const Logo = (props: { class?: string }) => {
+  // Unvara wordmark: the ember mark followed by the name in the display serif.
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -51,24 +52,25 @@ export const Logo = (props: { class?: string }) => {
       fill="none"
       classList={{ [props.class ?? ""]: !!props.class }}
     >
-      <g>
-        <path d="M18 30H6V18H18V30Z" fill="var(--icon-weak-base)" />
-        <path d="M18 12H6V30H18V12ZM24 36H0V6H24V36Z" fill="var(--icon-base)" />
-        <path d="M48 30H36V18H48V30Z" fill="var(--icon-weak-base)" />
-        <path d="M36 30H48V12H36V30ZM54 36H36V42H30V6H54V36Z" fill="var(--icon-base)" />
-        <path d="M84 24V30H66V24H84Z" fill="var(--icon-weak-base)" />
-        <path d="M84 24H66V30H84V36H60V6H84V24ZM66 18H78V12H66V18Z" fill="var(--icon-base)" />
-        <path d="M108 36H96V18H108V36Z" fill="var(--icon-weak-base)" />
-        <path d="M108 12H96V36H90V6H108V12ZM114 36H108V12H114V36Z" fill="var(--icon-base)" />
-        <path d="M144 30H126V18H144V30Z" fill="var(--icon-weak-base)" />
-        <path d="M144 12H126V30H144V36H120V6H144V12Z" fill="var(--icon-strong-base)" />
-        <path d="M168 30H156V18H168V30Z" fill="var(--icon-weak-base)" />
-        <path d="M168 12H156V30H168V12ZM174 36H150V6H174V36Z" fill="var(--icon-strong-base)" />
-        <path d="M198 30H186V18H198V30Z" fill="var(--icon-weak-base)" />
-        <path d="M198 12H186V30H198V12ZM204 36H180V6H198V0H204V36Z" fill="var(--icon-strong-base)" />
-        <path d="M234 24V30H216V24H234Z" fill="var(--icon-weak-base)" />
-        <path d="M216 12V18H228V12H216ZM234 24H216V30H234V36H210V6H234V24Z" fill="var(--icon-strong-base)" />
+      <g transform="translate(22 0) scale(1.75)">
+        <path
+          d="M15.38 5.25A8 8 0 1 1 8.62 5.25"
+          stroke="var(--uv-ember, #e2a04f)"
+          stroke-width="2.25"
+          stroke-linecap="round"
+        />
+        <circle cx="12" cy="3.6" r="1.7" fill="var(--uv-ember, #e2a04f)" />
       </g>
+      <text
+        x="76"
+        y="33"
+        fill="var(--icon-strong-base)"
+        font-size="34"
+        font-weight="500"
+        style={{ "font-family": "var(--font-family-serif), Georgia, serif", "letter-spacing": "-0.01em" }}
+      >
+        Unvara
+      </text>
     </svg>
   )
 }
