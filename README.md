@@ -94,6 +94,8 @@ their providers, with your own API key.
 **Where are my models?** In the models folder shown in *Customize → Local AI* (by default on the drive with the most free
 space, e.g. `D:\Unvara\models`).
 
+**I have a question or an idea.** Ask in [Discussions](https://github.com/Chumbayoumba/unvara/discussions).
+
 **Something broke.** *Help → Export Logs…*, then [open an issue](https://github.com/Chumbayoumba/unvara/issues/new/choose)
 with the file.
 

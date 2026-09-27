@@ -2,9 +2,12 @@
 
 Памятка для сопровождающего: как выпустить новую версию, подключить подпись и обновить каталог моделей.
 
+Ветка `main` защищена: любые изменения попадают в неё только через pull request, и CI (`check`) должен пройти.
+Прямой push в `main` и перезапись истории запрещены. Теги релизов (`v*`) ставятся как обычно.
+
 ## Новая версия
 
-1. Поднимите версию в `packages/desktop/package.json` (например, `0.1.1`) и закоммитьте в `main`.
+1. Поднимите версию в `packages/desktop/package.json` (например, `0.1.1`) и влейте это через pull request в `main`.
 2. Поставьте тег и отправьте его:
    ```sh
    git tag v0.1.1
@@ -56,7 +59,7 @@
    ```sh
    UNVARA_CATALOG_KEY=D:\Razrabotka\Unvara-refs\keys\catalog-signing-key.pem bun script/catalog/sign.ts
    ```
-3. Закоммитьте `catalog/catalog.json` и `catalog/catalog.json.sig` в `main`. Тест
+3. Влейте `catalog/catalog.json` и `catalog/catalog.json.sig` в `main` через pull request. Тест
    `packages/desktop/src/main/local-models/catalog-source.test.ts` не пропустит каталог без свежей подписи.
 
 Ключ подписи каталога нельзя терять и нельзя никому передавать: публичная половина зашита в приложение
